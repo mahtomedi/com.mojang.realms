@@ -1,12 +1,12 @@
 package com.mojang.realmsclient.gui.screens;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.gui.RealmsDataFetcher;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import net.minecraft.client.renderer.system.GlStateManager;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsScreen;
 

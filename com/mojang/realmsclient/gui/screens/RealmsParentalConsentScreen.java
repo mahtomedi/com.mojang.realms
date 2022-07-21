@@ -1,9 +1,9 @@
 package com.mojang.realmsclient.gui.screens;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.realmsclient.gui.RealmsConstants;
 import com.mojang.realmsclient.util.RealmsUtil;
 import java.util.List;
-import net.minecraft.client.renderer.system.GlStateManager;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsScreen;

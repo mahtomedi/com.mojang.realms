@@ -1,6 +1,9 @@
 package com.mojang.realmsclient;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.GlStateManager.DestFactor;
+import com.mojang.blaze3d.platform.GlStateManager.SourceFactor;
 import com.mojang.realmsclient.client.Ping;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.PingResult;
@@ -29,9 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
-import net.minecraft.client.renderer.system.GlStateManager;
-import net.minecraft.client.renderer.system.GlStateManager.DestFactor;
-import net.minecraft.client.renderer.system.GlStateManager.SourceFactor;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsBridge;
 import net.minecraft.realms.RealmsButton;
@@ -112,7 +112,7 @@ public class RealmsMainScreen extends RealmsScreen {
    private volatile String newsLink;
    private int carouselIndex;
    private int carouselTick;
-   boolean hasSwitchedCarouselImage;
+   private boolean hasSwitchedCarouselImage;
    private static RealmsScreen realmsGenericErrorScreen;
    private static boolean regionsPinged;
    private int mindex;
@@ -362,10 +362,10 @@ public class RealmsMainScreen extends RealmsScreen {
                      RealmsClient.CompatibleVersionResponse versionResponse = client.clientCompatible();
                      if (versionResponse.equals(RealmsClient.CompatibleVersionResponse.OUTDATED)) {
                         RealmsMainScreen.realmsGenericErrorScreen = new RealmsClientOutdatedScreen(RealmsMainScreen.this.lastScreen, true);
-                        RealmsMainScreen.this.threadSafeSetScreen(RealmsMainScreen.realmsGenericErrorScreen);
+                        Realms.setScreen(RealmsMainScreen.realmsGenericErrorScreen);
                      } else if (versionResponse.equals(RealmsClient.CompatibleVersionResponse.OTHER)) {
                         RealmsMainScreen.realmsGenericErrorScreen = new RealmsClientOutdatedScreen(RealmsMainScreen.this.lastScreen, false);
-                        RealmsMainScreen.this.threadSafeSetScreen(RealmsMainScreen.realmsGenericErrorScreen);
+                        Realms.setScreen(RealmsMainScreen.realmsGenericErrorScreen);
                      } else {
                         RealmsMainScreen.this.checkParentalConsent();
                      }
@@ -378,14 +378,14 @@ public class RealmsMainScreen extends RealmsScreen {
                            RealmsScreen.getLocalizedString("mco.error.invalid.session.message"),
                            RealmsMainScreen.this.lastScreen
                         );
-                        RealmsMainScreen.this.threadSafeSetScreen(RealmsMainScreen.realmsGenericErrorScreen);
+                        Realms.setScreen(RealmsMainScreen.realmsGenericErrorScreen);
                      } else {
-                        RealmsMainScreen.this.threadSafeSetScreen(new RealmsGenericErrorScreen(var3, RealmsMainScreen.this.lastScreen));
+                        Realms.setScreen(new RealmsGenericErrorScreen(var3, RealmsMainScreen.this.lastScreen));
                      }
                   } catch (IOException var4) {
                      RealmsMainScreen.checkedClientCompatability = false;
                      RealmsMainScreen.LOGGER.error("Couldn't connect to realms: ", var4.getMessage());
-                     RealmsMainScreen.this.threadSafeSetScreen(new RealmsGenericErrorScreen(var4.getMessage(), RealmsMainScreen.this.lastScreen));
+                     Realms.setScreen(new RealmsGenericErrorScreen(var4.getMessage(), RealmsMainScreen.this.lastScreen));
                   }
                }
             })
@@ -410,16 +410,16 @@ public class RealmsMainScreen extends RealmsScreen {
                } else {
                   RealmsMainScreen.LOGGER.info("Realms is not available for this user");
                   RealmsMainScreen.hasParentalConsent = false;
-                  RealmsMainScreen.this.threadSafeSetScreen(new RealmsParentalConsentScreen(RealmsMainScreen.this.lastScreen));
+                  Realms.setScreen(new RealmsParentalConsentScreen(RealmsMainScreen.this.lastScreen));
                }
 
                RealmsMainScreen.checkedParentalConsent = true;
             } catch (RealmsServiceException var3) {
                RealmsMainScreen.LOGGER.error("Couldn't connect to realms: ", var3.toString());
-               RealmsMainScreen.this.threadSafeSetScreen(new RealmsGenericErrorScreen(var3, RealmsMainScreen.this.lastScreen));
+               Realms.setScreen(new RealmsGenericErrorScreen(var3, RealmsMainScreen.this.lastScreen));
             } catch (IOException var4) {
                RealmsMainScreen.LOGGER.error("Couldn't connect to realms: ", var4.getMessage());
-               RealmsMainScreen.this.threadSafeSetScreen(new RealmsGenericErrorScreen(var4.getMessage(), RealmsMainScreen.this.lastScreen));
+               Realms.setScreen(new RealmsGenericErrorScreen(var4.getMessage(), RealmsMainScreen.this.lastScreen));
             }
 
          }
@@ -544,7 +544,7 @@ public class RealmsMainScreen extends RealmsScreen {
                      }
                   } catch (RealmsServiceException var3) {
                      RealmsMainScreen.LOGGER.error("Couldn't configure world");
-                     RealmsMainScreen.this.threadSafeSetScreen(new RealmsGenericErrorScreen(var3, RealmsMainScreen.this));
+                     Realms.setScreen(new RealmsGenericErrorScreen(var3, RealmsMainScreen.this));
                   }
 
                }

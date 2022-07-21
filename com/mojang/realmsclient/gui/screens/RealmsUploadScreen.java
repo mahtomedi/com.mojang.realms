@@ -1,5 +1,6 @@
 package com.mojang.realmsclient.gui.screens;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.realmsclient.client.FileUpload;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.client.UploadStatus;
@@ -15,7 +16,6 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.zip.GZIPOutputStream;
-import net.minecraft.client.renderer.system.GlStateManager;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsBridge;
 import net.minecraft.realms.RealmsButton;
@@ -430,6 +430,7 @@ public class RealmsUploadScreen extends RealmsScreen {
       try {
          File file = File.createTempFile("realms-upload-file", ".tar.gz");
          tar = new TarArchiveOutputStream(new GZIPOutputStream(new FileOutputStream(file)));
+         tar.setLongFileMode(3);
          this.addFileToTarGz(tar, pathToDirectoryFile.getAbsolutePath(), "world", true);
          tar.finish();
          var4 = file;

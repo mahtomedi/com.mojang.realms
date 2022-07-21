@@ -15,7 +15,7 @@ public class RealmsVersion {
          BufferedReader reader = null;
 
          try {
-            InputStream versionStream = RealmsVersion.class.getResourceAsStream("/version");
+            InputStream versionStream = RealmsVersion.class.getResourceAsStream("/realmsVersion");
             reader = new BufferedReader(new InputStreamReader(versionStream));
             version = reader.readLine();
             reader.close();

@@ -1,6 +1,6 @@
 package com.mojang.realmsclient.gui;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -86,7 +86,7 @@ public enum ChatFormatting {
    }
 
    public static Collection<String> getNames(boolean getColors, boolean getFormats) {
-      List<String> result = new ArrayList();
+      List<String> result = Lists.newArrayList();
 
       for(ChatFormatting format : values()) {
          if ((!format.isColor() || getColors) && (!format.isFormat() || getFormats)) {

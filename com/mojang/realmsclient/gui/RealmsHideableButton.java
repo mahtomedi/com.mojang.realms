@@ -3,7 +3,7 @@ package com.mojang.realmsclient.gui;
 import net.minecraft.realms.RealmsButton;
 
 public abstract class RealmsHideableButton extends RealmsButton {
-   boolean visible = true;
+   private boolean visible = true;
 
    public RealmsHideableButton(int id, int x, int y, int width, int height, String msg) {
       super(id, x, y, width, height, msg);

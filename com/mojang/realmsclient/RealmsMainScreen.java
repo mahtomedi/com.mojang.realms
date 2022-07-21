@@ -20,7 +20,6 @@ import com.mojang.realmsclient.gui.screens.PendingInvitationScreen;
 import com.mojang.realmsclient.gui.screens.RealmsClientOutdatedScreen;
 import com.mojang.realmsclient.gui.screens.RealmsConfigureWorldScreen;
 import com.mojang.realmsclient.gui.screens.RealmsGenericErrorScreen;
-import com.mojang.realmsclient.gui.screens.RealmsParentalConsentScreen;
 import java.io.IOException;
 import java.net.URI;
 import java.net.UnknownHostException;
@@ -77,7 +76,6 @@ public class RealmsMainScreen extends RealmsScreen {
    public static final int EXPIRATION_NOTIFICATION_DAYS = 7;
    private int animTick;
    private static volatile boolean mcoEnabled;
-   private static volatile boolean mcoEnabledCheck;
    private static boolean checkedMcoAvailability;
    private static RealmsScreen realmsGenericErrorScreen = null;
    private static boolean regionsPinged = false;
@@ -131,10 +129,6 @@ public class RealmsMainScreen extends RealmsScreen {
 
    public void tick() {
       ++this.animTick;
-      if (this.noParentalConsent()) {
-         Realms.setScreen(new RealmsParentalConsentScreen(this.lastScreen));
-      }
-
       if (this.isMcoEnabled()) {
          realmsDataFetcher.init();
          if (realmsDataFetcher.isFetchedSinceLastTry(RealmsDataFetcher.Task.SERVER_LIST)) {
@@ -204,10 +198,6 @@ public class RealmsMainScreen extends RealmsScreen {
       return mcoEnabled;
    }
 
-   private boolean noParentalConsent() {
-      return mcoEnabledCheck && !mcoEnabled;
-   }
-
    public void removed() {
       Keyboard.enableRepeatEvents(false);
    }
@@ -265,7 +255,6 @@ public class RealmsMainScreen extends RealmsScreen {
                for(int i = 0; i < 3; ++i) {
                   try {
                      Boolean result = client.mcoEnabled();
-                     RealmsMainScreen.mcoEnabledCheck = true;
                      if (result) {
                         RealmsMainScreen.LOGGER.info("Realms is available for this user");
                         RealmsMainScreen.mcoEnabled = true;

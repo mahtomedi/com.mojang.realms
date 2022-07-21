@@ -25,22 +25,29 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
    private final RealmsScreen lastScreen;
    private final RealmsServer serverData;
+   private final RealmsScreen mainScreen;
    private final int BUTTON_BACK_ID = 0;
+   private final int BUTTON_DELETE_ID = 1;
    private int daysLeft;
    private String startDate;
    private Subscription.SubscriptionType type;
    private final String PURCHASE_LINK = "https://account.mojang.com/buy/realms";
    private boolean onLink;
 
-   public RealmsSubscriptionInfoScreen(RealmsScreen lastScreen, RealmsServer serverData) {
+   public RealmsSubscriptionInfoScreen(RealmsScreen lastScreen, RealmsServer serverData, RealmsScreen mainScreen) {
       this.lastScreen = lastScreen;
       this.serverData = serverData;
+      this.mainScreen = mainScreen;
    }
 
    public void init() {
       this.getSubscription(this.serverData.id);
       Keyboard.enableRepeatEvents(true);
-      this.buttonsAdd(newButton(0, this.width() / 2 - 100, this.height() / 4 + 120 + 12, getLocalizedString("gui.back")));
+      this.buttonsAdd(newButton(0, this.width() / 2 - 100, RealmsConstants.row(12), getLocalizedString("gui.back")));
+      if (this.serverData.expired) {
+         this.buttonsAdd(newButton(1, this.width() / 2 - 100, RealmsConstants.row(10), getLocalizedString("mco.configure.world.delete.button")));
+      }
+
    }
 
    private void getSubscription(long worldId) {
@@ -60,6 +67,29 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 
    }
 
+   public void confirmResult(boolean result, int id) {
+      if (id == 1 && result) {
+         (new Thread("Realms-delete-realm") {
+            public void run() {
+               try {
+                  RealmsClient client = RealmsClient.createRealmsClient();
+                  client.deleteWorld(RealmsSubscriptionInfoScreen.this.serverData.id);
+               } catch (RealmsServiceException var2) {
+                  RealmsSubscriptionInfoScreen.LOGGER.error("Couldn't delete world");
+                  RealmsSubscriptionInfoScreen.LOGGER.error(var2);
+               } catch (IOException var3) {
+                  RealmsSubscriptionInfoScreen.LOGGER.error("Couldn't delete world");
+                  var3.printStackTrace();
+               }
+
+               Realms.setScreen(RealmsSubscriptionInfoScreen.this.mainScreen);
+            }
+         }).start();
+      }
+
+      Realms.setScreen(this);
+   }
+
    private String localPresentation(long cetTime) {
       Calendar cal = new GregorianCalendar(TimeZone.getDefault());
       cal.setTimeInMillis(cetTime);
@@ -74,6 +104,10 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
       if (button.active()) {
          if (button.id() == 0) {
             Realms.setScreen(this.lastScreen);
+         } else if (button.id() == 1) {
+            String line2 = getLocalizedString("mco.configure.world.delete.question.line1");
+            String line3 = getLocalizedString("mco.configure.world.delete.question.line2");
+            Realms.setScreen(new RealmsLongConfirmationScreen(this, RealmsLongConfirmationScreen.Type.Warning, line2, line3, true, 1));
          }
 
       }

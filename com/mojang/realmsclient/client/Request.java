@@ -55,15 +55,6 @@ public abstract class Request<T extends Request> {
       return (T)this;
    }
 
-   public int responseCode() {
-      try {
-         this.connect();
-         return this.connection.getResponseCode();
-      } catch (Exception var2) {
-         throw new RealmsHttpException(var2.getMessage(), var2);
-      }
-   }
-
    public int getRetryAfterHeader() {
       return getRetryAfterHeader(this.connection);
    }
@@ -75,6 +66,15 @@ public abstract class Request<T extends Request> {
          return Integer.valueOf(pauseTime);
       } catch (Exception var3) {
          return 5;
+      }
+   }
+
+   public int responseCode() {
+      try {
+         this.connect();
+         return this.connection.getResponseCode();
+      } catch (Exception var2) {
+         throw new RealmsHttpException(var2.getMessage(), var2);
       }
    }
 

@@ -239,7 +239,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
                   Realms.setScreen(new RealmsSettingsScreen(this, this.serverData.clone()));
                   break;
                case 4:
-                  Realms.setScreen(new RealmsSubscriptionInfoScreen(this, this.serverData.clone()));
+                  Realms.setScreen(new RealmsSubscriptionInfoScreen(this, this.serverData.clone(), this.lastScreen));
                   break;
                case 5:
                   Realms.setScreen(

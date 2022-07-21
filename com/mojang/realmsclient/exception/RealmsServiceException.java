@@ -26,8 +26,12 @@ public class RealmsServiceException extends Exception {
    }
 
    public String toString() {
-      return this.errorCode != -1
-         ? RealmsScreen.getLocalizedString("mco.errorMessage." + this.errorCode) + " - " + this.errorCode
-         : "Realms (" + this.httpResultCode + ") " + this.httpResponseContent;
+      if (this.errorCode != -1) {
+         String translationKey = "mco.errorMessage." + this.errorCode;
+         String translated = RealmsScreen.getLocalizedString(translationKey);
+         return (translated.equals(translationKey) ? this.errorMsg : translated) + " - " + this.errorCode;
+      } else {
+         return "Realms (" + this.httpResultCode + ") " + this.httpResponseContent;
+      }
    }
 }

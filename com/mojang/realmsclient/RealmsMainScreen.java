@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsMth;
@@ -79,6 +81,9 @@ public class RealmsMainScreen extends RealmsScreen {
    private static volatile boolean mcoEnabled;
    private static volatile boolean mcoEnabledCheck;
    private static boolean checkedMcoAvailability;
+   private static volatile boolean trialsAvailable;
+   private static volatile boolean createdTrial = false;
+   private static final ReentrantLock trialLock = new ReentrantLock();
    private static RealmsScreen realmsGenericErrorScreen = null;
    private static boolean regionsPinged = false;
    private boolean onLink = false;
@@ -169,6 +174,10 @@ public class RealmsMainScreen extends RealmsScreen {
             this.numberOfPendingInvites = realmsDataFetcher.getPendingInvitesCount();
          }
 
+         if (realmsDataFetcher.isFetchedSinceLastTry(RealmsDataFetcher.Task.TRIAL_AVAILABLE) && !createdTrial) {
+            trialsAvailable = realmsDataFetcher.isTrialAvailable();
+         }
+
          realmsDataFetcher.markClean();
       }
    }
@@ -241,6 +250,49 @@ public class RealmsMainScreen extends RealmsScreen {
                return;
          }
 
+      }
+   }
+
+   private void createTrial() {
+      if (createdTrial) {
+         trialsAvailable = false;
+      } else {
+         final RealmsScreen mainScreen = this;
+         (new Thread("Realms-create-trial") {
+            public void run() {
+               try {
+                  if (RealmsMainScreen.trialLock.tryLock(10L, TimeUnit.MILLISECONDS)) {
+                     RealmsClient client = RealmsClient.createRealmsClient();
+                     RealmsMainScreen.trialsAvailable = false;
+                     if (client.createTrial()) {
+                        RealmsMainScreen.createdTrial = true;
+                        RealmsMainScreen.realmsDataFetcher.forceUpdate();
+                     } else {
+                        Realms.setScreen(new RealmsGenericErrorScreen(RealmsScreen.getLocalizedString("mco.trial.unavailable"), mainScreen));
+                     }
+
+                     return;
+                  }
+               } catch (RealmsServiceException var7) {
+                  RealmsMainScreen.LOGGER.error("Trials wasn't available: " + var7.toString());
+                  Realms.setScreen(new RealmsGenericErrorScreen(var7, RealmsMainScreen.this));
+                  return;
+               } catch (IOException var8) {
+                  RealmsMainScreen.LOGGER.error("Couldn't parse response when trying to create trial: " + var8.toString());
+                  RealmsMainScreen.trialsAvailable = false;
+                  return;
+               } catch (InterruptedException var9) {
+                  RealmsMainScreen.LOGGER.error("Trial Interrupted exception: " + var9.toString());
+                  return;
+               } finally {
+                  if (RealmsMainScreen.trialLock.isHeldByCurrentThread()) {
+                     RealmsMainScreen.trialLock.unlock();
+                  }
+
+               }
+
+            }
+         }).start();
       }
    }
 
@@ -326,8 +378,10 @@ public class RealmsMainScreen extends RealmsScreen {
                try {
                   Boolean result = client.stageAvailable();
                   if (result) {
+                     RealmsMainScreen.this.stopRealmsFetcherAndPinger();
                      RealmsClient.switchToStage();
                      RealmsMainScreen.LOGGER.info("Switched to stage");
+                     RealmsMainScreen.realmsDataFetcher.init();
                      RealmsMainScreen.stageEnabled = true;
                   } else {
                      RealmsMainScreen.stageEnabled = false;
@@ -347,7 +401,9 @@ public class RealmsMainScreen extends RealmsScreen {
    private void switchToProd() {
       if (stageEnabled) {
          stageEnabled = false;
+         this.stopRealmsFetcherAndPinger();
          RealmsClient.switchToProd();
+         realmsDataFetcher.init();
       }
 
    }
@@ -761,10 +817,19 @@ public class RealmsMainScreen extends RealmsScreen {
       }
 
       public int getItemCount() {
-         return RealmsMainScreen.this.realmsServers.size() + 1;
+         return RealmsMainScreen.trialsAvailable ? RealmsMainScreen.this.realmsServers.size() + 2 : RealmsMainScreen.this.realmsServers.size() + 1;
       }
 
       public void selectItem(int item, boolean doubleClick, int xMouse, int yMouse) {
+         if (RealmsMainScreen.trialsAvailable) {
+            if (item == 0) {
+               RealmsMainScreen.this.createTrial();
+               return;
+            }
+
+            --item;
+         }
+
          if (item < RealmsMainScreen.this.realmsServers.size()) {
             RealmsServer server = (RealmsServer)RealmsMainScreen.this.realmsServers.get(item);
             RealmsMainScreen.this.selectedServerId = server.id;
@@ -785,6 +850,14 @@ public class RealmsMainScreen extends RealmsScreen {
       }
 
       public boolean isSelectedItem(int item) {
+         if (RealmsMainScreen.trialsAvailable) {
+            if (item == 0) {
+               return false;
+            }
+
+            --item;
+         }
+
          return item == RealmsMainScreen.this.findIndex(RealmsMainScreen.this.selectedServerId);
       }
 
@@ -797,8 +870,41 @@ public class RealmsMainScreen extends RealmsScreen {
       }
 
       protected void renderItem(int i, int x, int y, int h, Tezzelator t, int mouseX, int mouseY) {
+         if (RealmsMainScreen.trialsAvailable) {
+            if (i == 0) {
+               this.renderTrialItem(i, x, y);
+               return;
+            }
+
+            --i;
+         }
+
          if (i < RealmsMainScreen.this.realmsServers.size()) {
             this.renderMcoServerItem(i, x, y);
+         }
+
+      }
+
+      private void renderTrialItem(int i, int x, int y) {
+         int ry = y + 12;
+         int index = 0;
+         String msg = RealmsScreen.getLocalizedString("mco.trial.message");
+         boolean hovered = false;
+         if (x <= this.xm() && this.xm() <= this.getScrollbarPosition() && y <= this.ym() && this.ym() <= y + 32) {
+            hovered = true;
+         }
+
+         float scale = 0.5F + (1.0F + RealmsMth.sin((float)RealmsMainScreen.this.animTick * 0.25F)) * 0.25F;
+         int textColor;
+         if (hovered) {
+            textColor = 0xFF | (int)(127.0F * scale) << 16 | (int)(255.0F * scale) << 8 | (int)(127.0F * scale);
+         } else {
+            textColor = 0xFF000000 | (int)(127.0F * scale) << 16 | (int)(255.0F * scale) << 8 | (int)(127.0F * scale);
+         }
+
+         for(String s : msg.split("\\\\n")) {
+            RealmsMainScreen.this.drawCenteredString(s, RealmsMainScreen.this.width() / 2, ry + index, textColor);
+            index += 10;
          }
 
       }

@@ -40,6 +40,7 @@ public class RealmsClient {
    private static final String ACTIVITIES_RESOURCE = "activities";
    private static final String OPS_RESOURCE = "ops";
    private static final String REGIONS_RESOURCE = "regions/ping/stat";
+   private static final String TRIALS_RESOURCE = "trial";
    private static final String PATH_INITIALIZE = "/$WORLD_ID/initialize";
    private static final String PATH_GET_ACTIVTIES = "/$WORLD_ID";
    private static final String PATH_GET_SUBSCRIPTION = "/$WORLD_ID";
@@ -63,6 +64,7 @@ public class RealmsClient {
    private static final String PATH_WORLD_OPEN = "/$WORLD_ID/open";
    private static final String PATH_WORLD_CLOSE = "/$WORLD_ID/close";
    private static final String PATH_WORLD_RESET = "/$WORLD_ID/reset";
+   private static final String PATH_DELETE_WORLD = "/$WORLD_ID";
    private static final String PATH_WORLD_BACKUPS = "/$WORLD_ID/backups";
    private static final String PATH_WORLD_DOWNLOAD = "/$WORLD_ID/backups/download";
    private static final String PATH_WORLD_UPLOAD = "/$WORLD_ID/backups/upload";
@@ -74,9 +76,9 @@ public class RealmsClient {
    private static Gson gson = new Gson();
 
    public static RealmsClient createRealmsClient() {
-      String userName = Realms.userName();
+      String username = Realms.userName();
       String sessionId = Realms.sessionId();
-      return userName != null && sessionId != null ? new RealmsClient(sessionId, userName, Realms.getProxy()) : null;
+      return username != null && sessionId != null ? new RealmsClient(sessionId, username, Realms.getProxy()) : null;
    }
 
    public static void switchToStage() {
@@ -330,6 +332,23 @@ public class RealmsClient {
       this.execute(Request.post(asciiUrl, gson.toJson(pingResult)));
    }
 
+   public Boolean trialAvailable() throws RealmsServiceException, IOException {
+      String asciiUrl = this.url("trial");
+      String json = this.execute(Request.get(asciiUrl));
+      return Boolean.valueOf(json);
+   }
+
+   public Boolean createTrial() throws RealmsServiceException, IOException {
+      String asciiUrl = this.url("trial");
+      String json = this.execute(Request.put(asciiUrl, ""));
+      return Boolean.valueOf(json);
+   }
+
+   public void deleteWorld(long worldId) throws RealmsServiceException, IOException {
+      String asciiUrl = this.url("worlds" + "/$WORLD_ID".replace("$WORLD_ID", String.valueOf(worldId)));
+      this.execute(Request.delete(asciiUrl));
+   }
+
    private String url(String path) {
       return this.url(path, null);
    }
@@ -367,8 +386,11 @@ public class RealmsClient {
                LOGGER.info("Could not authorize you against Realms server: " + authenticationHeader);
                throw new RealmsServiceException(responseCode, authenticationHeader, -1, authenticationHeader);
             } else if (responseText != null && responseText.length() != 0) {
-               throw new RealmsServiceException(responseCode, responseText, new RealmsError(responseText));
+               RealmsError error = new RealmsError(responseText);
+               LOGGER.error("Realms http code: " + responseCode + " -  error code: " + error.getErrorCode() + " -  message: " + error.getErrorMessage());
+               throw new RealmsServiceException(responseCode, responseText, error);
             } else {
+               LOGGER.error("Realms error code: " + responseCode + " message: " + responseText);
                throw new RealmsServiceException(responseCode, responseText, responseCode, "");
             }
          }

@@ -152,6 +152,10 @@ mco.configure.world.edit.slot.name=World name
 mco.configure.world.players.title=Players
 mco.configure.world.players.error=Could not invite the provided name
 
+mco.configure.world.delete.button=Delete Realm
+mco.configure.world.delete.question.line1=Your Realm will be permanently deleted
+mco.configure.world.delete.question.line2=Are you sure you want to do this?
+
 mco.connect.connecting=Connecting to the online server...
 mco.connect.authorizing=Logging in...
 mco.connect.failed=Failed to connect to the online server
@@ -218,3 +222,6 @@ mco.errorMessage.6004=Upload limit reached
 mco.errorMessage.6005=World is in admin lock state
 
 mco.errorMessage.connectionFailure=An error occurred, please try again later.
+
+mco.trial.unavailable=Sorry, trials are unavailable at this time!
+mco.trial.message=Interested in trying Realms? \n Get a free two week trial by clicking here!

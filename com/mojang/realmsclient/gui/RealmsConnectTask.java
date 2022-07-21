@@ -34,7 +34,7 @@ public class RealmsConnectTask extends LongRunningTask {
       RealmsServerAddress a = null;
       boolean tosNotAccepted = false;
 
-      for(int i = 0; i < 10 && !this.aborted(); ++i) {
+      for(int i = 0; i < 20 && !this.aborted(); ++i) {
          try {
             a = client.join(this.data.id);
             addressRetrieved = true;

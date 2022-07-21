@@ -21,10 +21,17 @@ public class RealmsGenericErrorScreen extends RealmsScreen {
       this.errorMessage(message);
    }
 
+   public RealmsGenericErrorScreen(String title, String message, RealmsScreen nextScreen) {
+      this.nextScreen = nextScreen;
+      this.errorMessage(title, message);
+   }
+
    private void errorMessage(RealmsServiceException realmsServiceException) {
       if (realmsServiceException.errorCode != -1) {
          this.line1 = "Realms (" + realmsServiceException.errorCode + "):";
-         this.line2 = getLocalizedString("mco.errorMessage." + realmsServiceException.errorCode);
+         String translationKey = "mco.errorMessage." + realmsServiceException.errorCode;
+         String translated = getLocalizedString(translationKey);
+         this.line2 = translated.equals(translationKey) ? realmsServiceException.errorMsg : translated;
       } else {
          this.line1 = "An error occurred (" + realmsServiceException.httpResultCode + "):";
          this.line2 = realmsServiceException.httpResponseContent;
@@ -34,6 +41,11 @@ public class RealmsGenericErrorScreen extends RealmsScreen {
 
    private void errorMessage(String message) {
       this.line1 = "An error occurred: ";
+      this.line2 = message;
+   }
+
+   private void errorMessage(String title, String message) {
+      this.line1 = title;
       this.line2 = message;
    }
 

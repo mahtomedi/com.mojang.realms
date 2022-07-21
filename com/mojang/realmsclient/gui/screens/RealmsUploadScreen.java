@@ -353,8 +353,8 @@ public class RealmsUploadScreen extends RealmsScreen {
    
                      long length = archive.length();
                      RealmsUploadScreen.Unit lengthUnit = RealmsUploadScreen.getLargestUnit(length);
-                     RealmsUploadScreen.Unit maxUnit = RealmsUploadScreen.getLargestUnit(1073741824L);
-                     if (RealmsUploadScreen.humanReadableSize(length, lengthUnit).equals(RealmsUploadScreen.humanReadableSize(1073741824L, maxUnit))
+                     RealmsUploadScreen.Unit maxUnit = RealmsUploadScreen.getLargestUnit(5368709120L);
+                     if (RealmsUploadScreen.humanReadableSize(length, lengthUnit).equals(RealmsUploadScreen.humanReadableSize(5368709120L, maxUnit))
                         && lengthUnit != RealmsUploadScreen.Unit.B) {
                         RealmsUploadScreen.Unit unitToUse = RealmsUploadScreen.Unit.values()[lengthUnit.ordinal() - 1];
                         RealmsUploadScreen.this.errorMessage = RealmsScreen.getLocalizedString(
@@ -364,7 +364,7 @@ public class RealmsUploadScreen extends RealmsScreen {
                            + RealmsScreen.getLocalizedString(
                               "mco.upload.size.failure.line2",
                               new Object[]{
-                                 RealmsUploadScreen.humanReadableSize(length, unitToUse), RealmsUploadScreen.humanReadableSize(1073741824L, unitToUse)
+                                 RealmsUploadScreen.humanReadableSize(length, unitToUse), RealmsUploadScreen.humanReadableSize(5368709120L, unitToUse)
                               }
                            );
                         return;
@@ -376,7 +376,7 @@ public class RealmsUploadScreen extends RealmsScreen {
                         + "\\n"
                         + RealmsScreen.getLocalizedString(
                            "mco.upload.size.failure.line2",
-                           new Object[]{RealmsUploadScreen.humanReadableSize(length, lengthUnit), RealmsUploadScreen.humanReadableSize(1073741824L, maxUnit)}
+                           new Object[]{RealmsUploadScreen.humanReadableSize(length, lengthUnit), RealmsUploadScreen.humanReadableSize(5368709120L, maxUnit)}
                         );
                      return;
                   }
@@ -417,7 +417,7 @@ public class RealmsUploadScreen extends RealmsScreen {
    }
 
    private boolean verify(File archive) {
-      return archive.length() < 1073741824L;
+      return archive.length() < 5368709120L;
    }
 
    private File tarGzipArchive(File pathToDirectoryFile) throws IOException {

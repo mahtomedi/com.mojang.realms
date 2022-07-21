@@ -64,17 +64,24 @@ public class RealmsMainScreen extends RealmsScreen {
    private static final String LOGO_LOCATION = "realms:textures/gui/title/realms.png";
    private static final String CONFIGURE_LOCATION = "realms:textures/gui/realms/configure_icon.png";
    private static final String QUESTIONMARK_LOCATION = "realms:textures/gui/realms/questionmark.png";
+   private static final String NEWS_LOCATION = "realms:textures/gui/realms/news_icon.png";
    private static final String POPUP_LOCATION = "realms:textures/gui/realms/popup.png";
    private static final String DARKEN_LOCATION = "realms:textures/gui/realms/darken.png";
    private static final String CROSS_ICON_LOCATION = "realms:textures/gui/realms/cross_icon.png";
    private static final String TRIAL_ICON_LOCATION = "realms:textures/gui/realms/trial_icon.png";
    private static final String BUTTON_LOCATION = "minecraft:textures/gui/widgets.png";
    private static final String[] IMAGES_LOCATION = new String[]{
-      "realms:textures/gui/realms/images/one.png",
-      "realms:textures/gui/realms/images/two.png",
-      "realms:textures/gui/realms/images/three.png",
-      "realms:textures/gui/realms/images/four.png",
-      "realms:textures/gui/realms/images/five.png"
+      "realms:textures/gui/realms/images/flower_mountain.png",
+      "realms:textures/gui/realms/images/dornenstein_estate.png",
+      "realms:textures/gui/realms/images/desert.png",
+      "realms:textures/gui/realms/images/gray.png",
+      "realms:textures/gui/realms/images/imperium.png",
+      "realms:textures/gui/realms/images/ludo.png",
+      "realms:textures/gui/realms/images/makersspleef.png",
+      "realms:textures/gui/realms/images/negentropy.png",
+      "realms:textures/gui/realms/images/pumpkin_party.png",
+      "realms:textures/gui/realms/images/sparrenhout.png",
+      "realms:textures/gui/realms/images/spindlewood.png"
    };
    private static final RealmsDataFetcher realmsDataFetcher = new RealmsDataFetcher();
    private static int lastScrollYPosition = -1;
@@ -715,6 +722,7 @@ public class RealmsMainScreen extends RealmsScreen {
          this.renderMoreInfo(xm, ym);
       }
 
+      this.renderNews(xm, ym);
       this.drawInvitationPendingIcon(xm, ym);
       if (RealmsClient.currentEnvironment.equals(RealmsClient.Environment.STAGE)) {
          this.renderStage();
@@ -777,6 +785,8 @@ public class RealmsMainScreen extends RealmsScreen {
          this.popupOpenedByUser = !this.popupOpenedByUser;
       } else if (this.toolTip != null && this.toolTip.equals(getLocalizedString("mco.selectServer.close"))) {
          this.popupOpenedByUser = false;
+      } else if (this.toolTip != null && this.toolTip.equals(getLocalizedString("mco.news"))) {
+         RealmsUtil.browseTo("https://mojang.com/category/realms");
       } else if (this.isOutsidePopup(x, y) && this.popupOpenedByUser) {
          this.popupOpenedByUser = false;
          this.justClosedPopup = true;
@@ -1107,6 +1117,25 @@ public class RealmsMainScreen extends RealmsScreen {
       GL11.glPopMatrix();
       if (hovered) {
          this.toolTip = getLocalizedString("mco.selectServer.info");
+      }
+
+   }
+
+   private void renderNews(int xm, int ym) {
+      int x = this.width() - 17 - 20 - 25;
+      int y = 6;
+      boolean hovered = false;
+      if (xm >= x && xm <= x + 20 && ym >= 6 && ym <= 26) {
+         hovered = true;
+      }
+
+      RealmsScreen.bind("realms:textures/gui/realms/news_icon.png");
+      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+      GL11.glPushMatrix();
+      RealmsScreen.blit(x, 6, hovered ? 20.0F : 0.0F, 0.0F, 20, 20, 40.0F, 20.0F);
+      GL11.glPopMatrix();
+      if (hovered) {
+         this.toolTip = getLocalizedString("mco.news");
       }
 
    }

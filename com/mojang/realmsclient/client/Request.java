@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.Proxy;
@@ -166,11 +167,11 @@ public abstract class Request<T extends Request> {
    }
 
    public static Request<?> post(String uri, String content) {
-      return new Request.Post(uri, content.getBytes(), 5000, 60000);
+      return new Request.Post(uri, content, 5000, 60000);
    }
 
    public static Request<?> post(String uri, String content, int connectTimeoutMillis, int readTimeoutMillis) {
-      return new Request.Post(uri, content.getBytes(), connectTimeoutMillis, readTimeoutMillis);
+      return new Request.Post(uri, content, connectTimeoutMillis, readTimeoutMillis);
    }
 
    public static Request<?> delete(String url) {
@@ -178,11 +179,11 @@ public abstract class Request<T extends Request> {
    }
 
    public static Request<?> put(String url, String content) {
-      return new Request.Put(url, content.getBytes(), 5000, 60000);
+      return new Request.Put(url, content, 5000, 60000);
    }
 
    public static Request<?> put(String url, String content, int connectTimeoutMillis, int readTimeoutMillis) {
-      return new Request.Put(url, content.getBytes(), connectTimeoutMillis, readTimeoutMillis);
+      return new Request.Put(url, content, connectTimeoutMillis, readTimeoutMillis);
    }
 
    public String getHeader(String header) {
@@ -233,9 +234,9 @@ public abstract class Request<T extends Request> {
    }
 
    public static class Post extends Request<Request.Post> {
-      private byte[] content;
+      private String content;
 
-      public Post(String uri, byte[] content, int connectTimeout, int readTimeout) {
+      public Post(String uri, String content, int connectTimeout, int readTimeout) {
          super(uri, connectTimeout, readTimeout);
          this.content = content;
       }
@@ -251,19 +252,21 @@ public abstract class Request<T extends Request> {
             this.connection.setUseCaches(false);
             this.connection.setRequestMethod("POST");
             OutputStream out = this.connection.getOutputStream();
-            out.write(this.content);
+            OutputStreamWriter writer = new OutputStreamWriter(out, "UTF-8");
+            writer.write(this.content);
+            writer.close();
             out.flush();
             return this;
-         } catch (Exception var2) {
-            throw new RealmsHttpException(var2.getMessage(), var2);
+         } catch (Exception var3) {
+            throw new RealmsHttpException(var3.getMessage(), var3);
          }
       }
    }
 
    public static class Put extends Request<Request.Put> {
-      private byte[] content;
+      private String content;
 
-      public Put(String uri, byte[] content, int connectTimeout, int readTimeout) {
+      public Put(String uri, String content, int connectTimeout, int readTimeout) {
          super(uri, connectTimeout, readTimeout);
          this.content = content;
       }
@@ -277,12 +280,14 @@ public abstract class Request<T extends Request> {
             this.connection.setDoOutput(true);
             this.connection.setDoInput(true);
             this.connection.setRequestMethod("PUT");
-            OutputStream os = this.connection.getOutputStream();
-            os.write(this.content);
-            os.flush();
+            OutputStream out = this.connection.getOutputStream();
+            OutputStreamWriter writer = new OutputStreamWriter(out, "UTF-8");
+            writer.write(this.content);
+            writer.close();
+            out.flush();
             return this;
-         } catch (Exception var2) {
-            throw new RealmsHttpException(var2.getMessage(), var2);
+         } catch (Exception var3) {
+            throw new RealmsHttpException(var3.getMessage(), var3);
          }
       }
    }

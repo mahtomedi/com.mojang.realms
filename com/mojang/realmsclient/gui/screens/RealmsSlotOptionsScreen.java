@@ -144,8 +144,8 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
    }
 
    public void init() {
-      this.column1_x = this.width() / 2 - 122;
-      this.column_width = 122;
+      this.column_width = 170;
+      this.column1_x = this.width() / 2 - this.column_width * 2 / 2;
       this.column2_x = this.width() / 2 + 10;
       this.createDifficultyAndGameMode();
       this.difficultyIndex = this.options.difficulty;
@@ -169,23 +169,23 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
          this.commandBlocks = this.options.commandBlocks;
       }
 
-      this.nameEdit = this.newEditBox(11, this.column1_x + 2, RealmsConstants.row(2), this.column_width - 4, 20);
+      this.nameEdit = this.newEditBox(11, this.column1_x + 2, RealmsConstants.row(1), this.column_width - 4, 20);
       this.nameEdit.setFocus(true);
       this.nameEdit.setMaxLength(10);
       this.nameEdit.setValue(this.options.getSlotName(this.activeSlot));
-      this.buttonsAdd(this.pvpButton = newButton(4, this.column2_x, RealmsConstants.row(2), this.column_width, 20, this.pvpTitle()));
-      this.buttonsAdd(newButton(3, this.column1_x, RealmsConstants.row(4), this.column_width, 20, this.gameModeTitle()));
-      this.buttonsAdd(this.spawnAnimalsButton = newButton(5, this.column2_x, RealmsConstants.row(4), this.column_width, 20, this.spawnAnimalsTitle()));
-      this.buttonsAdd(newButton(2, this.column1_x, RealmsConstants.row(6), this.column_width, 20, this.difficultyTitle()));
-      this.buttonsAdd(this.spawnMonstersButton = newButton(6, this.column2_x, RealmsConstants.row(6), this.column_width, 20, this.spawnMonstersTitle()));
+      this.buttonsAdd(this.pvpButton = newButton(4, this.column2_x, RealmsConstants.row(1), this.column_width, 20, this.pvpTitle()));
+      this.buttonsAdd(newButton(3, this.column1_x, RealmsConstants.row(3), this.column_width, 20, this.gameModeTitle()));
+      this.buttonsAdd(this.spawnAnimalsButton = newButton(5, this.column2_x, RealmsConstants.row(3), this.column_width, 20, this.spawnAnimalsTitle()));
+      this.buttonsAdd(newButton(2, this.column1_x, RealmsConstants.row(5), this.column_width, 20, this.difficultyTitle()));
+      this.buttonsAdd(this.spawnMonstersButton = newButton(6, this.column2_x, RealmsConstants.row(5), this.column_width, 20, this.spawnMonstersTitle()));
       this.buttonsAdd(
          this.spawnProtectionButton = new RealmsSlotOptionsScreen.SettingsSlider(
-            8, this.column1_x, RealmsConstants.row(8), this.column_width, 17, this.spawnProtection, 0.0F, 16.0F
+            8, this.column1_x, RealmsConstants.row(7), this.column_width, 17, this.spawnProtection, 0.0F, 16.0F
          )
       );
-      this.buttonsAdd(this.spawnNPCsButton = newButton(7, this.column2_x, RealmsConstants.row(8), this.column_width, 20, this.spawnNPCsTitle()));
-      this.buttonsAdd(this.forceGameModeButton = newButton(10, this.column1_x, RealmsConstants.row(10), this.column_width, 20, this.forceGameModeTitle()));
-      this.buttonsAdd(this.commandBlocksButton = newButton(9, this.column2_x, RealmsConstants.row(10), this.column_width, 20, this.commandBlocksTitle()));
+      this.buttonsAdd(this.spawnNPCsButton = newButton(7, this.column2_x, RealmsConstants.row(7), this.column_width, 20, this.spawnNPCsTitle()));
+      this.buttonsAdd(this.forceGameModeButton = newButton(10, this.column1_x, RealmsConstants.row(9), this.column_width, 20, this.forceGameModeTitle()));
+      this.buttonsAdd(this.commandBlocksButton = newButton(9, this.column2_x, RealmsConstants.row(9), this.column_width, 20, this.commandBlocksTitle()));
       if (!this.worldType.equals(RealmsServer.WorldType.NORMAL)) {
          this.pvpButton.active(false);
          this.spawnAnimalsButton.active(false);
@@ -275,7 +275,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
    public void render(int xm, int ym, float a) {
       this.renderBackground();
       String slotName = getLocalizedString("mco.configure.world.edit.slot.name");
-      this.drawString(slotName, this.column1_x + this.fontWidth(slotName) / 2, RealmsConstants.row(0) + 5, 16777215);
+      this.drawString(slotName, this.column1_x + this.column_width / 2 - this.fontWidth(slotName) / 2, RealmsConstants.row(0) - 5, 16777215);
       this.drawCenteredString(getLocalizedString("mco.configure.world.buttons.options"), this.width() / 2, 17, 16777215);
       if (this.notNormal) {
          this.drawCenteredString(getLocalizedString("mco.configure.world.edit.subscreen.adventuremap"), this.width() / 2, 30, 16711680);

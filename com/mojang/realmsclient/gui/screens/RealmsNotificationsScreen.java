@@ -16,26 +16,22 @@ public class RealmsNotificationsScreen extends RealmsScreen {
    private static final String TRIAL_ICON_LOCATION = "realms:textures/gui/realms/trial_icon.png";
    private static RealmsDataFetcher realmsDataFetcher = new RealmsDataFetcher();
    private volatile int numberOfPendingInvites = 0;
-   private static boolean checkedMcoAvailability;
+   private static boolean checkedMcoAvailability = false;
    private static boolean trialAvailable = false;
    private static boolean validClient = false;
    private static final List<RealmsDataFetcher.Task> tasks = Arrays.asList(RealmsDataFetcher.Task.PENDING_INVITE, RealmsDataFetcher.Task.TRIAL_AVAILABLE);
 
    public RealmsNotificationsScreen(RealmsScreen lastScreen) {
-      this.checkIfMcoEnabled();
    }
 
    public void init() {
+      this.checkIfMcoEnabled();
       Keyboard.enableRepeatEvents(true);
       this.buttonsClear();
-      if (validClient && Realms.getRealmsNotificationsEnabled()) {
-         realmsDataFetcher.initWithSpecificTaskList(tasks);
-      }
-
    }
 
    public void tick() {
-      if ((!Realms.getRealmsNotificationsEnabled() || !Realms.inTitleScreen()) && !realmsDataFetcher.isStopped()) {
+      if ((!Realms.getRealmsNotificationsEnabled() || !Realms.inTitleScreen() || !validClient) && !realmsDataFetcher.isStopped()) {
          realmsDataFetcher.stop();
       } else if (validClient && Realms.getRealmsNotificationsEnabled()) {
          realmsDataFetcher.initWithSpecificTaskList(tasks);
@@ -64,7 +60,10 @@ public class RealmsNotificationsScreen extends RealmsScreen {
                      return;
                   }
                } catch (RealmsServiceException var3) {
-                  RealmsNotificationsScreen.checkedMcoAvailability = false;
+                  if (var3.httpResultCode != 401) {
+                     RealmsNotificationsScreen.checkedMcoAvailability = false;
+                  }
+
                   return;
                } catch (IOException var4) {
                   RealmsNotificationsScreen.checkedMcoAvailability = false;

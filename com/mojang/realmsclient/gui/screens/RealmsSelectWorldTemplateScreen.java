@@ -43,6 +43,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
    private String warningURL = null;
    private boolean displayWarning = false;
    private boolean hoverWarning = false;
+   private boolean prepopulated = false;
 
    public RealmsSelectWorldTemplateScreen(RealmsScreenWithCallback<WorldTemplate> lastScreen, WorldTemplate selectedWorldTemplate, boolean isMiniGame) {
       this.lastScreen = lastScreen;
@@ -55,6 +56,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
       RealmsScreenWithCallback<WorldTemplate> lastScreen, WorldTemplate selectedWorldTemplate, boolean isMiniGame, List<WorldTemplate> templates
    ) {
       this(lastScreen, selectedWorldTemplate, isMiniGame);
+      this.prepopulated = true;
       this.templates = templates;
    }
 
@@ -87,7 +89,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
       Keyboard.enableRepeatEvents(true);
       this.buttonsClear();
       this.worldTemplateSelectionList = new RealmsSelectWorldTemplateScreen.WorldTemplateSelectionList();
-      if (this.templates.size() == 0) {
+      if (!this.prepopulated && this.templates.isEmpty()) {
          final boolean isMiniGame = this.isMiniGame;
          (new Thread("Realms-minigame-fetcher") {
             public void run() {

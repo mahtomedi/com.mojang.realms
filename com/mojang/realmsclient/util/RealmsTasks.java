@@ -11,6 +11,7 @@ import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.exception.RetryCallException;
 import com.mojang.realmsclient.gui.LongRunningTask;
 import com.mojang.realmsclient.gui.screens.RealmsConfigureWorldScreen;
+import com.mojang.realmsclient.gui.screens.RealmsLongRunningMcoTaskScreen;
 import com.mojang.realmsclient.gui.screens.RealmsResetWorldScreen;
 import com.mojang.realmsclient.gui.screens.RealmsTermsScreen;
 import java.io.IOException;
@@ -138,13 +139,38 @@ public class RealmsTasks {
 
    public static class RealmsConnectTask extends LongRunningTask {
       private final RealmsConnect realmsConnect;
-      private final RealmsServer data;
-      private final RealmsScreen onlineScreen;
+      private final RealmsServerAddress a;
 
-      public RealmsConnectTask(RealmsScreen onlineScreen, RealmsServer server) {
-         this.onlineScreen = onlineScreen;
-         this.realmsConnect = new RealmsConnect(onlineScreen);
-         this.data = server;
+      public RealmsConnectTask(RealmsScreen lastScreen, RealmsServerAddress address) {
+         this.a = address;
+         this.realmsConnect = new RealmsConnect(lastScreen);
+      }
+
+      public void run() {
+         this.setTitle(RealmsScreen.getLocalizedString("mco.connect.connecting"));
+         net.minecraft.realms.RealmsServerAddress address = net.minecraft.realms.RealmsServerAddress.parseString(this.a.address);
+         this.realmsConnect.connect(address.getHost(), address.getPort());
+      }
+
+      @Override
+      public void abortTask() {
+         this.realmsConnect.abort();
+         Realms.clearResourcePack();
+      }
+
+      @Override
+      public void tick() {
+         this.realmsConnect.tick();
+      }
+   }
+
+   public static class RealmsGetServerDetailsTask extends LongRunningTask {
+      private final RealmsServer server;
+      private final RealmsScreen lastScreen;
+
+      public RealmsGetServerDetailsTask(RealmsScreen lastScreen, RealmsServer server) {
+         this.lastScreen = lastScreen;
+         this.server = server;
       }
 
       public void run() {
@@ -153,12 +179,12 @@ public class RealmsTasks {
          boolean addressRetrieved = false;
          boolean hasError = false;
          int sleepTime = 5;
-         final RealmsServerAddress a = null;
+         final RealmsServerAddress address = null;
          boolean tosNotAccepted = false;
 
          for(int i = 0; i < 20 && !this.aborted(); ++i) {
             try {
-               a = client.join(this.data.id);
+               address = client.join(this.server.id);
                addressRetrieved = true;
             } catch (RetryCallException var10) {
                sleepTime = var10.delaySeconds;
@@ -177,6 +203,7 @@ public class RealmsTasks {
                hasError = true;
                RealmsTasks.LOGGER.error("Couldn't connect to world", var13);
                this.error(var13.getLocalizedMessage());
+               break;
             }
 
             if (addressRetrieved) {
@@ -187,30 +214,41 @@ public class RealmsTasks {
          }
 
          if (tosNotAccepted) {
-            Realms.setScreen(new RealmsTermsScreen(this.onlineScreen, this.data));
+            Realms.setScreen(new RealmsTermsScreen(this.lastScreen, this.server));
          } else if (!this.aborted() && !hasError) {
             if (addressRetrieved) {
-               if (this.data.resourcePackUrl != null && this.data.resourcePackHash != null) {
+               if (this.server.resourcePackUrl != null && this.server.resourcePackHash != null) {
                   try {
-                     Futures.addCallback(Realms.downloadResourcePack(this.data.resourcePackUrl, this.data.resourcePackHash), new FutureCallback<Object>() {
-                        public void onSuccess(@Nullable Object result) {
-                           net.minecraft.realms.RealmsServerAddress address = net.minecraft.realms.RealmsServerAddress.parseString(a.address);
-                           RealmsConnectTask.this.realmsConnect.connect(address.getHost(), address.getPort());
+                     Futures.addCallback(
+                        Realms.downloadResourcePack(this.server.resourcePackUrl, this.server.resourcePackHash),
+                        new FutureCallback<Object>() {
+                           public void onSuccess(@Nullable Object result) {
+                              RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(
+                                 RealmsGetServerDetailsTask.this.lastScreen,
+                                 new RealmsTasks.RealmsConnectTask(RealmsGetServerDetailsTask.this.lastScreen, address)
+                              );
+                              longRunningMcoTaskScreen.start();
+                              Realms.setScreen(longRunningMcoTaskScreen);
+                           }
+   
+                           public void onFailure(Throwable t) {
+                              Realms.clearResourcePack();
+                              RealmsTasks.LOGGER.error(t);
+                              RealmsGetServerDetailsTask.this.error("Failed to download resource pack!");
+                           }
                         }
-
-                        public void onFailure(Throwable t) {
-                           RealmsTasks.LOGGER.error(t);
-                           RealmsConnectTask.this.error("Failed to download resource pack!");
-                        }
-                     });
+                     );
                   } catch (Exception var9) {
                      Realms.clearResourcePack();
                      RealmsTasks.LOGGER.error(var9);
                      this.error("Failed to download resource pack!");
                   }
                } else {
-                  net.minecraft.realms.RealmsServerAddress address = net.minecraft.realms.RealmsServerAddress.parseString(a.address);
-                  this.realmsConnect.connect(address.getHost(), address.getPort());
+                  RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(
+                     this.lastScreen, new RealmsTasks.RealmsConnectTask(this.lastScreen, address)
+                  );
+                  longRunningMcoTaskScreen.start();
+                  Realms.setScreen(longRunningMcoTaskScreen);
                }
             } else {
                this.error(RealmsScreen.getLocalizedString("mco.errorMessage.connectionFailure"));
@@ -226,16 +264,6 @@ public class RealmsTasks {
             RealmsTasks.LOGGER.warn(var3.getLocalizedMessage());
          }
 
-      }
-
-      @Override
-      public void abortTask() {
-         this.realmsConnect.abort();
-      }
-
-      @Override
-      public void tick() {
-         this.realmsConnect.tick();
       }
    }
 

@@ -32,7 +32,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
    private RealmsServer serverData;
    private volatile long serverId;
    private String title = getLocalizedString("mco.brokenworld.title");
-   private String message = getLocalizedString("mco.brokenworld.message");
+   private String message = getLocalizedString("mco.brokenworld.message.line1") + "\\n" + getLocalizedString("mco.brokenworld.message.line2");
    private int left_x;
    private int right_x;
    private int default_button_width = 80;

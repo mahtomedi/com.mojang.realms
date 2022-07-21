@@ -35,8 +35,8 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTempla
    private List<WorldTemplate> adventuremaps = new ArrayList();
    private final Random random = new Random();
    private RealmsResetWorldScreen.ResetType selectedType = RealmsResetWorldScreen.ResetType.NONE;
-   private int templateId;
-   private int adventureMapId;
+   private int templateId = -1;
+   private int adventureMapId = -1;
    public int slot = -1;
    private RealmsResetWorldScreen.ResetType typeToReset = RealmsResetWorldScreen.ResetType.NONE;
    private RealmsResetWorldScreen.ResetWorldInfo worldInfoToReset = null;
@@ -89,8 +89,14 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTempla
                      }
                   }
 
-                  RealmsResetWorldScreen.this.templateId = RealmsResetWorldScreen.this.random.nextInt(RealmsResetWorldScreen.this.templates.size());
-                  RealmsResetWorldScreen.this.adventureMapId = RealmsResetWorldScreen.this.random.nextInt(RealmsResetWorldScreen.this.adventuremaps.size());
+                  if (!RealmsResetWorldScreen.this.templates.isEmpty()) {
+                     RealmsResetWorldScreen.this.templateId = RealmsResetWorldScreen.this.random.nextInt(RealmsResetWorldScreen.this.templates.size());
+                  }
+
+                  if (!RealmsResetWorldScreen.this.adventuremaps.isEmpty()) {
+                     RealmsResetWorldScreen.this.adventureMapId = RealmsResetWorldScreen.this.random.nextInt(RealmsResetWorldScreen.this.adventuremaps.size());
+                  }
+
                   RealmsResetWorldScreen.this.loaded = true;
                } catch (RealmsServiceException var4) {
                   RealmsResetWorldScreen.LOGGER.error("Couldn't fetch templates in reset world");
@@ -184,8 +190,8 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTempla
             xm,
             ym,
             getLocalizedString("mco.reset.world.adventure"),
-            Long.valueOf(((WorldTemplate)this.adventuremaps.get(this.adventureMapId)).id),
-            ((WorldTemplate)this.adventuremaps.get(this.adventureMapId)).image,
+            this.adventureMapId == -1 ? -1L : Long.valueOf(((WorldTemplate)this.adventuremaps.get(this.adventureMapId)).id),
+            this.adventureMapId == -1 ? "textures/gui/presets/isles.png" : ((WorldTemplate)this.adventuremaps.get(this.adventureMapId)).image,
             RealmsResetWorldScreen.ResetType.ADVENTURE
          );
          this.drawFrame(
@@ -194,8 +200,8 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTempla
             xm,
             ym,
             getLocalizedString("mco.reset.world.template"),
-            Long.valueOf(((WorldTemplate)this.templates.get(this.templateId)).id),
-            ((WorldTemplate)this.templates.get(this.templateId)).image,
+            this.templateId == -1 ? -1L : Long.valueOf(((WorldTemplate)this.templates.get(this.templateId)).id),
+            this.templateId == -1 ? "textures/gui/title/background/panorama_3.png" : ((WorldTemplate)this.templates.get(this.templateId)).image,
             RealmsResetWorldScreen.ResetType.SURVIVAL_SPAWN
          );
       }

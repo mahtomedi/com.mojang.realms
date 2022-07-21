@@ -358,24 +358,26 @@ public class RealmsUploadScreen extends RealmsScreen {
                         && lengthUnit != RealmsUploadScreen.Unit.B) {
                         RealmsUploadScreen.Unit unitToUse = RealmsUploadScreen.Unit.values()[lengthUnit.ordinal() - 1];
                         RealmsUploadScreen.this.errorMessage = RealmsScreen.getLocalizedString(
-                           "mco.upload.size.failure",
-                           new Object[]{
-                              RealmsUploadScreen.this.selectedLevel.getLevelName(),
-                              RealmsUploadScreen.humanReadableSize(length, unitToUse),
-                              RealmsUploadScreen.humanReadableSize(1073741824L, unitToUse)
-                           }
-                        );
+                              "mco.upload.size.failure.line1", new Object[]{RealmsUploadScreen.this.selectedLevel.getLevelName()}
+                           )
+                           + "\\n"
+                           + RealmsScreen.getLocalizedString(
+                              "mco.upload.size.failure.line2",
+                              new Object[]{
+                                 RealmsUploadScreen.humanReadableSize(length, unitToUse), RealmsUploadScreen.humanReadableSize(1073741824L, unitToUse)
+                              }
+                           );
                         return;
                      }
    
                      RealmsUploadScreen.this.errorMessage = RealmsScreen.getLocalizedString(
-                        "mco.upload.size.failure",
-                        new Object[]{
-                           RealmsUploadScreen.this.selectedLevel.getLevelName(),
-                           RealmsUploadScreen.humanReadableSize(length, lengthUnit),
-                           RealmsUploadScreen.humanReadableSize(1073741824L, maxUnit)
-                        }
-                     );
+                           "mco.upload.size.failure.line1", new Object[]{RealmsUploadScreen.this.selectedLevel.getLevelName()}
+                        )
+                        + "\\n"
+                        + RealmsScreen.getLocalizedString(
+                           "mco.upload.size.failure.line2",
+                           new Object[]{RealmsUploadScreen.humanReadableSize(length, lengthUnit), RealmsUploadScreen.humanReadableSize(1073741824L, maxUnit)}
+                        );
                      return;
                   }
                } catch (IOException var21) {

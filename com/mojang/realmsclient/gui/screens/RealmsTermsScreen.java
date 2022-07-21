@@ -74,7 +74,7 @@ public class RealmsTermsScreen extends RealmsScreen {
       try {
          client.agreeToTos();
          RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(
-            this.lastScreen, new RealmsTasks.RealmsConnectTask(this.lastScreen, this.realmsServer)
+            this.lastScreen, new RealmsTasks.RealmsGetServerDetailsTask(this.lastScreen, this.realmsServer)
          );
          longRunningMcoTaskScreen.start();
          Realms.setScreen(longRunningMcoTaskScreen);

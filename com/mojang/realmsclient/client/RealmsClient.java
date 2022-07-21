@@ -434,8 +434,8 @@ public class RealmsClient {
    }
 
    public static enum Environment {
-      PRODUCTION("mcoapi.minecraft.net", "https"),
-      STAGE("mcoapi-stage.minecraft.net", "https"),
+      PRODUCTION("pc.realms.minecraft.net", "https"),
+      STAGE("pc-stage.realms.minecraft.net", "https"),
       LOCAL("localhost:8080", "http");
 
       public String baseUrl;

@@ -50,6 +50,7 @@ public class RealmsUploadScreen extends RealmsScreen {
    private Long previousTimeSnapshot = null;
    private long bytesPersSecond = 0L;
    private static final ReentrantLock uploadLock = new ReentrantLock();
+   public static final long SIZE_LIMIT = 524288000L;
 
    public RealmsUploadScreen(long worldId, RealmsScreen lastScreen, RealmsLevelSummary selectedLevel) {
       this.worldId = worldId;
@@ -115,6 +116,10 @@ public class RealmsUploadScreen extends RealmsScreen {
 
    private void drawProgressBar() {
       double percentage = this.uploadStatus.bytesWritten.doubleValue() / this.uploadStatus.totalBytes.doubleValue() * 100.0;
+      if (percentage > 100.0) {
+         percentage = 100.0;
+      }
+
       this.progress = String.format("%.1f", percentage);
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glDisable(3553);
@@ -271,25 +276,25 @@ public class RealmsUploadScreen extends RealmsScreen {
                   RealmsUploadScreen.LOGGER.error("Could not acquire upload lock");
                   return;
                } finally {
-                  if (!RealmsUploadScreen.uploadLock.isHeldByCurrentThread()) {
-                     return;
+                  if (RealmsUploadScreen.uploadLock.isHeldByCurrentThread()) {
+                     RealmsUploadScreen.uploadLock.unlock();
+                     RealmsUploadScreen.this.showDots = false;
+                     RealmsUploadScreen.this.buttonsRemove(RealmsUploadScreen.this.cancelButton);
+                     RealmsUploadScreen.this.buttonsAdd(RealmsUploadScreen.this.backButton);
+                     if (archive != null) {
+                        RealmsUploadScreen.LOGGER.debug("Deleting file " + archive.getAbsolutePath());
+                        archive.delete();
+                     }
+   
+                     try {
+                        client.uploadFinished(wid);
+                     } catch (RealmsServiceException var27) {
+                        RealmsUploadScreen.LOGGER.error("Failed to request upload-finished to Realms", new Object[]{var27.toString()});
+                     }
+   
                   }
    
-                  RealmsUploadScreen.uploadLock.unlock();
-                  RealmsUploadScreen.this.showDots = false;
-                  RealmsUploadScreen.this.buttonsRemove(RealmsUploadScreen.this.cancelButton);
-                  RealmsUploadScreen.this.buttonsAdd(RealmsUploadScreen.this.backButton);
-                  if (archive != null) {
-                     RealmsUploadScreen.LOGGER.debug("Deleting file " + archive.getAbsolutePath());
-                     archive.delete();
-                  }
-   
-                  try {
-                     client.uploadFinished(wid);
-                  } catch (RealmsServiceException var27) {
-                     RealmsUploadScreen.LOGGER.error("Failed to request upload-finished to Realms", new Object[]{var27.toString()});
-                  }
-   
+                  return;
                }
    
             }

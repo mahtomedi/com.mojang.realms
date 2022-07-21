@@ -1,12 +1,12 @@
 package com.mojang.realmsclient.gui;
 
-import com.mojang.realmsclient.gui.screens.LongRunningMcoTaskScreen;
+import com.mojang.realmsclient.gui.screens.RealmsLongRunningMcoTaskScreen;
 import net.minecraft.realms.RealmsButton;
 
 public abstract class LongRunningTask implements Runnable, ErrorCallback, GuiCallback {
-   protected LongRunningMcoTaskScreen longRunningMcoTaskScreen;
+   protected RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen;
 
-   public void setScreen(LongRunningMcoTaskScreen longRunningMcoTaskScreen) {
+   public void setScreen(RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen) {
       this.longRunningMcoTaskScreen = longRunningMcoTaskScreen;
    }
 

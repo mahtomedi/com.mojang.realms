@@ -13,7 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 
-public class EditRealmsWorldScreen extends RealmsScreen implements RealmsConfirmResultListener {
+public class RealmsEditRealmsWorldScreen extends RealmsScreen implements RealmsConfirmResultListener {
    private static final Logger LOGGER = LogManager.getLogger();
    private RealmsScreen configureWorldScreen;
    private RealmsScreen onlineScreen;
@@ -28,7 +28,7 @@ public class EditRealmsWorldScreen extends RealmsScreen implements RealmsConfirm
    private RealmsButton doneButton;
    private RealmsButton moreSettingsButton;
 
-   public EditRealmsWorldScreen(RealmsScreen configureWorldScreen, RealmsScreen onlineScreen, RealmsServer serverData) {
+   public RealmsEditRealmsWorldScreen(RealmsScreen configureWorldScreen, RealmsScreen onlineScreen, RealmsServer serverData) {
       this.configureWorldScreen = configureWorldScreen;
       this.onlineScreen = onlineScreen;
       this.serverData = serverData;

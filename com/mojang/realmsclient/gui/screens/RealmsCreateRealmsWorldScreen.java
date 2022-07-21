@@ -14,7 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 
-public class CreateRealmsWorldScreen extends ScreenWithCallback<WorldTemplate> {
+public class RealmsCreateRealmsWorldScreen extends RealmsScreenWithCallback<WorldTemplate> {
    private static final Logger LOGGER = LogManager.getLogger();
    private final long worldId;
    private RealmsScreen lastScreen;
@@ -29,7 +29,7 @@ public class CreateRealmsWorldScreen extends ScreenWithCallback<WorldTemplate> {
    private WorldTemplate selectedWorldTemplate;
    private RealmsButton templateButton;
 
-   public CreateRealmsWorldScreen(long worldId, RealmsScreen lastScreen) {
+   public RealmsCreateRealmsWorldScreen(long worldId, RealmsScreen lastScreen) {
       this.worldId = worldId;
       this.lastScreen = lastScreen;
    }
@@ -99,10 +99,10 @@ public class CreateRealmsWorldScreen extends ScreenWithCallback<WorldTemplate> {
 
    private void createWorld() {
       if (this.valid()) {
-         CreateRealmsWorldScreen.WorldCreationTask worldCreationTask = new CreateRealmsWorldScreen.WorldCreationTask(
+         RealmsCreateRealmsWorldScreen.WorldCreationTask worldCreationTask = new RealmsCreateRealmsWorldScreen.WorldCreationTask(
             this.worldId, this.nameBox.getValue(), this.selectedWorldTemplate
          );
-         LongRunningMcoTaskScreen longRunningMcoTaskScreen = new LongRunningMcoTaskScreen(this.lastScreen, worldCreationTask);
+         RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(this.lastScreen, worldCreationTask);
          longRunningMcoTaskScreen.start();
          Realms.setScreen(longRunningMcoTaskScreen);
       }
@@ -158,18 +158,18 @@ public class CreateRealmsWorldScreen extends ScreenWithCallback<WorldTemplate> {
                client.initializeWorld(this.worldId, this.name, "-1");
             }
 
-            Realms.setScreen(CreateRealmsWorldScreen.this.lastScreen);
+            Realms.setScreen(RealmsCreateRealmsWorldScreen.this.lastScreen);
          } catch (RealmsServiceException var4) {
-            CreateRealmsWorldScreen.LOGGER.error("Couldn't create world");
+            RealmsCreateRealmsWorldScreen.LOGGER.error("Couldn't create world");
             this.error(var4.toString());
          } catch (UnsupportedEncodingException var5) {
-            CreateRealmsWorldScreen.LOGGER.error("Couldn't create world");
+            RealmsCreateRealmsWorldScreen.LOGGER.error("Couldn't create world");
             this.error(var5.getLocalizedMessage());
          } catch (IOException var6) {
-            CreateRealmsWorldScreen.LOGGER.error("Could not parse response creating world");
+            RealmsCreateRealmsWorldScreen.LOGGER.error("Could not parse response creating world");
             this.error(var6.getLocalizedMessage());
          } catch (Exception var7) {
-            CreateRealmsWorldScreen.LOGGER.error("Could not create world");
+            RealmsCreateRealmsWorldScreen.LOGGER.error("Could not create world");
             this.error(var7.getLocalizedMessage());
          }
 

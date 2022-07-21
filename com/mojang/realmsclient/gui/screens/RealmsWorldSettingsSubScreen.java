@@ -18,7 +18,7 @@ public class RealmsWorldSettingsSubScreen extends RealmsScreen {
    private static final int SPAWN_PROTECTION_BUTTON_ID = 8;
    private static final int COMMANDBLOCKS_BUTTON_ID = 9;
    private static final int FORCE_GAME_MODE_ID = 10;
-   protected final EditRealmsWorldScreen parent;
+   protected final RealmsEditRealmsWorldScreen parent;
    private int column1_x;
    private int column_width;
    private int column2_x;
@@ -39,11 +39,12 @@ public class RealmsWorldSettingsSubScreen extends RealmsScreen {
    private RealmsSliderButton spawnProtectionButton;
    private RealmsButton commandBlocksButton;
    private RealmsButton forceGameModeButton;
+   private boolean notNormal = false;
    String[] difficulties;
    String[] gameModes;
    String[][] gameModeHints;
 
-   public RealmsWorldSettingsSubScreen(EditRealmsWorldScreen parent, RealmsServer serverData) {
+   public RealmsWorldSettingsSubScreen(RealmsEditRealmsWorldScreen parent, RealmsServer serverData) {
       this.parent = parent;
       this.serverData = serverData;
    }
@@ -73,8 +74,10 @@ public class RealmsWorldSettingsSubScreen extends RealmsScreen {
          } else if (button.id() == 2) {
             this.difficultyIndex = (this.difficultyIndex + 1) % this.difficulties.length;
             button.msg(this.difficultyTitle());
-            this.spawnMonstersButton.active(this.difficultyIndex != 0);
-            this.spawnMonstersButton.msg(this.spawnMonstersTitle());
+            if (this.serverData.worldType.equals(RealmsServer.WorldType.NORMAL)) {
+               this.spawnMonstersButton.active(this.difficultyIndex != 0);
+               this.spawnMonstersButton.msg(this.spawnMonstersTitle());
+            }
          } else if (button.id() == 3) {
             this.gameModeIndex = (this.gameModeIndex + 1) % this.gameModes.length;
             button.msg(this.gameModeTitle());
@@ -115,13 +118,25 @@ public class RealmsWorldSettingsSubScreen extends RealmsScreen {
       this.createDifficultyAndGameMode();
       this.difficultyIndex = this.serverData.options.difficulty;
       this.gameModeIndex = this.serverData.options.gameMode;
-      this.pvp = this.serverData.options.pvp;
-      this.spawnAnimals = this.serverData.options.spawnAnimals;
-      this.spawnMonsters = this.serverData.options.spawnMonsters;
-      this.spawnNPCs = this.serverData.options.spawnNPCs;
-      this.spawnProtection = this.serverData.options.spawnProtection;
-      this.commandBlocks = this.serverData.options.commandBlocks;
-      this.forceGameMode = this.serverData.options.forceGameMode;
+      if (!this.serverData.worldType.equals(RealmsServer.WorldType.NORMAL)) {
+         this.notNormal = true;
+         this.pvp = true;
+         this.spawnProtection = 0;
+         this.forceGameMode = false;
+         this.spawnAnimals = true;
+         this.spawnMonsters = true;
+         this.spawnNPCs = true;
+         this.commandBlocks = true;
+      } else {
+         this.pvp = this.serverData.options.pvp;
+         this.spawnProtection = this.serverData.options.spawnProtection;
+         this.forceGameMode = this.serverData.options.forceGameMode;
+         this.spawnAnimals = this.serverData.options.spawnAnimals;
+         this.spawnMonsters = this.serverData.options.spawnMonsters;
+         this.spawnNPCs = this.serverData.options.spawnNPCs;
+         this.commandBlocks = this.serverData.options.commandBlocks;
+      }
+
       this.buttonsAdd(this.pvpButton = newButton(4, this.column1_x, this.height() / 4 + 0 - 20, this.column_width, 20, this.pvpTitle()));
       this.buttonsAdd(newButton(2, this.column1_x, this.height() / 4 + 24 - 20, this.column_width, 20, this.difficultyTitle()));
       this.buttonsAdd(
@@ -142,6 +157,7 @@ public class RealmsWorldSettingsSubScreen extends RealmsScreen {
          this.spawnMonstersButton.active(false);
          this.spawnProtectionButton.active(false);
          this.commandBlocksButton.active(false);
+         this.spawnProtectionButton.active(false);
          this.forceGameModeButton.active(false);
       }
 
@@ -223,6 +239,10 @@ public class RealmsWorldSettingsSubScreen extends RealmsScreen {
    public void render(int xm, int ym, float a) {
       this.renderBackground();
       this.drawCenteredString(getLocalizedString("mco.configure.world.edit.subscreen.title"), this.width() / 2, 17, 16777215);
+      if (this.notNormal) {
+         this.drawCenteredString(getLocalizedString("mco.configure.world.edit.subscreen.adventuremap"), this.width() / 2, 30, 16711680);
+      }
+
       this.renderHints();
       super.render(xm, ym, a);
    }
@@ -233,11 +253,15 @@ public class RealmsWorldSettingsSubScreen extends RealmsScreen {
    }
 
    public void mouseReleased(int x, int y, int buttonNum) {
-      this.spawnProtectionButton.released(x, y);
+      if (this.spawnProtectionButton.active()) {
+         this.spawnProtectionButton.released(x, y);
+      }
    }
 
    public void mouseDragged(int x, int y, int buttonNum, long delta) {
-      this.spawnProtectionButton.clicked(x, y);
+      if (this.spawnProtectionButton.active()) {
+         this.spawnProtectionButton.clicked(x, y);
+      }
    }
 
    private class SettingsSlider extends RealmsSliderButton {
@@ -256,7 +280,9 @@ public class RealmsWorldSettingsSubScreen extends RealmsScreen {
       }
 
       public void clicked(float value) {
-         RealmsWorldSettingsSubScreen.this.spawnProtection = (int)value;
+         if (RealmsWorldSettingsSubScreen.this.spawnProtectionButton.active()) {
+            RealmsWorldSettingsSubScreen.this.spawnProtection = (int)value;
+         }
       }
    }
 }

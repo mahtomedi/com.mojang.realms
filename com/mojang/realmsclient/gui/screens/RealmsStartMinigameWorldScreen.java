@@ -12,7 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 
-public class StartMinigameWorldScreen extends ScreenWithCallback<WorldTemplate> {
+public class RealmsStartMinigameWorldScreen extends RealmsScreenWithCallback<WorldTemplate> {
    private static final Logger LOGGER = LogManager.getLogger();
    private RealmsScreen lastScreen;
    private RealmsServer serverData;
@@ -22,7 +22,7 @@ public class StartMinigameWorldScreen extends ScreenWithCallback<WorldTemplate> 
    private WorldTemplate selectedWorldTemplate;
    private RealmsButton startButton;
 
-   public StartMinigameWorldScreen(RealmsScreen lastScreen, RealmsServer serverData) {
+   public RealmsStartMinigameWorldScreen(RealmsScreen lastScreen, RealmsServer serverData) {
       this.lastScreen = lastScreen;
       this.serverData = serverData;
    }
@@ -75,10 +75,10 @@ public class StartMinigameWorldScreen extends ScreenWithCallback<WorldTemplate> 
    }
 
    private void startMinigame() {
-      StartMinigameWorldScreen.StartMinigameTask startMinigameTask = new StartMinigameWorldScreen.StartMinigameTask(
+      RealmsStartMinigameWorldScreen.StartMinigameTask startMinigameTask = new RealmsStartMinigameWorldScreen.StartMinigameTask(
          this.serverData.id, this.selectedWorldTemplate
       );
-      LongRunningMcoTaskScreen longRunningMcoTaskScreen = new LongRunningMcoTaskScreen(this.lastScreen, startMinigameTask);
+      RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(this.lastScreen, startMinigameTask);
       longRunningMcoTaskScreen.start();
       Realms.setScreen(longRunningMcoTaskScreen);
    }
@@ -122,7 +122,7 @@ public class StartMinigameWorldScreen extends ScreenWithCallback<WorldTemplate> 
             Boolean result = client.putIntoMinigameMode(this.worldId, this.worldTemplate.id);
             Thread.sleep(2000L);
             if (result) {
-               RealmsServer serverData = StartMinigameWorldScreen.this.serverData;
+               RealmsServer serverData = RealmsStartMinigameWorldScreen.this.serverData;
                serverData.worldType = RealmsServer.WorldType.MINIGAME;
                serverData.motd = this.worldTemplate.id;
             }
@@ -131,20 +131,20 @@ public class StartMinigameWorldScreen extends ScreenWithCallback<WorldTemplate> 
                return;
             }
 
-            Realms.setScreen(StartMinigameWorldScreen.this.lastScreen);
+            Realms.setScreen(RealmsStartMinigameWorldScreen.this.lastScreen);
          } catch (RealmsServiceException var5) {
             if (this.aborted()) {
                return;
             }
 
-            StartMinigameWorldScreen.LOGGER.error("Couldn't start mini game!");
+            RealmsStartMinigameWorldScreen.LOGGER.error("Couldn't start mini game!");
             this.error(var5.toString());
          } catch (Exception var6) {
             if (this.aborted()) {
                return;
             }
 
-            StartMinigameWorldScreen.LOGGER.error("Couldn't start mini game!");
+            RealmsStartMinigameWorldScreen.LOGGER.error("Couldn't start mini game!");
             this.error(var6.toString());
          }
 

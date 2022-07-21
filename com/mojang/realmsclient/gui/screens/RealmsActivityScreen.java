@@ -26,23 +26,23 @@ import net.minecraft.realms.Tezzelator;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
-public class ActivityScreen extends RealmsScreen {
+public class RealmsActivityScreen extends RealmsScreen {
    private final RealmsScreen lastScreen;
    private final long serverId;
-   private volatile List<ActivityScreen.ActivityRow> activityMap = new ArrayList();
-   private ActivityScreen.DetailsList list;
+   private volatile List<RealmsActivityScreen.ActivityRow> activityMap = new ArrayList();
+   private RealmsActivityScreen.DetailsList list;
    private int matrixWidth;
    private int matrixHeight;
    private String toolTip;
-   private volatile List<ActivityScreen.Day> dayList = new ArrayList();
-   private List<ActivityScreen.Color> colors = Arrays.asList(
-      new ActivityScreen.Color(79, 243, 29),
-      new ActivityScreen.Color(243, 175, 29),
-      new ActivityScreen.Color(243, 29, 190),
-      new ActivityScreen.Color(29, 165, 243),
-      new ActivityScreen.Color(29, 243, 130),
-      new ActivityScreen.Color(243, 29, 64),
-      new ActivityScreen.Color(29, 74, 243)
+   private volatile List<RealmsActivityScreen.Day> dayList = new ArrayList();
+   private List<RealmsActivityScreen.Color> colors = Arrays.asList(
+      new RealmsActivityScreen.Color(79, 243, 29),
+      new RealmsActivityScreen.Color(243, 175, 29),
+      new RealmsActivityScreen.Color(243, 29, 190),
+      new RealmsActivityScreen.Color(29, 165, 243),
+      new RealmsActivityScreen.Color(29, 243, 130),
+      new RealmsActivityScreen.Color(243, 29, 64),
+      new RealmsActivityScreen.Color(29, 74, 243)
    );
    private int colorIndex = 0;
    private long periodInMillis;
@@ -55,7 +55,7 @@ public class ActivityScreen extends RealmsScreen {
       }
    });
 
-   public ActivityScreen(RealmsScreen lastScreen, long serverId) {
+   public RealmsActivityScreen(RealmsScreen lastScreen, long serverId) {
       this.lastScreen = lastScreen;
       this.serverId = serverId;
       this.getActivities();
@@ -72,16 +72,16 @@ public class ActivityScreen extends RealmsScreen {
       this.matrixWidth = this.width();
       this.matrixHeight = this.height() - 40;
       this.fontWidth = this.fontWidth("A");
-      this.list = new ActivityScreen.DetailsList();
+      this.list = new RealmsActivityScreen.DetailsList();
       this.buttonsAdd(newButton(1, this.width() / 2 - 100, this.height() - 30, 200, 20, getLocalizedString("gui.back")));
    }
 
-   private ActivityScreen.Color getColor() {
+   private RealmsActivityScreen.Color getColor() {
       if (this.colorIndex > this.colors.size() - 1) {
          this.colorIndex = 0;
       }
 
-      ActivityScreen.Color color = (ActivityScreen.Color)this.colors.get(this.colorIndex);
+      RealmsActivityScreen.Color color = (RealmsActivityScreen.Color)this.colors.get(this.colorIndex);
       ++this.colorIndex;
       return color;
    }
@@ -92,26 +92,26 @@ public class ActivityScreen extends RealmsScreen {
             RealmsClient client = RealmsClient.createRealmsClient();
 
             try {
-               ServerActivityList activities = client.getActivity(ActivityScreen.this.serverId);
-               ActivityScreen.this.activityMap = ActivityScreen.this.convertToActivityMatrix(activities);
-               List<ActivityScreen.Day> tempDayList = new ArrayList();
+               ServerActivityList activities = client.getActivity(RealmsActivityScreen.this.serverId);
+               RealmsActivityScreen.this.activityMap = RealmsActivityScreen.this.convertToActivityMatrix(activities);
+               List<RealmsActivityScreen.Day> tempDayList = new ArrayList();
 
-               for(ActivityScreen.ActivityRow row : ActivityScreen.this.activityMap) {
-                  for(ActivityScreen.Activity activity : row.activities) {
+               for(RealmsActivityScreen.ActivityRow row : RealmsActivityScreen.this.activityMap) {
+                  for(RealmsActivityScreen.Activity activity : row.activities) {
                      String day = new SimpleDateFormat("dd/MM").format(new Date(activity.start));
-                     ActivityScreen.Day the_day = new ActivityScreen.Day(day, activity.start);
+                     RealmsActivityScreen.Day the_day = new RealmsActivityScreen.Day(day, activity.start);
                      if (!tempDayList.contains(the_day)) {
                         tempDayList.add(the_day);
                      }
                   }
                }
 
-               Collections.sort(tempDayList, new Comparator<ActivityScreen.Day>() {
-                  public int compare(ActivityScreen.Day day1, ActivityScreen.Day day2) {
+               Collections.sort(tempDayList, new Comparator<RealmsActivityScreen.Day>() {
+                  public int compare(RealmsActivityScreen.Day day1, RealmsActivityScreen.Day day2) {
                      return day1.timestamp.compareTo(day2.timestamp);
                   }
                });
-               ActivityScreen.this.dayList = tempDayList;
+               RealmsActivityScreen.this.dayList = tempDayList;
             } catch (RealmsServiceException var10) {
                var10.printStackTrace();
             }
@@ -120,18 +120,18 @@ public class ActivityScreen extends RealmsScreen {
       }).start();
    }
 
-   private List<ActivityScreen.ActivityRow> convertToActivityMatrix(ServerActivityList serverActivityList) {
-      List<ActivityScreen.ActivityRow> activityRows = Lists.newArrayList();
+   private List<RealmsActivityScreen.ActivityRow> convertToActivityMatrix(ServerActivityList serverActivityList) {
+      List<RealmsActivityScreen.ActivityRow> activityRows = Lists.newArrayList();
       this.periodInMillis = serverActivityList.periodInMillis;
       long base = System.currentTimeMillis() - serverActivityList.periodInMillis;
 
       for(ServerActivity sa : serverActivityList.serverActivities) {
-         ActivityScreen.ActivityRow activityRow = this.find(sa.profileUuid, activityRows);
+         RealmsActivityScreen.ActivityRow activityRow = this.find(sa.profileUuid, activityRows);
          Calendar joinTime = Calendar.getInstance(TimeZone.getDefault());
          joinTime.setTimeInMillis(sa.joinTime);
          Calendar leaveTime = Calendar.getInstance(TimeZone.getDefault());
          leaveTime.setTimeInMillis(sa.leaveTime);
-         ActivityScreen.Activity e = new ActivityScreen.Activity(base, joinTime.getTimeInMillis(), leaveTime.getTimeInMillis());
+         RealmsActivityScreen.Activity e = new RealmsActivityScreen.Activity(base, joinTime.getTimeInMillis(), leaveTime.getTimeInMillis());
          if (activityRow == null) {
             String name = "";
 
@@ -141,7 +141,7 @@ public class ActivityScreen extends RealmsScreen {
                var13.printStackTrace();
             }
 
-            activityRow = new ActivityScreen.ActivityRow(sa.profileUuid, new ArrayList(), this.getColor(), name, sa.profileUuid);
+            activityRow = new RealmsActivityScreen.ActivityRow(sa.profileUuid, new ArrayList(), this.getColor(), name, sa.profileUuid);
             activityRow.activities.add(e);
             activityRows.add(activityRow);
          } else {
@@ -149,7 +149,7 @@ public class ActivityScreen extends RealmsScreen {
          }
       }
 
-      for(ActivityScreen.ActivityRow row : activityRows) {
+      for(RealmsActivityScreen.ActivityRow row : activityRows) {
          Collections.sort(row.activities);
       }
 
@@ -157,8 +157,8 @@ public class ActivityScreen extends RealmsScreen {
       return activityRows;
    }
 
-   private ActivityScreen.ActivityRow find(String key, List<ActivityScreen.ActivityRow> rows) {
-      for(ActivityScreen.ActivityRow row : rows) {
+   private RealmsActivityScreen.ActivityRow find(String key, List<RealmsActivityScreen.ActivityRow> rows) {
+      for(RealmsActivityScreen.ActivityRow row : rows) {
          if (row.key.equals(key)) {
             return row;
          }
@@ -222,7 +222,7 @@ public class ActivityScreen extends RealmsScreen {
       }
    }
 
-   static class Activity implements Comparable<ActivityScreen.Activity> {
+   static class Activity implements Comparable<RealmsActivityScreen.Activity> {
       long base;
       long start;
       long end;
@@ -233,7 +233,7 @@ public class ActivityScreen extends RealmsScreen {
          this.end = end;
       }
 
-      public int compareTo(ActivityScreen.Activity o) {
+      public int compareTo(RealmsActivityScreen.Activity o) {
          return (int)(this.start - o.start);
       }
 
@@ -250,12 +250,12 @@ public class ActivityScreen extends RealmsScreen {
 
    static class ActivityRow {
       String key;
-      List<ActivityScreen.Activity> activities;
-      ActivityScreen.Color color;
+      List<RealmsActivityScreen.Activity> activities;
+      RealmsActivityScreen.Color color;
       String name;
       String uuid;
 
-      ActivityRow(String key, List<ActivityScreen.Activity> activities, ActivityScreen.Color color, String name, String uuid) {
+      ActivityRow(String key, List<RealmsActivityScreen.Activity> activities, RealmsActivityScreen.Color color, String name, String uuid) {
          this.key = key;
          this.activities = activities;
          this.color = color;
@@ -286,10 +286,10 @@ public class ActivityScreen extends RealmsScreen {
       }
 
       public boolean equals(Object d) {
-         if (!(d instanceof ActivityScreen.Day)) {
+         if (!(d instanceof RealmsActivityScreen.Day)) {
             return false;
          } else {
-            ActivityScreen.Day that = (ActivityScreen.Day)d;
+            RealmsActivityScreen.Day that = (RealmsActivityScreen.Day)d;
             return this.day.equals(that.day);
          }
       }
@@ -297,11 +297,17 @@ public class ActivityScreen extends RealmsScreen {
 
    class DetailsList extends RealmsScrolledSelectionList {
       public DetailsList() {
-         super(ActivityScreen.this.width(), ActivityScreen.this.height(), 30, ActivityScreen.this.height() - 40, ActivityScreen.this.fontLineHeight() + 1);
+         super(
+            RealmsActivityScreen.this.width(),
+            RealmsActivityScreen.this.height(),
+            30,
+            RealmsActivityScreen.this.height() - 40,
+            RealmsActivityScreen.this.fontLineHeight() + 1
+         );
       }
 
       public int getItemCount() {
-         return ActivityScreen.this.activityMap.size();
+         return RealmsActivityScreen.this.activityMap.size();
       }
 
       public void selectItem(int item, boolean doubleClick, int xMouse, int yMouse) {
@@ -315,30 +321,30 @@ public class ActivityScreen extends RealmsScreen {
       }
 
       public int getMaxPosition() {
-         return this.getItemCount() * (ActivityScreen.this.fontLineHeight() + 1) + 10;
+         return this.getItemCount() * (RealmsActivityScreen.this.fontLineHeight() + 1) + 10;
       }
 
       protected void renderItem(int i, int x, int y, int h, Tezzelator t, int mouseX, int mouseY) {
-         if (ActivityScreen.this.activityMap != null && ActivityScreen.this.activityMap.size() > 0) {
-            ActivityScreen.this.drawString(((ActivityScreen.ActivityRow)ActivityScreen.this.activityMap.get(i)).name, 20, y, 16777215);
-            int keyWidth = ActivityScreen.this.fontWidth * ((ActivityScreen.ActivityRow)ActivityScreen.this.activityMap.get(i)).name.length();
-            if (keyWidth > ActivityScreen.this.maxKeyWidth) {
-               ActivityScreen.this.maxKeyWidth = keyWidth + 5;
+         if (RealmsActivityScreen.this.activityMap != null && RealmsActivityScreen.this.activityMap.size() > 0) {
+            RealmsActivityScreen.this.drawString(((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).name, 20, y, 16777215);
+            int keyWidth = RealmsActivityScreen.this.fontWidth * ((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).name.length();
+            if (keyWidth > RealmsActivityScreen.this.maxKeyWidth) {
+               RealmsActivityScreen.this.maxKeyWidth = keyWidth + 5;
             }
 
             int keyRightPadding = 25;
-            int activityPoint = ActivityScreen.this.maxKeyWidth + keyRightPadding;
-            int spaceLeft = ActivityScreen.this.matrixWidth - activityPoint - 10;
-            int days = ActivityScreen.this.dayList.size() < 1 ? 1 : ActivityScreen.this.dayList.size();
+            int activityPoint = RealmsActivityScreen.this.maxKeyWidth + keyRightPadding;
+            int spaceLeft = RealmsActivityScreen.this.matrixWidth - activityPoint - 10;
+            int days = RealmsActivityScreen.this.dayList.size() < 1 ? 1 : RealmsActivityScreen.this.dayList.size();
             int dayWidth = spaceLeft / days;
             double hourWidth = (double)dayWidth / 24.0;
             double minuteWidth = hourWidth / 60.0;
             GL11.glDisable(3553);
             t.begin();
             t.color(
-               ((ActivityScreen.ActivityRow)ActivityScreen.this.activityMap.get(i)).color.r,
-               ((ActivityScreen.ActivityRow)ActivityScreen.this.activityMap.get(i)).color.g,
-               ((ActivityScreen.ActivityRow)ActivityScreen.this.activityMap.get(i)).color.b
+               ((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).color.r,
+               ((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).color.g,
+               ((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).color.b
             );
             t.vertex((double)(activityPoint - 8), (double)(y + 7), 0.0);
             t.vertex((double)(activityPoint - 3), (double)(y + 7), 0.0);
@@ -349,32 +355,32 @@ public class ActivityScreen extends RealmsScreen {
             GL11.glDisable(3553);
             t.begin();
             t.color(8421504);
-            t.vertex((double)activityPoint, (double)(ActivityScreen.this.height() - 40), 0.0);
-            t.vertex((double)(activityPoint + 1), (double)(ActivityScreen.this.height() - 40), 0.0);
-            t.vertex((double)(activityPoint + 1), (double)(-ActivityScreen.this.height()), 0.0);
-            t.vertex((double)activityPoint, (double)(-ActivityScreen.this.height()), 0.0);
+            t.vertex((double)activityPoint, (double)(RealmsActivityScreen.this.height() - 40), 0.0);
+            t.vertex((double)(activityPoint + 1), (double)(RealmsActivityScreen.this.height() - 40), 0.0);
+            t.vertex((double)(activityPoint + 1), (double)(-RealmsActivityScreen.this.height()), 0.0);
+            t.vertex((double)activityPoint, (double)(-RealmsActivityScreen.this.height()), 0.0);
             t.end();
             GL11.glEnable(3553);
             int daysIndex = 1;
 
-            for(ActivityScreen.Day day : ActivityScreen.this.dayList) {
-               ActivityScreen.this.drawString(
+            for(RealmsActivityScreen.Day day : RealmsActivityScreen.this.dayList) {
+               RealmsActivityScreen.this.drawString(
                   day.day,
-                  activityPoint + (daysIndex - 1) * dayWidth + (dayWidth - ActivityScreen.this.fontWidth(day.day)) / 2 + 2,
-                  ActivityScreen.this.height() - 52,
+                  activityPoint + (daysIndex - 1) * dayWidth + (dayWidth - RealmsActivityScreen.this.fontWidth(day.day)) / 2 + 2,
+                  RealmsActivityScreen.this.height() - 52,
                   16777215
                );
                GL11.glDisable(3553);
                t.begin();
                t.color(8421504);
-               t.vertex((double)(activityPoint + daysIndex * dayWidth), (double)(ActivityScreen.this.height() - 40), 0.0);
-               t.vertex((double)(activityPoint + daysIndex * dayWidth + 1), (double)(ActivityScreen.this.height() - 40), 0.0);
-               t.vertex((double)(activityPoint + daysIndex * dayWidth + 1), (double)(-ActivityScreen.this.height()), 0.0);
-               t.vertex((double)(activityPoint + daysIndex * dayWidth), (double)(-ActivityScreen.this.height()), 0.0);
+               t.vertex((double)(activityPoint + daysIndex * dayWidth), (double)(RealmsActivityScreen.this.height() - 40), 0.0);
+               t.vertex((double)(activityPoint + daysIndex * dayWidth + 1), (double)(RealmsActivityScreen.this.height() - 40), 0.0);
+               t.vertex((double)(activityPoint + daysIndex * dayWidth + 1), (double)(-RealmsActivityScreen.this.height()), 0.0);
+               t.vertex((double)(activityPoint + daysIndex * dayWidth), (double)(-RealmsActivityScreen.this.height()), 0.0);
                t.end();
                GL11.glEnable(3553);
 
-               for(ActivityScreen.Activity activity : ((ActivityScreen.ActivityRow)ActivityScreen.this.activityMap.get(i)).activities) {
+               for(RealmsActivityScreen.Activity activity : ((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).activities) {
                   String the_day = new SimpleDateFormat("dd/MM").format(new Date(activity.start));
                   if (the_day.equals(day.day)) {
                      int minute = activity.minuteIndice();
@@ -387,9 +393,9 @@ public class ActivityScreen extends RealmsScreen {
                      GL11.glDisable(3553);
                      t.begin();
                      t.color(
-                        ((ActivityScreen.ActivityRow)ActivityScreen.this.activityMap.get(i)).color.r,
-                        ((ActivityScreen.ActivityRow)ActivityScreen.this.activityMap.get(i)).color.g,
-                        ((ActivityScreen.ActivityRow)ActivityScreen.this.activityMap.get(i)).color.b
+                        ((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).color.r,
+                        ((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).color.g,
+                        ((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).color.b
                      );
                      t.vertex(
                         (double)(activityPoint + (dayWidth * daysIndex - dayWidth)) + (double)hour * hourWidth + (double)minute * minuteWidth,
@@ -427,7 +433,7 @@ public class ActivityScreen extends RealmsScreen {
                            length = 1;
                         }
 
-                        ActivityScreen.this.toolTip = "["
+                        RealmsActivityScreen.this.toolTip = "["
                            + format.format(startDate)
                            + " - "
                            + format.format(endDate)
@@ -442,8 +448,8 @@ public class ActivityScreen extends RealmsScreen {
             }
 
             RealmsScreen.bindFace(
-               ((ActivityScreen.ActivityRow)ActivityScreen.this.activityMap.get(i)).uuid,
-               ((ActivityScreen.ActivityRow)ActivityScreen.this.activityMap.get(i)).name
+               ((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).uuid,
+               ((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).name
             );
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
             RealmsScreen.blit(10, y, 8.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);

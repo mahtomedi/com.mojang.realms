@@ -12,7 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 
-public class ModifyMinigameWorldScreen extends ScreenWithCallback<WorldTemplate> {
+public class RealmsModifyMinigameWorldScreen extends RealmsScreenWithCallback<WorldTemplate> {
    private static final Logger LOGGER = LogManager.getLogger();
    private RealmsScreen lastScreen;
    private RealmsServer serverData;
@@ -20,7 +20,7 @@ public class ModifyMinigameWorldScreen extends ScreenWithCallback<WorldTemplate>
    private final int END_BUTTON_ID = 2;
    private final int CANCEL_BUTTON = 3;
 
-   public ModifyMinigameWorldScreen(RealmsScreen lastScreen, RealmsServer serverData) {
+   public RealmsModifyMinigameWorldScreen(RealmsScreen lastScreen, RealmsServer serverData) {
       this.lastScreen = lastScreen;
       this.serverData = serverData;
    }
@@ -52,11 +52,11 @@ public class ModifyMinigameWorldScreen extends ScreenWithCallback<WorldTemplate>
          if (button.id() == 3) {
             Realms.setScreen(this.lastScreen);
          } else if (button.id() == 1) {
-            Realms.setScreen(new StartMinigameWorldScreen(this.lastScreen, this.serverData));
+            Realms.setScreen(new RealmsStartMinigameWorldScreen(this.lastScreen, this.serverData));
          } else if (button.id() == 2) {
             String line2 = getLocalizedString("mco.minigame.world.restore.question.line1");
             String line3 = getLocalizedString("mco.minigame.world.restore.question.line2");
-            Realms.setScreen(new LongConfirmationScreen(this, LongConfirmationScreen.Type.Info, line2, line3, 2));
+            Realms.setScreen(new RealmsLongConfirmationScreen(this, RealmsLongConfirmationScreen.Type.Info, line2, line3, true, 2));
          }
 
       }
@@ -74,8 +74,8 @@ public class ModifyMinigameWorldScreen extends ScreenWithCallback<WorldTemplate>
    }
 
    private void stopMinigame() {
-      ModifyMinigameWorldScreen.StopMinigameTask stopMinigameTask = new ModifyMinigameWorldScreen.StopMinigameTask();
-      LongRunningMcoTaskScreen longRunningMcoTaskScreen = new LongRunningMcoTaskScreen(this.lastScreen, stopMinigameTask);
+      RealmsModifyMinigameWorldScreen.StopMinigameTask stopMinigameTask = new RealmsModifyMinigameWorldScreen.StopMinigameTask();
+      RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(this.lastScreen, stopMinigameTask);
       longRunningMcoTaskScreen.start();
       Realms.setScreen(longRunningMcoTaskScreen);
    }
@@ -105,28 +105,28 @@ public class ModifyMinigameWorldScreen extends ScreenWithCallback<WorldTemplate>
          this.setTitle(title);
 
          try {
-            boolean closeResult = client.putIntoNormalMode(ModifyMinigameWorldScreen.this.serverData.id);
+            boolean closeResult = client.putIntoNormalMode(RealmsModifyMinigameWorldScreen.this.serverData.id);
             Thread.sleep(2000L);
             if (closeResult) {
-               ModifyMinigameWorldScreen.this.serverData.worldType = RealmsServer.WorldType.NORMAL;
-               ModifyMinigameWorldScreen.this.serverData.motd = "";
+               RealmsModifyMinigameWorldScreen.this.serverData.worldType = RealmsServer.WorldType.NORMAL;
+               RealmsModifyMinigameWorldScreen.this.serverData.motd = "";
                this.init();
             }
 
-            Realms.setScreen(ModifyMinigameWorldScreen.this.lastScreen);
+            Realms.setScreen(RealmsModifyMinigameWorldScreen.this.lastScreen);
          } catch (RealmsServiceException var4) {
             if (this.aborted()) {
                return;
             }
 
-            ModifyMinigameWorldScreen.LOGGER.error("Couldn't start mini game!");
+            RealmsModifyMinigameWorldScreen.LOGGER.error("Couldn't start mini game!");
             this.error(var4.toString());
          } catch (Exception var5) {
             if (this.aborted()) {
                return;
             }
 
-            ModifyMinigameWorldScreen.LOGGER.error("Couldn't start mini game!");
+            RealmsModifyMinigameWorldScreen.LOGGER.error("Couldn't start mini game!");
             this.error(var5.toString());
          }
 

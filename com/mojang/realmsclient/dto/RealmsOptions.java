@@ -13,7 +13,7 @@ public class RealmsOptions {
    public Boolean forceGameMode;
    public Integer difficulty;
    public Integer gameMode;
-   private static boolean forceGameModeDefault = true;
+   private static boolean forceGameModeDefault = false;
    private static boolean pvpDefault = true;
    private static boolean spawnAnimalsDefault = true;
    private static boolean spawnMonstersDefault = true;

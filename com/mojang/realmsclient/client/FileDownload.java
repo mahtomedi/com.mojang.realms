@@ -1,6 +1,6 @@
 package com.mojang.realmsclient.client;
 
-import com.mojang.realmsclient.gui.screens.DownloadLatestWorldScreen;
+import com.mojang.realmsclient.gui.screens.RealmsDownloadLatestWorldScreen;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedInputStream;
@@ -22,6 +22,7 @@ import org.apache.commons.io.output.CountingOutputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -65,10 +66,41 @@ public class FileDownload {
       "LPT9"
    };
 
+   public long contentLength(String downloadLink) {
+      CloseableHttpClient client = null;
+      HttpGet httpGet = null;
+
+      long var5;
+      try {
+         httpGet = new HttpGet(downloadLink);
+         client = HttpClientBuilder.create().setDefaultRequestConfig(this.requestConfig).build();
+         CloseableHttpResponse response = client.execute(httpGet);
+         return Long.parseLong(response.getFirstHeader("Content-Length").getValue());
+      } catch (Throwable var16) {
+         LOGGER.error("Unable to get content length for download");
+         var5 = 0L;
+      } finally {
+         if (httpGet != null) {
+            httpGet.releaseConnection();
+         }
+
+         if (client != null) {
+            try {
+               client.close();
+            } catch (IOException var15) {
+               LOGGER.error("Could not close http client", var15);
+            }
+         }
+
+      }
+
+      return var5;
+   }
+
    public void download(
       final String downloadLink,
       final String worldName,
-      final DownloadLatestWorldScreen.DownloadStatus downloadStatus,
+      final RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus,
       final RealmsAnvilLevelStorageSource levelStorageSource
    ) {
       if (this.currentThread == null) {
@@ -248,10 +280,10 @@ public class FileDownload {
       private volatile String worldName;
       private volatile File tempFile;
       private volatile RealmsAnvilLevelStorageSource levelStorageSource;
-      private volatile DownloadLatestWorldScreen.DownloadStatus downloadStatus;
+      private volatile RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus;
 
       private ProgressListener(
-         String worldName, File tempFile, RealmsAnvilLevelStorageSource levelStorageSource, DownloadLatestWorldScreen.DownloadStatus downloadStatus
+         String worldName, File tempFile, RealmsAnvilLevelStorageSource levelStorageSource, RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus
       ) {
          this.worldName = worldName;
          this.tempFile = tempFile;

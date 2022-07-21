@@ -12,14 +12,15 @@ import com.mojang.realmsclient.exception.RetryCallException;
 import com.mojang.realmsclient.gui.ChatFormatting;
 import com.mojang.realmsclient.gui.RealmsConnectTask;
 import com.mojang.realmsclient.gui.RealmsDataFetcher;
-import com.mojang.realmsclient.gui.screens.BuyRealmsScreen;
-import com.mojang.realmsclient.gui.screens.CreateRealmsWorldScreen;
-import com.mojang.realmsclient.gui.screens.LongConfirmationScreen;
-import com.mojang.realmsclient.gui.screens.LongRunningMcoTaskScreen;
-import com.mojang.realmsclient.gui.screens.PendingInvitationScreen;
+import com.mojang.realmsclient.gui.screens.RealmsBuyRealmsScreen;
 import com.mojang.realmsclient.gui.screens.RealmsClientOutdatedScreen;
 import com.mojang.realmsclient.gui.screens.RealmsConfigureWorldScreen;
+import com.mojang.realmsclient.gui.screens.RealmsCreateRealmsWorldScreen;
 import com.mojang.realmsclient.gui.screens.RealmsGenericErrorScreen;
+import com.mojang.realmsclient.gui.screens.RealmsLongConfirmationScreen;
+import com.mojang.realmsclient.gui.screens.RealmsLongRunningMcoTaskScreen;
+import com.mojang.realmsclient.gui.screens.RealmsParentalConsentScreen;
+import com.mojang.realmsclient.gui.screens.RealmsPendingInvitationScreen;
 import java.io.IOException;
 import java.net.URI;
 import java.net.UnknownHostException;
@@ -76,6 +77,7 @@ public class RealmsMainScreen extends RealmsScreen {
    public static final int EXPIRATION_NOTIFICATION_DAYS = 7;
    private int animTick;
    private static volatile boolean mcoEnabled;
+   private static volatile boolean mcoEnabledCheck;
    private static boolean checkedMcoAvailability;
    private static RealmsScreen realmsGenericErrorScreen = null;
    private static boolean regionsPinged = false;
@@ -123,12 +125,16 @@ public class RealmsMainScreen extends RealmsScreen {
       RealmsServer server = this.findServer(this.selectedServerId);
       this.playButton.active(server != null && server.state == RealmsServer.State.OPEN && !server.expired);
       this.configureButton
-         .active(overrideConfigure || server != null && server.state != RealmsServer.State.ADMIN_LOCK && server.owner.equals(Realms.getName()));
-      this.leaveButton.active(server != null && !server.owner.equals(Realms.getName()));
+         .active(overrideConfigure || server != null && server.state != RealmsServer.State.ADMIN_LOCK && server.ownerUUID.equals(Realms.getUUID()));
+      this.leaveButton.active(server != null && !server.ownerUUID.equals(Realms.getUUID()));
    }
 
    public void tick() {
       ++this.animTick;
+      if (this.noParentalConsent()) {
+         Realms.setScreen(new RealmsParentalConsentScreen(this.lastScreen));
+      }
+
       if (this.isMcoEnabled()) {
          realmsDataFetcher.init();
          if (realmsDataFetcher.isFetchedSinceLastTry(RealmsDataFetcher.Task.SERVER_LIST)) {
@@ -198,6 +204,10 @@ public class RealmsMainScreen extends RealmsScreen {
       return mcoEnabled;
    }
 
+   private boolean noParentalConsent() {
+      return mcoEnabledCheck && !mcoEnabled;
+   }
+
    public void removed() {
       Keyboard.enableRepeatEvents(false);
    }
@@ -216,7 +226,7 @@ public class RealmsMainScreen extends RealmsScreen {
          } else if (button.id() == 2) {
             this.saveListScrollPosition();
             this.stopRealmsFetcherAndPinger();
-            Realms.setScreen(new BuyRealmsScreen(this));
+            Realms.setScreen(new RealmsBuyRealmsScreen(this));
          } else if (button.id() == 4) {
             this.moreInfoButtonClicked();
          }
@@ -255,6 +265,7 @@ public class RealmsMainScreen extends RealmsScreen {
                for(int i = 0; i < 3; ++i) {
                   try {
                      Boolean result = client.mcoEnabled();
+                     RealmsMainScreen.mcoEnabledCheck = true;
                      if (result) {
                         RealmsMainScreen.LOGGER.info("Realms is available for this user");
                         RealmsMainScreen.mcoEnabled = true;
@@ -333,12 +344,12 @@ public class RealmsMainScreen extends RealmsScreen {
    private void moreInfoButtonClicked() {
       String line2 = getLocalizedString("mco.more.info.question.line1");
       String line3 = getLocalizedString("mco.more.info.question.line2");
-      Realms.setScreen(new LongConfirmationScreen(this, LongConfirmationScreen.Type.Info, line2, line3, 4));
+      Realms.setScreen(new RealmsLongConfirmationScreen(this, RealmsLongConfirmationScreen.Type.Info, line2, line3, true, 4));
    }
 
    private void configureClicked() {
       RealmsServer selectedServer = this.findServer(this.selectedServerId);
-      if (selectedServer != null && (Realms.getName().equals(selectedServer.owner) || overrideConfigure)) {
+      if (selectedServer != null && (Realms.getUUID().equals(selectedServer.ownerUUID) || overrideConfigure)) {
          this.stopRealmsFetcherAndPinger();
          this.saveListScrollPosition();
          Realms.setScreen(new RealmsConfigureWorldScreen(this, selectedServer.id));
@@ -348,11 +359,11 @@ public class RealmsMainScreen extends RealmsScreen {
 
    private void leaveClicked() {
       RealmsServer selectedServer = this.findServer(this.selectedServerId);
-      if (selectedServer != null && !Realms.getName().equals(selectedServer.owner)) {
+      if (selectedServer != null && !Realms.getUUID().equals(selectedServer.ownerUUID)) {
          this.saveListScrollPosition();
          String line2 = getLocalizedString("mco.configure.world.leave.question.line1");
          String line3 = getLocalizedString("mco.configure.world.leave.question.line2");
-         Realms.setScreen(new LongConfirmationScreen(this, LongConfirmationScreen.Type.Info, line2, line3, 5));
+         Realms.setScreen(new RealmsLongConfirmationScreen(this, RealmsLongConfirmationScreen.Type.Info, line2, line3, true, 5));
       }
 
    }
@@ -498,7 +509,7 @@ public class RealmsMainScreen extends RealmsScreen {
    public void mouseClicked(int x, int y, int buttonNum) {
       if (this.inPendingInvitationArea(x, y) && this.numberOfPendingInvites != 0) {
          this.stopRealmsFetcherAndPinger();
-         PendingInvitationScreen pendingInvitationScreen = new PendingInvitationScreen(this.lastScreen);
+         RealmsPendingInvitationScreen pendingInvitationScreen = new RealmsPendingInvitationScreen(this.lastScreen);
          Realms.setScreen(pendingInvitationScreen);
       }
 
@@ -586,7 +597,7 @@ public class RealmsMainScreen extends RealmsScreen {
       RealmsServer server = this.findServer(serverId);
       if (server != null) {
          this.stopRealmsFetcherAndPinger();
-         LongRunningMcoTaskScreen longRunningMcoTaskScreen = new LongRunningMcoTaskScreen(this, new RealmsConnectTask(this, server));
+         RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(this, new RealmsConnectTask(this, server));
          longRunningMcoTaskScreen.start();
          Realms.setScreen(longRunningMcoTaskScreen);
       }
@@ -594,11 +605,11 @@ public class RealmsMainScreen extends RealmsScreen {
    }
 
    private boolean isSelfOwnedServer(RealmsServer serverData) {
-      return serverData.owner != null && serverData.owner.equals(Realms.getName());
+      return serverData.ownerUUID != null && serverData.ownerUUID.equals(Realms.getUUID());
    }
 
    private boolean isSelfOwnedNonExpiredServer(RealmsServer serverData) {
-      return serverData.owner != null && serverData.owner.equals(Realms.getName()) && !serverData.expired;
+      return serverData.ownerUUID != null && serverData.ownerUUID.equals(Realms.getUUID()) && !serverData.expired;
    }
 
    private void drawExpired(int x, int y, int xm, int ym) {
@@ -742,7 +753,7 @@ public class RealmsMainScreen extends RealmsScreen {
             RealmsMainScreen.this.selectedServerId = server.id;
             if (server.state == RealmsServer.State.UNINITIALIZED) {
                RealmsMainScreen.this.stopRealmsFetcherAndPinger();
-               Realms.setScreen(new CreateRealmsWorldScreen(server.id, RealmsMainScreen.this));
+               Realms.setScreen(new RealmsCreateRealmsWorldScreen(server.id, RealmsMainScreen.this));
             }
 
             RealmsMainScreen.this.configureButton

@@ -6,7 +6,7 @@ import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsScreen;
 
-public class LongRunningMcoTaskScreen extends RealmsScreen implements ErrorCallback {
+public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements ErrorCallback {
    private final int BUTTON_CANCEL_ID = 666;
    private final int BUTTON_BACK_ID = 667;
    private final RealmsScreen lastScreen;
@@ -41,7 +41,7 @@ public class LongRunningMcoTaskScreen extends RealmsScreen implements ErrorCallb
       "▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ _"
    };
 
-   public LongRunningMcoTaskScreen(RealmsScreen lastScreen, LongRunningTask task) {
+   public RealmsLongRunningMcoTaskScreen(RealmsScreen lastScreen, LongRunningTask task) {
       this.lastScreen = lastScreen;
       this.task = task;
       task.setScreen(this);

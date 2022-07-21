@@ -19,8 +19,8 @@ import org.lwjgl.opengl.GL11;
 
 public class RealmsWorldTemplateScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
-   private static final String PLUS_ICON_LOCATION = "realms:textures/gui/realms/plus_icon.png";
-   private final ScreenWithCallback<WorldTemplate> lastScreen;
+   private static final String LINK_ICON = "realms:textures/gui/realms/link_icons.png";
+   private final RealmsScreenWithCallback<WorldTemplate> lastScreen;
    private WorldTemplate selectedWorldTemplate;
    private List<WorldTemplate> templates = Collections.emptyList();
    private RealmsWorldTemplateScreen.WorldTemplateSelectionList worldTemplateSelectionList;
@@ -31,7 +31,7 @@ public class RealmsWorldTemplateScreen extends RealmsScreen {
    private String toolTip = null;
    private boolean isMiniGame;
 
-   public RealmsWorldTemplateScreen(ScreenWithCallback<WorldTemplate> configureWorldScreen, WorldTemplate selectedWorldTemplate, boolean isMiniGame) {
+   public RealmsWorldTemplateScreen(RealmsScreenWithCallback<WorldTemplate> configureWorldScreen, WorldTemplate selectedWorldTemplate, boolean isMiniGame) {
       this.lastScreen = configureWorldScreen;
       this.selectedWorldTemplate = selectedWorldTemplate;
       this.isMiniGame = isMiniGame;
@@ -69,6 +69,7 @@ public class RealmsWorldTemplateScreen extends RealmsScreen {
    private void postInit() {
       this.buttonsAdd(newButton(0, this.width() / 2 + 6, this.height() - 52, 153, 20, getLocalizedString("gui.cancel")));
       this.buttonsAdd(this.selectButton = newButton(1, this.width() / 2 - 154, this.height() - 52, 153, 20, getLocalizedString("mco.template.button.select")));
+      this.selectButton.active(false);
    }
 
    public void tick() {
@@ -158,8 +159,13 @@ public class RealmsWorldTemplateScreen extends RealmsScreen {
 
       public void selectItem(int item, boolean doubleClick, int xMouse, int yMouse) {
          if (item < RealmsWorldTemplateScreen.this.templates.size()) {
+            RealmsWorldTemplateScreen.this.selectButton.active(true);
             RealmsWorldTemplateScreen.this.selectedTemplate = item;
             RealmsWorldTemplateScreen.this.selectedWorldTemplate = null;
+            if (doubleClick) {
+               RealmsWorldTemplateScreen.this.selectTemplate();
+            }
+
          }
       }
 
@@ -196,15 +202,23 @@ public class RealmsWorldTemplateScreen extends RealmsScreen {
       }
 
       public void itemClicked(int clickSlotPos, int slot, int xm, int ym, int width) {
-         int dx = this.getScrollbarPosition()
-            - 240
-            + RealmsWorldTemplateScreen.this.fontWidth(((WorldTemplate)RealmsWorldTemplateScreen.this.templates.get(slot)).author)
-            + 12;
-         int dy = clickSlotPos + 30 - this.getScroll();
-         if (xm >= dx && xm <= dx + 9 && ym >= dy && ym <= dy + 9 && !((WorldTemplate)RealmsWorldTemplateScreen.this.templates.get(slot)).link.equals("")) {
-            RealmsWorldTemplateScreen.this.browseTo(((WorldTemplate)RealmsWorldTemplateScreen.this.templates.get(slot)).link);
-         }
+         if (slot < RealmsWorldTemplateScreen.this.templates.size()) {
+            int dx = this.getScrollbarPosition()
+               - 240
+               + RealmsWorldTemplateScreen.this.fontWidth(((WorldTemplate)RealmsWorldTemplateScreen.this.templates.get(slot)).author)
+               + 12;
+            int dy = clickSlotPos - slot * 36 - this.getScroll();
+            if (xm >= dx
+               && xm <= dx + 15
+               && dy >= 12
+               && dy <= 24
+               && ym < RealmsWorldTemplateScreen.this.height() - 15
+               && ym > 32
+               && !((WorldTemplate)RealmsWorldTemplateScreen.this.templates.get(slot)).link.equals("")) {
+               RealmsWorldTemplateScreen.this.browseTo(((WorldTemplate)RealmsWorldTemplateScreen.this.templates.get(slot)).link);
+            }
 
+         }
       }
 
       public int getMaxPosition() {
@@ -245,7 +259,7 @@ public class RealmsWorldTemplateScreen extends RealmsScreen {
       private void renderWorldTemplateItem(int i, int x, int y, int h) {
          WorldTemplate worldTemplate = (WorldTemplate)RealmsWorldTemplateScreen.this.templates.get(i);
          RealmsWorldTemplateScreen.this.drawString(worldTemplate.name, x + 2, y + 1, 16777215);
-         RealmsWorldTemplateScreen.this.drawString(worldTemplate.author, x + 2, y + 12, 7105644);
+         RealmsWorldTemplateScreen.this.drawString(worldTemplate.author, x + 2, y + 14, 7105644);
          RealmsWorldTemplateScreen.this.drawString(
             worldTemplate.version, x + 2 + 207 - RealmsWorldTemplateScreen.this.fontWidth(worldTemplate.version), y + 1, 5000268
          );
@@ -258,13 +272,18 @@ public class RealmsWorldTemplateScreen extends RealmsScreen {
       }
 
       private void drawInfo(int x, int y, int xm, int ym) {
-         RealmsScreen.bind("realms:textures/gui/realms/plus_icon.png");
+         boolean hovered = false;
+         if (xm >= x && xm <= x + 15 && ym >= y && ym <= y + 9 && ym < RealmsWorldTemplateScreen.this.height() - 15 && ym > 32) {
+            hovered = true;
+         }
+
+         RealmsScreen.bind("realms:textures/gui/realms/link_icons.png");
          GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
          GL11.glPushMatrix();
-         GL11.glScalef(0.5F, 0.5F, 0.5F);
-         RealmsScreen.blit(x * 2, y * 2, 0.0F, 0.0F, 15, 15, 15.0F, 15.0F);
+         GL11.glScalef(1.0F, 1.0F, 1.0F);
+         RealmsScreen.blit(x, y - 3, hovered ? 15.0F : 0.0F, 0.0F, 15, 15, 30.0F, 15.0F);
          GL11.glPopMatrix();
-         if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9 && ym < RealmsWorldTemplateScreen.this.height() - 15 && ym > 32) {
+         if (hovered) {
             RealmsWorldTemplateScreen.this.toolTip = RealmsScreen.getLocalizedString("mco.template.info.tooltip");
          }
 

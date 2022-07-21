@@ -14,14 +14,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 
-public class BuyRealmsScreen extends RealmsScreen {
+public class RealmsBuyRealmsScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
    private RealmsScreen lastScreen;
    private static int BACK_BUTTON_ID = 111;
    private volatile RealmsState realmsStatus;
    private boolean onLink = false;
 
-   public BuyRealmsScreen(RealmsScreen lastScreen) {
+   public RealmsBuyRealmsScreen(RealmsScreen lastScreen) {
       this.lastScreen = lastScreen;
    }
 
@@ -42,9 +42,9 @@ public class BuyRealmsScreen extends RealmsScreen {
       (new Thread("Realms-stat-message") {
          public void run() {
             try {
-               BuyRealmsScreen.this.realmsStatus = client.fetchRealmsState();
+               RealmsBuyRealmsScreen.this.realmsStatus = client.fetchRealmsState();
             } catch (RealmsServiceException var2) {
-               BuyRealmsScreen.LOGGER.error("Could not get stat");
+               RealmsBuyRealmsScreen.LOGGER.error("Could not get stat");
             }
 
          }

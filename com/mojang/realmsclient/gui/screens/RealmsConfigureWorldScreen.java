@@ -144,25 +144,25 @@ public class RealmsConfigureWorldScreen extends RealmsScreen implements RealmsCo
          if (button.id() == 10) {
             this.backButtonClicked();
          } else if (button.id() == 5) {
-            Realms.setScreen(new EditRealmsWorldScreen(this, this.lastScreen, this.serverData.clone()));
+            Realms.setScreen(new RealmsEditRealmsWorldScreen(this, this.lastScreen, this.serverData.clone()));
          } else if (button.id() == 1) {
             String line2 = getLocalizedString("mco.configure.world.close.question.line1");
             String line3 = getLocalizedString("mco.configure.world.close.question.line2");
-            Realms.setScreen(new LongConfirmationScreen(this, LongConfirmationScreen.Type.Info, line2, line3, 1));
+            Realms.setScreen(new RealmsLongConfirmationScreen(this, RealmsLongConfirmationScreen.Type.Info, line2, line3, true, 1));
          } else if (button.id() == 0) {
             this.openTheWorld();
          } else if (button.id() == 8) {
             if (this.serverData.worldType.equals(RealmsServer.WorldType.MINIGAME)) {
-               Realms.setScreen(new ModifyMinigameWorldScreen(this, this.serverData));
+               Realms.setScreen(new RealmsModifyMinigameWorldScreen(this, this.serverData));
             } else {
-               Realms.setScreen(new StartMinigameWorldScreen(this, this.serverData));
+               Realms.setScreen(new RealmsStartMinigameWorldScreen(this, this.serverData));
             }
          } else if (button.id() == 7) {
             Realms.setScreen(new RealmsSubscriptionScreen(this, this.serverData));
          } else if (button.id() == 11) {
-            Realms.setScreen(new ActivityScreen(this, this.serverData.id));
+            Realms.setScreen(new RealmsActivityScreen(this, this.serverData.id));
          } else if (button.id() == 12) {
-            Realms.setScreen(new WorldManagementScreen(this, this.lastScreen, this.serverData.clone()));
+            Realms.setScreen(new RealmsWorldManagementScreen(this, this.lastScreen, this.serverData.clone()));
          } else if (button.id() == 13) {
             Realms.setScreen(new RealmsInviteScreen(this.lastScreen, this, this.serverData));
          }
@@ -325,7 +325,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreen implements RealmsCo
       } else if (this.openButtonHovered && !this.serverData.expired) {
          String line2 = getLocalizedString("mco.configure.world.close.question.line1");
          String line3 = getLocalizedString("mco.configure.world.close.question.line2");
-         Realms.setScreen(new LongConfirmationScreen(this, LongConfirmationScreen.Type.Info, line2, line3, 1));
+         Realms.setScreen(new RealmsLongConfirmationScreen(this, RealmsLongConfirmationScreen.Type.Info, line2, line3, true, 1));
       }
 
       super.mouseClicked(x, y, buttonNum);
@@ -531,8 +531,6 @@ public class RealmsConfigureWorldScreen extends RealmsScreen implements RealmsCo
          int removey = clickSlotPos + 70 - this.getScroll();
          int mx = removex + 10;
          int my = removey - 3;
-         System.out.println("xm: " + xm + " ym: " + ym);
-         System.out.println("removeX: " + removex + " removey: " + removey);
          if (xm >= mx && xm <= mx + 9 && ym >= my && ym <= my + 9) {
             if (slot >= 0 && slot < RealmsConfigureWorldScreen.this.serverData.players.size()) {
                String selectedPlayer = ((PlayerInfo)RealmsConfigureWorldScreen.this.serverData.players.get(slot)).getName();

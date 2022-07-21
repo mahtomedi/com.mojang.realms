@@ -3,28 +3,37 @@ package com.mojang.realmsclient.gui.screens;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsScreen;
 
-public class LongConfirmationScreen extends RealmsScreen {
-   private final LongConfirmationScreen.Type type;
+public class RealmsLongConfirmationScreen extends RealmsScreen {
+   private final RealmsLongConfirmationScreen.Type type;
    private final String line2;
    private final String line3;
    protected final RealmsScreen parent;
    protected final String yesButton;
    protected final String noButton;
+   private final String okButton;
    protected final int id;
+   private final boolean yesNoQuestion;
 
-   public LongConfirmationScreen(RealmsScreen parent, LongConfirmationScreen.Type type, String line2, String line3, int id) {
+   public RealmsLongConfirmationScreen(RealmsScreen parent, RealmsLongConfirmationScreen.Type type, String line2, String line3, boolean yesNoQuestion, int id) {
       this.parent = parent;
       this.id = id;
       this.type = type;
       this.line2 = line2;
       this.line3 = line3;
+      this.yesNoQuestion = yesNoQuestion;
       this.yesButton = getLocalizedString("gui.yes");
       this.noButton = getLocalizedString("gui.no");
+      this.okButton = getLocalizedString("mco.gui.ok");
    }
 
    public void init() {
-      this.buttonsAdd(newButton(0, this.width() / 2 - 105, this.height() / 6 + 112, 100, 20, this.yesButton));
-      this.buttonsAdd(newButton(1, this.width() / 2 + 5, this.height() / 6 + 112, 100, 20, this.noButton));
+      if (this.yesNoQuestion) {
+         this.buttonsAdd(newButton(0, this.width() / 2 - 105, this.height() / 6 + 112, 100, 20, this.yesButton));
+         this.buttonsAdd(newButton(1, this.width() / 2 + 5, this.height() / 6 + 112, 100, 20, this.noButton));
+      } else {
+         this.buttonsAdd(newButton(0, this.width() / 2 - 50, this.height() / 6 + 112, 100, 20, this.okButton));
+      }
+
    }
 
    public void buttonClicked(RealmsButton button) {

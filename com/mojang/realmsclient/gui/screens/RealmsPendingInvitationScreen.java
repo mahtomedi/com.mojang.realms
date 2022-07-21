@@ -14,17 +14,17 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 
-public class PendingInvitationScreen extends RealmsScreen {
+public class RealmsPendingInvitationScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
    private static final int BACK_BUTTON_ID = 0;
    private static final int ACCEPT_BUTTON_ID = 1;
    private static final int REJECT_BUTTON_ID = 2;
    private final RealmsScreen onlineScreenLastScreen;
-   private PendingInvitationScreen.PendingInvitationList pendingList;
+   private RealmsPendingInvitationScreen.PendingInvitationList pendingList;
    private List<PendingInvite> pendingInvites = Lists.newArrayList();
    private int selectedItem = -1;
 
-   public PendingInvitationScreen(RealmsScreen onlineScreenLastScreen) {
+   public RealmsPendingInvitationScreen(RealmsScreen onlineScreenLastScreen) {
       this.onlineScreenLastScreen = onlineScreenLastScreen;
    }
 
@@ -36,15 +36,15 @@ public class PendingInvitationScreen extends RealmsScreen {
    public void init() {
       Keyboard.enableRepeatEvents(true);
       this.buttonsClear();
-      this.pendingList = new PendingInvitationScreen.PendingInvitationList();
+      this.pendingList = new RealmsPendingInvitationScreen.PendingInvitationList();
       (new Thread("Realms-pending-invitations-fetcher") {
          public void run() {
             RealmsClient client = RealmsClient.createRealmsClient();
 
             try {
-               PendingInvitationScreen.this.pendingInvites = client.pendingInvites().pendingInvites;
+               RealmsPendingInvitationScreen.this.pendingInvites = client.pendingInvites().pendingInvites;
             } catch (RealmsServiceException var3) {
-               PendingInvitationScreen.LOGGER.error("Couldn't list invites");
+               RealmsPendingInvitationScreen.LOGGER.error("Couldn't list invites");
             }
 
          }
@@ -89,11 +89,11 @@ public class PendingInvitationScreen extends RealmsScreen {
                   try {
                      RealmsClient client = RealmsClient.createRealmsClient();
                      client.rejectInvitation(
-                        ((PendingInvite)PendingInvitationScreen.this.pendingInvites.get(PendingInvitationScreen.this.selectedItem)).invitationId
+                        ((PendingInvite)RealmsPendingInvitationScreen.this.pendingInvites.get(RealmsPendingInvitationScreen.this.selectedItem)).invitationId
                      );
-                     PendingInvitationScreen.this.updateSelectedItemPointer();
+                     RealmsPendingInvitationScreen.this.updateSelectedItemPointer();
                   } catch (RealmsServiceException var2) {
-                     PendingInvitationScreen.LOGGER.error("Couldn't reject invite");
+                     RealmsPendingInvitationScreen.LOGGER.error("Couldn't reject invite");
                   }
    
                }
@@ -110,11 +110,11 @@ public class PendingInvitationScreen extends RealmsScreen {
                   try {
                      RealmsClient client = RealmsClient.createRealmsClient();
                      client.acceptInvitation(
-                        ((PendingInvite)PendingInvitationScreen.this.pendingInvites.get(PendingInvitationScreen.this.selectedItem)).invitationId
+                        ((PendingInvite)RealmsPendingInvitationScreen.this.pendingInvites.get(RealmsPendingInvitationScreen.this.selectedItem)).invitationId
                      );
-                     PendingInvitationScreen.this.updateSelectedItemPointer();
+                     RealmsPendingInvitationScreen.this.updateSelectedItemPointer();
                   } catch (RealmsServiceException var2) {
-                     PendingInvitationScreen.LOGGER.error("Couldn't accept invite");
+                     RealmsPendingInvitationScreen.LOGGER.error("Couldn't accept invite");
                   }
    
                }
@@ -147,21 +147,23 @@ public class PendingInvitationScreen extends RealmsScreen {
 
    private class PendingInvitationList extends RealmsScrolledSelectionList {
       public PendingInvitationList() {
-         super(PendingInvitationScreen.this.width(), PendingInvitationScreen.this.height(), 32, PendingInvitationScreen.this.height() - 64, 36);
+         super(
+            RealmsPendingInvitationScreen.this.width(), RealmsPendingInvitationScreen.this.height(), 32, RealmsPendingInvitationScreen.this.height() - 64, 36
+         );
       }
 
       public int getItemCount() {
-         return PendingInvitationScreen.this.pendingInvites.size() + 1;
+         return RealmsPendingInvitationScreen.this.pendingInvites.size() + 1;
       }
 
       public void selectItem(int item, boolean doubleClick, int xMouse, int yMouse) {
-         if (item < PendingInvitationScreen.this.pendingInvites.size()) {
-            PendingInvitationScreen.this.selectedItem = item;
+         if (item < RealmsPendingInvitationScreen.this.pendingInvites.size()) {
+            RealmsPendingInvitationScreen.this.selectedItem = item;
          }
       }
 
       public boolean isSelectedItem(int item) {
-         return item == PendingInvitationScreen.this.selectedItem;
+         return item == RealmsPendingInvitationScreen.this.selectedItem;
       }
 
       public int getMaxPosition() {
@@ -169,20 +171,20 @@ public class PendingInvitationScreen extends RealmsScreen {
       }
 
       public void renderBackground() {
-         PendingInvitationScreen.this.renderBackground();
+         RealmsPendingInvitationScreen.this.renderBackground();
       }
 
       public void renderItem(int i, int x, int y, int h, int mouseX, int mouseY) {
-         if (i < PendingInvitationScreen.this.pendingInvites.size()) {
+         if (i < RealmsPendingInvitationScreen.this.pendingInvites.size()) {
             this.renderPendingInvitationItem(i, x, y, h);
          }
 
       }
 
       private void renderPendingInvitationItem(int i, int x, int y, int h) {
-         PendingInvite invite = (PendingInvite)PendingInvitationScreen.this.pendingInvites.get(i);
-         PendingInvitationScreen.this.drawString(invite.worldName, x + 2, y + 1, 16777215);
-         PendingInvitationScreen.this.drawString(invite.worldOwnerName, x + 2, y + 12, 7105644);
+         PendingInvite invite = (PendingInvite)RealmsPendingInvitationScreen.this.pendingInvites.get(i);
+         RealmsPendingInvitationScreen.this.drawString(invite.worldName, x + 2, y + 1, 16777215);
+         RealmsPendingInvitationScreen.this.drawString(invite.worldOwnerName, x + 2, y + 12, 7105644);
       }
    }
 }

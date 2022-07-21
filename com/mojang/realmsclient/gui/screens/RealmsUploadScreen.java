@@ -313,7 +313,7 @@ public class RealmsUploadScreen extends RealmsScreen {
                            uploadInfo,
                            Realms.getSessionId(),
                            Realms.getName(),
-                           "1.13.1",
+                           "1.13.2",
                            RealmsUploadScreen.this.uploadStatus
                         );
                         fileUpload.upload(

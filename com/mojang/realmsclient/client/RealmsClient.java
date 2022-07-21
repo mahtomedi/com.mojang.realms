@@ -384,7 +384,7 @@ public class RealmsClient {
    private String execute(Request<?> r) throws RealmsServiceException {
       r.cookie("sid", this.sessionId);
       r.cookie("user", this.username);
-      r.cookie("version", "1.13.1");
+      r.cookie("version", "1.13.2");
       String realmsVersion = RealmsVersion.getVersion();
       if (realmsVersion != null) {
          r.cookie("realms_version", realmsVersion);

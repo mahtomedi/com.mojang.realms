@@ -1,6 +1,6 @@
 package com.mojang.realmsclient.client;
 
-import com.mojang.realmsclient.gui.DownloadLatestWorldScreen;
+import com.mojang.realmsclient.gui.screens.DownloadLatestWorldScreen;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedInputStream;
@@ -13,11 +13,13 @@ import java.io.OutputStream;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsAnvilLevelStorageSource;
 import net.minecraft.realms.RealmsLevelSummary;
+import net.minecraft.realms.RealmsSharedConstants;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.CountingOutputStream;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
@@ -36,6 +38,32 @@ public class FileDownload {
    private volatile HttpGet request;
    private Thread currentThread;
    private RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(120000).setConnectTimeout(120000).build();
+   private static final String[] INVALID_FILE_NAMES = new String[]{
+      "CON",
+      "COM",
+      "PRN",
+      "AUX",
+      "CLOCK$",
+      "NUL",
+      "COM1",
+      "COM2",
+      "COM3",
+      "COM4",
+      "COM5",
+      "COM6",
+      "COM7",
+      "COM8",
+      "COM9",
+      "LPT1",
+      "LPT2",
+      "LPT3",
+      "LPT4",
+      "LPT5",
+      "LPT6",
+      "LPT7",
+      "LPT8",
+      "LPT9"
+   };
 
    public void download(
       final String downloadLink,
@@ -117,8 +145,30 @@ public class FileDownload {
       return this.extracting;
    }
 
+   public static String findAvailableFolderName(String folder) {
+      folder = folder.replaceAll("[\\./\"]", "_");
+
+      for(String invalidName : INVALID_FILE_NAMES) {
+         if (folder.equalsIgnoreCase(invalidName)) {
+            folder = "_" + folder + "_";
+         }
+      }
+
+      return folder;
+   }
+
    private void untarGzipArchive(String name, File file, RealmsAnvilLevelStorageSource levelStorageSource) throws IOException {
       int number = 1;
+
+      for(char replacer : RealmsSharedConstants.ILLEGAL_FILE_CHARACTERS) {
+         name = name.replace(replacer, '_');
+      }
+
+      if (StringUtils.isEmpty(name)) {
+         name = "Realm";
+      }
+
+      name = findAvailableFolderName(name);
 
       try {
          for(RealmsLevelSummary summary : levelStorageSource.getLevelList()) {
@@ -154,7 +204,7 @@ public class FileDownload {
                }
 
                bout.close();
-               Object var23 = null;
+               Object var28 = null;
             }
          }
       } catch (Exception var17) {

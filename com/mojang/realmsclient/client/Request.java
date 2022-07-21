@@ -1,6 +1,6 @@
 package com.mojang.realmsclient.client;
 
-import com.mojang.realmsclient.exception.McoHttpException;
+import com.mojang.realmsclient.exception.RealmsHttpException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -30,9 +30,9 @@ public abstract class Request<T extends Request> {
          this.connection.setConnectTimeout(connectTimeout);
          this.connection.setReadTimeout(readTimeout);
       } catch (MalformedURLException var5) {
-         throw new McoHttpException(var5.getMessage(), var5);
+         throw new RealmsHttpException(var5.getMessage(), var5);
       } catch (IOException var6) {
-         throw new McoHttpException(var6.getMessage(), var6);
+         throw new RealmsHttpException(var6.getMessage(), var6);
       }
    }
 
@@ -60,7 +60,7 @@ public abstract class Request<T extends Request> {
          this.connect();
          return this.connection.getResponseCode();
       } catch (Exception var2) {
-         throw new McoHttpException(var2.getMessage(), var2);
+         throw new RealmsHttpException(var2.getMessage(), var2);
       }
    }
 
@@ -91,7 +91,7 @@ public abstract class Request<T extends Request> {
          this.dispose();
          return result;
       } catch (IOException var2) {
-         throw new McoHttpException(var2.getMessage(), var2);
+         throw new RealmsHttpException(var2.getMessage(), var2);
       }
    }
 
@@ -209,7 +209,7 @@ public abstract class Request<T extends Request> {
             this.connection.connect();
             return this;
          } catch (Exception var2) {
-            throw new McoHttpException(var2.getMessage(), var2);
+            throw new RealmsHttpException(var2.getMessage(), var2);
          }
       }
    }
@@ -227,7 +227,7 @@ public abstract class Request<T extends Request> {
             this.connection.setRequestMethod("GET");
             return this;
          } catch (Exception var2) {
-            throw new McoHttpException(var2.getMessage(), var2);
+            throw new RealmsHttpException(var2.getMessage(), var2);
          }
       }
    }
@@ -255,7 +255,7 @@ public abstract class Request<T extends Request> {
             out.flush();
             return this;
          } catch (Exception var2) {
-            throw new McoHttpException(var2.getMessage(), var2);
+            throw new RealmsHttpException(var2.getMessage(), var2);
          }
       }
    }
@@ -282,7 +282,7 @@ public abstract class Request<T extends Request> {
             os.flush();
             return this;
          } catch (Exception var2) {
-            throw new McoHttpException(var2.getMessage(), var2);
+            throw new RealmsHttpException(var2.getMessage(), var2);
          }
       }
    }

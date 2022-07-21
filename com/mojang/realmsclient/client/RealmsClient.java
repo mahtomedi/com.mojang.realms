@@ -3,19 +3,19 @@ package com.mojang.realmsclient.client;
 import com.google.gson.Gson;
 import com.mojang.realmsclient.RealmsVersion;
 import com.mojang.realmsclient.dto.BackupList;
-import com.mojang.realmsclient.dto.McoOptions;
-import com.mojang.realmsclient.dto.McoServer;
-import com.mojang.realmsclient.dto.McoServerAddress;
-import com.mojang.realmsclient.dto.McoServerList;
 import com.mojang.realmsclient.dto.Ops;
 import com.mojang.realmsclient.dto.PendingInvitesList;
 import com.mojang.realmsclient.dto.PingResult;
+import com.mojang.realmsclient.dto.RealmsOptions;
+import com.mojang.realmsclient.dto.RealmsServer;
+import com.mojang.realmsclient.dto.RealmsServerAddress;
+import com.mojang.realmsclient.dto.RealmsServerList;
 import com.mojang.realmsclient.dto.RealmsState;
 import com.mojang.realmsclient.dto.ServerActivityList;
 import com.mojang.realmsclient.dto.Subscription;
 import com.mojang.realmsclient.dto.UploadInfo;
 import com.mojang.realmsclient.dto.WorldTemplateList;
-import com.mojang.realmsclient.exception.McoHttpException;
+import com.mojang.realmsclient.exception.RealmsHttpException;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.exception.RetryCallException;
 import java.io.IOException;
@@ -84,16 +84,16 @@ public class RealmsClient {
       RealmsClientConfig.setProxy(proxy);
    }
 
-   public McoServerList listWorlds() throws RealmsServiceException, IOException {
+   public RealmsServerList listWorlds() throws RealmsServiceException, IOException {
       String asciiUrl = this.url("worlds");
       String json = this.execute(Request.get(asciiUrl));
-      return McoServerList.parse(json);
+      return RealmsServerList.parse(json);
    }
 
-   public McoServer getOwnWorld(long worldId) throws RealmsServiceException, IOException {
+   public RealmsServer getOwnWorld(long worldId) throws RealmsServiceException, IOException {
       String asciiUrl = this.url("worlds" + "/$ID".replace("$ID", String.valueOf(worldId)));
       String json = this.execute(Request.get(asciiUrl));
-      return McoServer.parse(json);
+      return RealmsServer.parse(json);
    }
 
    public ServerActivityList getActivity(long worldId) throws RealmsServiceException {
@@ -102,10 +102,10 @@ public class RealmsClient {
       return ServerActivityList.parse(json);
    }
 
-   public McoServerAddress join(long worldId) throws RealmsServiceException, IOException {
+   public RealmsServerAddress join(long worldId) throws RealmsServiceException, IOException {
       String asciiUrl = this.url("worlds" + "/$ID/join".replace("$ID", "" + worldId));
       String json = this.execute(Request.get(asciiUrl, 5000, 30000));
-      return McoServerAddress.parse(json);
+      return RealmsServerAddress.parse(json);
    }
 
    public void initializeWorld(long worldId, String name, String worldTemplateId) throws RealmsServiceException, IOException {
@@ -136,10 +136,10 @@ public class RealmsClient {
       this.execute(Request.delete(asciiUrl));
    }
 
-   public McoServer invite(long worldId, String profileName) throws RealmsServiceException, IOException {
+   public RealmsServer invite(long worldId, String profileName) throws RealmsServiceException, IOException {
       String asciiUrl = this.url("invites" + "/$WORLD_ID/invite/$USER_NAME".replace("$WORLD_ID", String.valueOf(worldId)).replace("$USER_NAME", profileName));
       String json = this.execute(Request.post(asciiUrl, ""));
-      return McoServer.parse(json);
+      return RealmsServer.parse(json);
    }
 
    public BackupList backupsFor(long worldId) throws RealmsServiceException {
@@ -148,7 +148,7 @@ public class RealmsClient {
       return BackupList.parse(json);
    }
 
-   public void update(long worldId, String name, String motd, int difficulty, int gameMode, McoOptions options) throws RealmsServiceException, UnsupportedEncodingException {
+   public void update(long worldId, String name, String motd, int difficulty, int gameMode, RealmsOptions options) throws RealmsServiceException, UnsupportedEncodingException {
       QueryBuilder qb = QueryBuilder.of("name", name);
       if (motd != null) {
          qb = qb.with("motd", motd);
@@ -350,7 +350,7 @@ public class RealmsClient {
                throw new RealmsServiceException(responseCode, responseText, responseCode, "");
             }
          }
-      } catch (McoHttpException var6) {
+      } catch (RealmsHttpException var6) {
          throw new RealmsServiceException(500, "Could not connect to Realms: " + var6.getMessage(), -1, "");
       }
    }

@@ -3,7 +3,7 @@ package com.mojang.realmsclient.gui;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.realmsclient.client.RealmsClient;
-import com.mojang.realmsclient.dto.McoServer;
+import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import java.io.IOException;
 import java.util.Collections;
@@ -28,8 +28,8 @@ public class RealmsDataFetcher {
    private volatile boolean stopped = true;
    private RealmsDataFetcher.ServerListUpdateTask serverListUpdateTask = new RealmsDataFetcher.ServerListUpdateTask();
    private RealmsDataFetcher.PendingInviteUpdateTask pendingInviteUpdateTask = new RealmsDataFetcher.PendingInviteUpdateTask();
-   private Set<McoServer> removedServers = Sets.newHashSet();
-   private List<McoServer> servers = Lists.newArrayList();
+   private Set<RealmsServer> removedServers = Sets.newHashSet();
+   private List<RealmsServer> servers = Lists.newArrayList();
    private int pendingInvitesCount;
    private ScheduledFuture<?> serverListScheduledFuture;
    private ScheduledFuture<?> pendingInviteScheduledFuture;
@@ -60,7 +60,7 @@ public class RealmsDataFetcher {
 
    }
 
-   public synchronized List<McoServer> getServers() {
+   public synchronized List<RealmsServer> getServers() {
       return Lists.newArrayList(this.servers);
    }
 
@@ -93,10 +93,10 @@ public class RealmsDataFetcher {
 
    }
 
-   private synchronized void setServers(List<McoServer> newServers) {
+   private synchronized void setServers(List<RealmsServer> newServers) {
       int removedCnt = 0;
 
-      for(McoServer server : this.removedServers) {
+      for(RealmsServer server : this.removedServers) {
          if (newServers.remove(server)) {
             ++removedCnt;
          }
@@ -109,13 +109,13 @@ public class RealmsDataFetcher {
       this.servers = newServers;
    }
 
-   public synchronized void removeItem(McoServer server) {
+   public synchronized void removeItem(RealmsServer server) {
       this.servers.remove(server);
       this.removedServers.add(server);
    }
 
-   private void sort(List<McoServer> servers) {
-      Collections.sort(servers, new McoServer.McoServerComparator(Realms.getName()));
+   private void sort(List<RealmsServer> servers) {
+      Collections.sort(servers, new RealmsServer.McoServerComparator(Realms.getName()));
    }
 
    private boolean isActive() {
@@ -162,7 +162,7 @@ public class RealmsDataFetcher {
          try {
             RealmsClient client = RealmsClient.createRealmsClient();
             if (client != null) {
-               List<McoServer> servers = client.listWorlds().servers;
+               List<RealmsServer> servers = client.listWorlds().servers;
                if (servers != null) {
                   RealmsDataFetcher.this.sort(servers);
                   RealmsDataFetcher.this.setServers(servers);

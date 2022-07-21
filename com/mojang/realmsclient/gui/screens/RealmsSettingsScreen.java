@@ -29,6 +29,7 @@ public class RealmsSettingsScreen extends RealmsScreen {
    public void tick() {
       this.nameEdit.tick();
       this.descEdit.tick();
+      this.doneButton.active(this.nameEdit.getValue() != null && !this.nameEdit.getValue().trim().equals(""));
    }
 
    public void init() {
@@ -121,7 +122,6 @@ public class RealmsSettingsScreen extends RealmsScreen {
             this.save();
       }
 
-      this.doneButton.active(this.nameEdit.getValue() != null && !this.nameEdit.getValue().trim().equals(""));
    }
 
    public void mouseClicked(int x, int y, int buttonNum) {

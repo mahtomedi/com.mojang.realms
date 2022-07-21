@@ -2,8 +2,8 @@ package com.mojang.realmsclient.gui.screens;
 
 import com.mojang.realmsclient.RealmsMainScreen;
 import com.mojang.realmsclient.client.RealmsClient;
-import com.mojang.realmsclient.dto.RealmsOptions;
 import com.mojang.realmsclient.dto.RealmsServer;
+import com.mojang.realmsclient.dto.RealmsWorldOptions;
 import com.mojang.realmsclient.dto.WorldTemplate;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.gui.RealmsConstants;
@@ -28,6 +28,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
    private static final String ON_ICON_LOCATION = "realms:textures/gui/realms/on_icon.png";
    private static final String OFF_ICON_LOCATION = "realms:textures/gui/realms/off_icon.png";
    private static final String EXPIRED_ICON_LOCATION = "realms:textures/gui/realms/expired_icon.png";
+   private static final String EXPIRES_SOON_ICON_LOCATION = "realms:textures/gui/realms/expires_soon_icon.png";
    private static final String SLOT_FRAME_LOCATION = "realms:textures/gui/realms/slot_frame.png";
    private static final String EMPTY_FRAME_LOCATION = "realms:textures/gui/realms/empty_frame.png";
    private String toolTip;
@@ -181,24 +182,24 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
          int nameWidth = this.fontWidth(name);
          int nameColor = this.serverData.state == RealmsServer.State.CLOSED ? 10526880 : 8388479;
          int titleWidth = this.fontWidth(getLocalizedString("mco.configure.world.title"));
-         this.drawCenteredString(getLocalizedString("mco.configure.world.title"), this.width() / 2 - nameWidth / 2 - 2, 17, 16777215);
-         this.drawCenteredString(name, this.width() / 2 + titleWidth / 2 + 2, 17, nameColor);
-         int statusX = this.width() / 2 + nameWidth / 2 + titleWidth / 2 + 5;
-         this.drawServerStatus(statusX, 17, xm, ym);
+         this.drawCenteredString(getLocalizedString("mco.configure.world.title"), this.width() / 2, 12, 16777215);
+         this.drawCenteredString(name, this.width() / 2, 24, nameColor);
+         int statusX = Math.min(this.centerButton(2, 3) + this.default_button_width - 11, this.width() / 2 + nameWidth / 2 + titleWidth / 2 + 10);
+         this.drawServerStatus(statusX, 7, xm, ym);
 
-         for(Entry<Integer, RealmsOptions> entry : this.serverData.slots.entrySet()) {
-            if (((RealmsOptions)entry.getValue()).templateImage != null && ((RealmsOptions)entry.getValue()).templateId != -1L) {
+         for(Entry<Integer, RealmsWorldOptions> entry : this.serverData.slots.entrySet()) {
+            if (((RealmsWorldOptions)entry.getValue()).templateImage != null && ((RealmsWorldOptions)entry.getValue()).templateId != -1L) {
                this.drawSlotFrame(
                   this.frame(entry.getKey()),
                   RealmsConstants.row(5) + 5,
                   xm,
                   ym,
                   this.serverData.activeSlot == entry.getKey() && !this.isMinigame(),
-                  ((RealmsOptions)entry.getValue()).getSlotName(entry.getKey()),
+                  ((RealmsWorldOptions)entry.getValue()).getSlotName(entry.getKey()),
                   entry.getKey(),
-                  ((RealmsOptions)entry.getValue()).templateId,
-                  ((RealmsOptions)entry.getValue()).templateImage,
-                  ((RealmsOptions)entry.getValue()).empty
+                  ((RealmsWorldOptions)entry.getValue()).templateId,
+                  ((RealmsWorldOptions)entry.getValue()).templateImage,
+                  ((RealmsWorldOptions)entry.getValue()).empty
                );
             } else {
                this.drawSlotFrame(
@@ -207,11 +208,11 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
                   xm,
                   ym,
                   this.serverData.activeSlot == entry.getKey() && !this.isMinigame(),
-                  ((RealmsOptions)entry.getValue()).getSlotName(entry.getKey()),
+                  ((RealmsWorldOptions)entry.getValue()).getSlotName(entry.getKey()),
                   entry.getKey(),
                   -1L,
                   null,
-                  ((RealmsOptions)entry.getValue()).empty
+                  ((RealmsWorldOptions)entry.getValue()).empty
                );
             }
          }
@@ -264,7 +265,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
                   Realms.setScreen(
                      new RealmsSlotOptionsScreen(
                         this,
-                        ((RealmsOptions)this.serverData.slots.get(this.serverData.activeSlot)).clone(),
+                        ((RealmsWorldOptions)this.serverData.slots.get(this.serverData.activeSlot)).clone(),
                         this.serverData.worldType,
                         this.serverData.activeSlot
                      )
@@ -372,7 +373,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
             if (this.hoveredSlot < 4) {
                String line2 = getLocalizedString("mco.configure.world.slot.switch.question.line1");
                String line3 = getLocalizedString("mco.configure.world.slot.switch.question.line2");
-               if (((RealmsOptions)this.serverData.slots.get(this.hoveredSlot)).empty) {
+               if (((RealmsWorldOptions)this.serverData.slots.get(this.hoveredSlot)).empty) {
                   Realms.setScreen(new RealmsLongConfirmationScreen(this, RealmsLongConfirmationScreen.Type.Info, line2, line3, true, 10));
                } else {
                   Realms.setScreen(new RealmsLongConfirmationScreen(this, RealmsLongConfirmationScreen.Type.Info, line2, line3, true, 9));
@@ -411,10 +412,8 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
    private void drawServerStatus(int x, int y, int xm, int ym) {
       if (this.serverData.expired) {
          this.drawExpired(x, y, xm, ym);
-      } else if (this.serverData.state == RealmsServer.State.ADMIN_LOCK) {
-         this.drawLocked(x, y, xm, ym, false);
       } else if (this.serverData.state == RealmsServer.State.CLOSED) {
-         this.drawLocked(x, y, xm, ym, true);
+         this.drawClose(x, y, xm, ym);
       } else if (this.serverData.state == RealmsServer.State.OPEN) {
          if (this.serverData.daysLeft < 7) {
             this.drawExpiring(x, y, xm, ym, this.serverData.daysLeft);
@@ -425,18 +424,31 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
 
    }
 
-   private void drawExpiring(int x, int y, int xm, int ym, int daysLeft) {
-      if (this.animTick % 20 < 10) {
-         RealmsScreen.bind("realms:textures/gui/realms/on_icon.png");
-         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-         GL11.glPushMatrix();
-         GL11.glScalef(0.5F, 0.5F, 0.5F);
-         RealmsScreen.blit(x * 2, y * 2, 0.0F, 0.0F, 15, 15, 15.0F, 15.0F);
-         GL11.glPopMatrix();
+   private void drawExpired(int x, int y, int xm, int ym) {
+      RealmsScreen.bind("realms:textures/gui/realms/expired_icon.png");
+      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+      GL11.glPushMatrix();
+      RealmsScreen.blit(x, y, 0.0F, 0.0F, 10, 28, 10.0F, 28.0F);
+      GL11.glPopMatrix();
+      if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 27) {
+         this.toolTip = getLocalizedString("mco.selectServer.expired");
       }
 
-      if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9) {
-         if (daysLeft == 0) {
+   }
+
+   private void drawExpiring(int x, int y, int xm, int ym, int daysLeft) {
+      RealmsScreen.bind("realms:textures/gui/realms/expires_soon_icon.png");
+      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+      GL11.glPushMatrix();
+      if (this.animTick % 20 < 10) {
+         RealmsScreen.blit(x, y, 0.0F, 0.0F, 10, 28, 20.0F, 28.0F);
+      } else {
+         RealmsScreen.blit(x, y, 10.0F, 0.0F, 10, 28, 20.0F, 28.0F);
+      }
+
+      GL11.glPopMatrix();
+      if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 27) {
+         if (daysLeft <= 0) {
             this.toolTip = getLocalizedString("mco.selectServer.expires.soon");
          } else if (daysLeft == 1) {
             this.toolTip = getLocalizedString("mco.selectServer.expires.day");
@@ -451,36 +463,21 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
       RealmsScreen.bind("realms:textures/gui/realms/on_icon.png");
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glPushMatrix();
-      GL11.glScalef(0.5F, 0.5F, 0.5F);
-      RealmsScreen.blit(x * 2, y * 2, 0.0F, 0.0F, 15, 15, 15.0F, 15.0F);
+      RealmsScreen.blit(x, y, 0.0F, 0.0F, 10, 28, 10.0F, 28.0F);
       GL11.glPopMatrix();
-      if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9) {
+      if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 27) {
          this.toolTip = getLocalizedString("mco.selectServer.open");
       }
 
    }
 
-   private void drawExpired(int x, int y, int xm, int ym) {
-      bind("realms:textures/gui/realms/expired_icon.png");
+   private void drawClose(int x, int y, int xm, int ym) {
+      RealmsScreen.bind("realms:textures/gui/realms/off_icon.png");
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glPushMatrix();
-      GL11.glScalef(0.5F, 0.5F, 0.5F);
-      RealmsScreen.blit(x * 2, y * 2, 0.0F, 0.0F, 15, 15, 15.0F, 15.0F);
+      RealmsScreen.blit(x, y, 0.0F, 0.0F, 10, 28, 10.0F, 28.0F);
       GL11.glPopMatrix();
-      if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9) {
-         this.toolTip = getLocalizedString("mco.selectServer.expired");
-      }
-
-   }
-
-   private void drawLocked(int x, int y, int xm, int ym, boolean closed) {
-      bind("realms:textures/gui/realms/off_icon.png");
-      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-      GL11.glPushMatrix();
-      GL11.glScalef(0.5F, 0.5F, 0.5F);
-      RealmsScreen.blit(x * 2, y * 2, 0.0F, 0.0F, 15, 15, 15.0F, 15.0F);
-      GL11.glPopMatrix();
-      if (closed && xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9) {
+      if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 27) {
          this.toolTip = getLocalizedString("mco.selectServer.closed");
       }
 
@@ -571,7 +568,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
       RealmsClient client = RealmsClient.createRealmsClient();
 
       try {
-         client.updateSlot(this.serverData.id, (RealmsOptions)this.serverData.slots.get(this.serverData.activeSlot));
+         client.updateSlot(this.serverData.id, this.serverData.activeSlot, (RealmsWorldOptions)this.serverData.slots.get(this.serverData.activeSlot));
       } catch (RealmsServiceException var3) {
          LOGGER.error("Couldn't save slot settings");
          Realms.setScreen(new RealmsGenericErrorScreen(var3, this));
@@ -583,8 +580,8 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
       Realms.setScreen(this);
    }
 
-   public void saveSlotSettings(RealmsOptions options) {
-      RealmsOptions oldOptions = (RealmsOptions)this.serverData.slots.get(this.serverData.activeSlot);
+   public void saveSlotSettings(RealmsWorldOptions options) {
+      RealmsWorldOptions oldOptions = (RealmsWorldOptions)this.serverData.slots.get(this.serverData.activeSlot);
       options.templateId = oldOptions.templateId;
       options.templateImage = oldOptions.templateImage;
       this.serverData.slots.put(this.serverData.activeSlot, options);

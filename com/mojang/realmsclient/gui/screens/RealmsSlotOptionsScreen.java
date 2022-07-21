@@ -1,7 +1,7 @@
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.realmsclient.dto.RealmsOptions;
 import com.mojang.realmsclient.dto.RealmsServer;
+import com.mojang.realmsclient.dto.RealmsWorldOptions;
 import com.mojang.realmsclient.gui.RealmsConstants;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
@@ -28,7 +28,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
    private int column1_x;
    private int column_width;
    private int column2_x;
-   private RealmsOptions options;
+   private RealmsWorldOptions options;
    private RealmsServer.WorldType worldType;
    private int activeSlot;
    private int difficultyIndex;
@@ -52,7 +52,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
    String[] gameModes;
    String[][] gameModeHints;
 
-   public RealmsSlotOptionsScreen(RealmsConfigureWorldScreen configureWorldScreen, RealmsOptions options, RealmsServer.WorldType worldType, int activeSlot) {
+   public RealmsSlotOptionsScreen(RealmsConfigureWorldScreen configureWorldScreen, RealmsWorldOptions options, RealmsServer.WorldType worldType, int activeSlot) {
       this.parent = configureWorldScreen;
       this.options = options;
       this.worldType = worldType;
@@ -173,8 +173,8 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
       this.nameEdit.setFocus(true);
       this.nameEdit.setMaxLength(10);
       this.nameEdit.setValue(this.options.getSlotName(this.activeSlot));
-      this.buttonsAdd(newButton(3, this.column2_x, RealmsConstants.row(2), this.column_width, 20, this.gameModeTitle()));
-      this.buttonsAdd(this.pvpButton = newButton(4, this.column1_x, RealmsConstants.row(4), this.column_width, 20, this.pvpTitle()));
+      this.buttonsAdd(this.pvpButton = newButton(4, this.column2_x, RealmsConstants.row(2), this.column_width, 20, this.pvpTitle()));
+      this.buttonsAdd(newButton(3, this.column1_x, RealmsConstants.row(4), this.column_width, 20, this.gameModeTitle()));
       this.buttonsAdd(this.spawnAnimalsButton = newButton(5, this.column2_x, RealmsConstants.row(4), this.column_width, 20, this.spawnAnimalsTitle()));
       this.buttonsAdd(newButton(2, this.column1_x, RealmsConstants.row(6), this.column_width, 20, this.difficultyTitle()));
       this.buttonsAdd(this.spawnMonstersButton = newButton(6, this.column2_x, RealmsConstants.row(6), this.column_width, 20, this.spawnMonstersTitle()));
@@ -316,7 +316,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
       if (this.worldType.equals(RealmsServer.WorldType.ADVENTUREMAP)) {
          this.parent
             .saveSlotSettings(
-               new RealmsOptions(
+               new RealmsWorldOptions(
                   this.options.pvp,
                   this.options.spawnAnimals,
                   this.options.spawnMonsters,
@@ -332,7 +332,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
       } else {
          this.parent
             .saveSlotSettings(
-               new RealmsOptions(
+               new RealmsWorldOptions(
                   this.pvp,
                   this.spawnAnimals,
                   this.spawnMonsters,

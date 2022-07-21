@@ -22,7 +22,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
    private static final String OP_ICON_LOCATION = "realms:textures/gui/realms/op_icon.png";
    private static final String USER_ICON_LOCATION = "realms:textures/gui/realms/user_icon.png";
-   private static final String CROSS_ICON_LOCATION = "realms:textures/gui/realms/cross_icon.png";
+   private static final String CROSS_ICON_LOCATION = "realms:textures/gui/realms/cross_player_icon.png";
    private String toolTip;
    private final RealmsConfigureWorldScreen lastScreen;
    private RealmsServer serverData;
@@ -122,7 +122,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 
    private void op(int index) {
       RealmsClient client = RealmsClient.createRealmsClient();
-      String selectedInvite = ((PlayerInfo)this.serverData.players.get(index)).getName();
+      String selectedInvite = ((PlayerInfo)this.serverData.players.get(index)).getUuid();
 
       try {
          this.updateOps(client.op(this.serverData.id, selectedInvite));
@@ -134,7 +134,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 
    private void deop(int index) {
       RealmsClient client = RealmsClient.createRealmsClient();
-      String selectedInvite = ((PlayerInfo)this.serverData.players.get(index)).getName();
+      String selectedInvite = ((PlayerInfo)this.serverData.players.get(index)).getUuid();
 
       try {
          this.updateOps(client.deop(this.serverData.id, selectedInvite));
@@ -242,8 +242,8 @@ public class RealmsPlayerScreen extends RealmsScreen {
    }
 
    private void drawRemoveIcon(int x, int y, int xm, int ym) {
-      boolean hovered = xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9 && ym < this.height() - 25 && ym > RealmsConstants.row(1);
-      bind("realms:textures/gui/realms/cross_icon.png");
+      boolean hovered = xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9 && ym < RealmsConstants.row(12) + 20 && ym > RealmsConstants.row(1);
+      bind("realms:textures/gui/realms/cross_player_icon.png");
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glPushMatrix();
       RealmsScreen.blit(x, y, 0.0F, hovered ? 7.0F : 0.0F, 8, 7, 8.0F, 14.0F);
@@ -255,7 +255,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
    }
 
    private void drawOpped(int x, int y, int xm, int ym) {
-      boolean hovered = xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9 && ym < this.height() - 25 && ym > RealmsConstants.row(1);
+      boolean hovered = xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9 && ym < RealmsConstants.row(12) + 20 && ym > RealmsConstants.row(1);
       bind("realms:textures/gui/realms/op_icon.png");
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glPushMatrix();
@@ -268,7 +268,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
    }
 
    private void drawNormal(int x, int y, int xm, int ym) {
-      boolean hovered = xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9;
+      boolean hovered = xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9 && ym < RealmsConstants.row(12) + 20 && ym > RealmsConstants.row(1);
       bind("realms:textures/gui/realms/user_icon.png");
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glPushMatrix();

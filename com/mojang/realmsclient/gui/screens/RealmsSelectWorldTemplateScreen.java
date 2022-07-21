@@ -132,8 +132,85 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
    }
 
    public void keyPressed(char eventCharacter, int eventKey) {
-      if (eventKey == 1) {
-         this.backButtonClicked();
+      switch(eventKey) {
+         case 1:
+            this.backButtonClicked();
+            break;
+         case 28:
+         case 156:
+            this.selectTemplate();
+            break;
+         case 200:
+            if (this.selectedTemplate != -1) {
+               int the_index = this.selectedTemplate;
+               if (the_index == 0) {
+                  this.worldTemplateSelectionList.scroll(0 - this.worldTemplateSelectionList.getScroll());
+                  return;
+               }
+
+               int new_index = the_index - 1;
+               if (new_index > -1) {
+                  this.selectedTemplate = new_index;
+                  int maxScroll = Math.max(
+                     0, this.worldTemplateSelectionList.getMaxPosition() - (this.height() - 40 - (this.displayWarning ? RealmsConstants.row(1) : 32) - 4)
+                  );
+                  int maxItemsInView = (int)Math.floor((double)((this.height() - 40 - (this.displayWarning ? RealmsConstants.row(1) : 32)) / 46));
+                  int scroll = this.worldTemplateSelectionList.getScroll();
+                  int hiddenItems = (int)Math.ceil((double)((float)scroll / 46.0F));
+                  int scrollPerItem = maxScroll / this.templates.size();
+                  int positionNeeded = scrollPerItem * new_index;
+                  int proposedScroll = positionNeeded - this.worldTemplateSelectionList.getScroll();
+                  if (new_index < hiddenItems || new_index > hiddenItems + maxItemsInView) {
+                     this.worldTemplateSelectionList.scroll(proposedScroll);
+                  }
+
+                  return;
+               }
+            }
+
+            this.selectedTemplate = 0;
+            this.worldTemplateSelectionList.scroll(0 - this.worldTemplateSelectionList.getScroll());
+            break;
+         case 208:
+            if (this.selectedTemplate != -1) {
+               int the_index = this.selectedTemplate;
+               int maxScroll = Math.max(
+                  0, this.worldTemplateSelectionList.getMaxPosition() - (this.height() - 40 - (this.displayWarning ? RealmsConstants.row(1) : 32))
+               );
+               if (the_index == this.templates.size() - 1) {
+                  this.worldTemplateSelectionList.scroll(maxScroll - this.worldTemplateSelectionList.getScroll() + 46);
+                  return;
+               }
+
+               int new_index = the_index + 1;
+               if (new_index == this.templates.size() - 1) {
+                  this.selectedTemplate = new_index;
+                  this.worldTemplateSelectionList.scroll(maxScroll - this.worldTemplateSelectionList.getScroll() + 46);
+                  return;
+               }
+
+               if (new_index < this.templates.size()) {
+                  this.selectedTemplate = new_index;
+                  int maxItemsInView = (int)Math.floor((double)((this.height() - 40 - (this.displayWarning ? RealmsConstants.row(1) : 32)) / 46));
+                  int scroll = this.worldTemplateSelectionList.getScroll();
+                  int hiddenItems = (int)Math.ceil((double)((float)scroll / 46.0F));
+                  int scrollPerItem = maxScroll / this.templates.size();
+                  int positionNeeded = scrollPerItem * new_index;
+                  int proposedScroll = positionNeeded - this.worldTemplateSelectionList.getScroll();
+                  if (proposedScroll > 0) {
+                     proposedScroll += scrollPerItem;
+                  }
+
+                  if (new_index < hiddenItems || new_index >= hiddenItems + maxItemsInView) {
+                     this.worldTemplateSelectionList.scroll(proposedScroll);
+                  }
+
+                  return;
+               }
+            }
+
+            this.selectedTemplate = 0;
+            this.worldTemplateSelectionList.scroll(-(this.worldTemplateSelectionList.getItemCount() * 46));
       }
 
    }

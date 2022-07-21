@@ -21,9 +21,15 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
    private RealmsButton resetButton;
    private RealmsButton levelTypeButton;
    private RealmsButton generateStructuresButton;
+   private String buttonTitle = getLocalizedString("mco.backup.button.reset");
 
    public RealmsResetNormalWorldScreen(RealmsResetWorldScreen lastScreen) {
       this.lastScreen = lastScreen;
+   }
+
+   public RealmsResetNormalWorldScreen(RealmsResetWorldScreen lastScreen, String buttonTitle) {
+      this(lastScreen);
+      this.buttonTitle = buttonTitle;
    }
 
    public void tick() {
@@ -41,7 +47,7 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
       Keyboard.enableRepeatEvents(true);
       this.buttonsClear();
       this.buttonsAdd(newButton(0, this.width() / 2 + 8, RealmsConstants.row(12), 97, 20, getLocalizedString("gui.back")));
-      this.buttonsAdd(this.resetButton = newButton(1, this.width() / 2 - 102, RealmsConstants.row(12), 97, 20, getLocalizedString("mco.backup.button.reset")));
+      this.buttonsAdd(this.resetButton = newButton(1, this.width() / 2 - 102, RealmsConstants.row(12), 97, 20, this.buttonTitle));
       this.seedEdit = this.newEditBox(4, this.width() / 2 - 100, RealmsConstants.row(2), 200, 20);
       this.seedEdit.setFocus(true);
       this.seedEdit.setMaxLength(32);

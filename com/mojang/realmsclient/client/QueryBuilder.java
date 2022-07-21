@@ -1,5 +1,7 @@
 package com.mojang.realmsclient.client;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -34,14 +36,22 @@ public class QueryBuilder {
          return null;
       } else {
          String firstKey = (String)keyIterator.next();
-         stringBuilder.append(firstKey).append("=").append((String)this.queryParams.get(firstKey));
+         stringBuilder.append(firstKey).append("=").append(this.encodeString((String)this.queryParams.get(firstKey)));
 
          while(keyIterator.hasNext()) {
             String key = (String)keyIterator.next();
-            stringBuilder.append("&").append(key).append("=").append((String)this.queryParams.get(key));
+            stringBuilder.append("&").append(key).append("=").append(this.encodeString((String)this.queryParams.get(key)));
          }
 
          return stringBuilder.toString();
+      }
+   }
+
+   private String encodeString(String value) {
+      try {
+         return URLEncoder.encode(value, "UTF-8");
+      } catch (UnsupportedEncodingException var3) {
+         return value;
       }
    }
 }

@@ -1,7 +1,6 @@
 package com.mojang.realmsclient.gui.screens;
 
 import com.mojang.realmsclient.RealmsMainScreen;
-import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.util.RealmsTasks;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
@@ -9,8 +8,7 @@ import net.minecraft.realms.RealmsEditBox;
 import net.minecraft.realms.RealmsScreen;
 import org.lwjgl.input.Keyboard;
 
-public class RealmsCreateRealmScreen extends RealmsScreen {
-   private final RealmsServer server;
+public class RealmsCreateTrialScreen extends RealmsScreen {
    private RealmsMainScreen lastScreen;
    private RealmsEditBox nameBox;
    private RealmsEditBox descriptionBox;
@@ -18,16 +16,17 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
    private static int CANCEL_BUTTON = 1;
    private static int NAME_BOX_ID = 3;
    private static int DESCRIPTION_BOX_ID = 4;
+   private boolean initialized = false;
    private RealmsButton createButton;
 
-   public RealmsCreateRealmScreen(RealmsServer server, RealmsMainScreen lastScreen) {
-      this.server = server;
+   public RealmsCreateTrialScreen(RealmsMainScreen lastScreen) {
       this.lastScreen = lastScreen;
    }
 
    public void tick() {
       if (this.nameBox != null) {
          this.nameBox.tick();
+         this.createButton.active(this.valid());
       }
 
       if (this.descriptionBox != null) {
@@ -39,14 +38,18 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
    public void init() {
       Keyboard.enableRepeatEvents(true);
       this.buttonsClear();
+      if (!this.initialized) {
+         this.initialized = true;
+         this.nameBox = this.newEditBox(NAME_BOX_ID, this.width() / 2 - 100, 65, 200, 20);
+         this.nameBox.setFocus(true);
+         this.descriptionBox = this.newEditBox(DESCRIPTION_BOX_ID, this.width() / 2 - 100, 115, 200, 20);
+      }
+
       this.buttonsAdd(
          this.createButton = newButton(CREATE_BUTTON, this.width() / 2 - 100, this.height() / 4 + 120 + 17, 97, 20, getLocalizedString("mco.create.world"))
       );
       this.buttonsAdd(newButton(CANCEL_BUTTON, this.width() / 2 + 5, this.height() / 4 + 120 + 17, 95, 20, getLocalizedString("gui.cancel")));
-      this.createButton.active(false);
-      this.nameBox = this.newEditBox(NAME_BOX_ID, this.width() / 2 - 100, 65, 200, 20);
-      this.nameBox.setFocus(true);
-      this.descriptionBox = this.newEditBox(DESCRIPTION_BOX_ID, this.width() / 2 - 100, 115, 200, 20);
+      this.createButton.active(this.valid());
    }
 
    public void removed() {
@@ -73,7 +76,6 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
          this.descriptionBox.keyPressed(ch, eventKey);
       }
 
-      this.createButton.active(this.valid());
       switch(eventKey) {
          case 1:
             Realms.setScreen(this.lastScreen);
@@ -96,20 +98,10 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
 
    private void createWorld() {
       if (this.valid()) {
-         RealmsResetWorldScreen resetWorldScreen = new RealmsResetWorldScreen(
-            this.lastScreen,
-            this.server,
-            this.lastScreen.newScreen(),
-            getLocalizedString("mco.selectServer.create"),
-            getLocalizedString("mco.create.world.subtitle"),
-            10526880,
-            getLocalizedString("mco.create.world.skip")
+         RealmsTasks.TrialCreationTask trialCreationTask = new RealmsTasks.TrialCreationTask(
+            this.nameBox.getValue(), this.descriptionBox.getValue(), this.lastScreen
          );
-         resetWorldScreen.setResetTitle(getLocalizedString("mco.create.world.reset.title"));
-         RealmsTasks.WorldCreationTask worldCreationTask = new RealmsTasks.WorldCreationTask(
-            this.server.id, this.nameBox.getValue(), this.descriptionBox.getValue(), resetWorldScreen
-         );
-         RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(this.lastScreen, worldCreationTask);
+         RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(this.lastScreen, trialCreationTask);
          longRunningMcoTaskScreen.start();
          Realms.setScreen(longRunningMcoTaskScreen);
       }
@@ -117,7 +109,7 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
    }
 
    private boolean valid() {
-      return this.nameBox.getValue() != null && !this.nameBox.getValue().trim().equals("");
+      return this.nameBox != null && this.nameBox.getValue() != null && !this.nameBox.getValue().trim().equals("");
    }
 
    public void mouseClicked(int x, int y, int buttonNum) {
@@ -133,7 +125,7 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
 
    public void render(int xm, int ym, float a) {
       this.renderBackground();
-      this.drawCenteredString(getLocalizedString("mco.selectServer.create"), this.width() / 2, 11, 16777215);
+      this.drawCenteredString(getLocalizedString("mco.trial.title"), this.width() / 2, 11, 16777215);
       this.drawString(getLocalizedString("mco.configure.world.name"), this.width() / 2 - 100, 52, 10526880);
       this.drawString(getLocalizedString("mco.configure.world.description"), this.width() / 2 - 100, 102, 10526880);
       if (this.nameBox != null) {

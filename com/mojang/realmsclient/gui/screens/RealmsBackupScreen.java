@@ -2,8 +2,8 @@ package com.mojang.realmsclient.gui.screens;
 
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.Backup;
-import com.mojang.realmsclient.dto.RealmsOptions;
 import com.mojang.realmsclient.dto.RealmsServer;
+import com.mojang.realmsclient.dto.RealmsWorldOptions;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.exception.RetryCallException;
 import com.mojang.realmsclient.gui.LongRunningTask;
@@ -162,7 +162,7 @@ public class RealmsBackupScreen extends RealmsScreen {
                downloadLink,
                this.serverData.name
                   + " ("
-                  + ((RealmsOptions)this.serverData.slots.get(this.serverData.activeSlot)).getSlotName(this.serverData.activeSlot)
+                  + ((RealmsWorldOptions)this.serverData.slots.get(this.serverData.activeSlot)).getSlotName(this.serverData.activeSlot)
                   + ")"
             )
          );

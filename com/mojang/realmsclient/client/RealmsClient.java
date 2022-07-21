@@ -1,16 +1,20 @@
 package com.mojang.realmsclient.client;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mojang.realmsclient.RealmsVersion;
 import com.mojang.realmsclient.dto.BackupList;
 import com.mojang.realmsclient.dto.Ops;
 import com.mojang.realmsclient.dto.PendingInvitesList;
 import com.mojang.realmsclient.dto.PingResult;
-import com.mojang.realmsclient.dto.RealmsOptions;
+import com.mojang.realmsclient.dto.PlayerInfo;
+import com.mojang.realmsclient.dto.RealmsDescriptionDto;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.RealmsServerAddress;
 import com.mojang.realmsclient.dto.RealmsServerList;
-import com.mojang.realmsclient.dto.RealmsState;
+import com.mojang.realmsclient.dto.RealmsServerPlayerLists;
+import com.mojang.realmsclient.dto.RealmsWorldOptions;
+import com.mojang.realmsclient.dto.RealmsWorldResetDto;
 import com.mojang.realmsclient.dto.ServerActivityList;
 import com.mojang.realmsclient.dto.Subscription;
 import com.mojang.realmsclient.dto.UploadInfo;
@@ -33,6 +37,7 @@ public class RealmsClient {
    private final String sessionId;
    private final String username;
    private static String baseUrl = "mcoapi.minecraft.net";
+   private static String protocol = "https";
    private static final String WORLDS_RESOURCE_PATH = "worlds";
    private static final String INVITES_RESOURCE_PATH = "invites";
    private static final String MCO_RESOURCE_PATH = "mco";
@@ -43,15 +48,16 @@ public class RealmsClient {
    private static final String TRIALS_RESOURCE = "trial";
    private static final String PATH_INITIALIZE = "/$WORLD_ID/initialize";
    private static final String PATH_GET_ACTIVTIES = "/$WORLD_ID";
+   private static final String PATH_GET_LIVESTATS = "/liveplayerlist";
    private static final String PATH_GET_SUBSCRIPTION = "/$WORLD_ID";
    private static final String PATH_GET_MINIGAMES = "/minigames";
-   private static final String PATH_OP = "/$WORLD_ID";
+   private static final String PATH_OP = "/$WORLD_ID/$PROFILE_UUID";
    private static final String PATH_PUT_INTO_MINIGAMES_MODE = "/minigames/$MINIGAME_ID/$WORLD_ID";
    private static final String PATH_AVAILABLE = "/available";
    private static final String PATH_TEMPLATES = "/templates";
    private static final String PATH_WORLD_JOIN = "/$ID/join";
    private static final String PATH_WORLD_GET = "/$ID";
-   private static final String PATH_WORLD_INVITES = "/$WORLD_ID/invite";
+   private static final String PATH_WORLD_INVITES = "/$WORLD_ID";
    private static final String PATH_WORLD_UNINVITE = "/$WORLD_ID/invite/$UUID";
    private static final String PATH_PENDING_INVITES_COUNT = "/count/pending";
    private static final String PATH_PENDING_INVITES = "/pending";
@@ -59,8 +65,7 @@ public class RealmsClient {
    private static final String PATH_REJECT_INVITE = "/reject/$INVITATION_ID";
    private static final String PATH_UNINVITE_MYSELF = "/$WORLD_ID";
    private static final String PATH_WORLD_UPDATE = "/$WORLD_ID";
-   private static final String PATH_SLOT_UPDATE = "/$WORLD_ID/slot";
-   private static final String PATH_SLOT_SWITCH = "/$WORLD_ID/slot/$SLOT_ID";
+   private static final String PATH_SLOT = "/$WORLD_ID/slot/$SLOT_ID";
    private static final String PATH_WORLD_OPEN = "/$WORLD_ID/open";
    private static final String PATH_WORLD_CLOSE = "/$WORLD_ID/close";
    private static final String PATH_WORLD_RESET = "/$WORLD_ID/reset";
@@ -68,11 +73,8 @@ public class RealmsClient {
    private static final String PATH_WORLD_BACKUPS = "/$WORLD_ID/backups";
    private static final String PATH_WORLD_DOWNLOAD = "/$WORLD_ID/backups/download";
    private static final String PATH_WORLD_UPLOAD = "/$WORLD_ID/backups/upload";
-   private static final String PATH_WORLD_UPLOAD_FINISHED = "/$WORLD_ID/backups/upload/finished";
-   private static final String PATH_WORLD_UPLOAD_CANCELLED = "/$WORLD_ID/backups/upload/cancelled";
    private static final String PATH_CLIENT_COMPATIBLE = "/client/compatible";
    private static final String PATH_TOS_AGREED = "/tos/agreed";
-   private static final String PATH_MCO_BUY = "/buy";
    private static final String PATH_STAGE_AVAILABLE = "/stageAvailable";
    private static Gson gson = new Gson();
 
@@ -84,10 +86,17 @@ public class RealmsClient {
 
    public static void switchToStage() {
       baseUrl = "mcoapi-stage.minecraft.net";
+      protocol = "https";
    }
 
    public static void switchToProd() {
       baseUrl = "mcoapi.minecraft.net";
+      protocol = "https";
+   }
+
+   public static void switchToLocal() {
+      baseUrl = "localhost:8080";
+      protocol = "http";
    }
 
    public RealmsClient(String sessionId, String username, Proxy proxy) {
@@ -114,6 +123,12 @@ public class RealmsClient {
       return ServerActivityList.parse(json);
    }
 
+   public RealmsServerPlayerLists getLiveStats() throws RealmsServiceException {
+      String asciiUrl = this.url("activities/liveplayerlist");
+      String json = this.execute(Request.get(asciiUrl));
+      return RealmsServerPlayerLists.parse(json);
+   }
+
    public RealmsServerAddress join(long worldId) throws RealmsServiceException, IOException {
       String asciiUrl = this.url("worlds" + "/$ID/join".replace("$ID", "" + worldId));
       String json = this.execute(Request.get(asciiUrl, 5000, 30000));
@@ -121,9 +136,10 @@ public class RealmsClient {
    }
 
    public void initializeWorld(long worldId, String name, String motd) throws RealmsServiceException, IOException {
-      String queryString = QueryBuilder.of("name", name).with("motd", motd).toQueryString();
-      String asciiUrl = this.url("worlds" + "/$WORLD_ID/initialize".replace("$WORLD_ID", String.valueOf(worldId)), queryString);
-      this.execute(Request.put(asciiUrl, "", 5000, 10000));
+      RealmsDescriptionDto realmsDescription = new RealmsDescriptionDto(name, motd);
+      String asciiUrl = this.url("worlds" + "/$WORLD_ID/initialize".replace("$WORLD_ID", String.valueOf(worldId)));
+      String json = gson.toJson(realmsDescription);
+      this.execute(Request.post(asciiUrl, json, 5000, 10000));
    }
 
    public Boolean mcoEnabled() throws RealmsServiceException, IOException {
@@ -160,9 +176,10 @@ public class RealmsClient {
    }
 
    public RealmsServer invite(long worldId, String profileName) throws RealmsServiceException, IOException {
-      String queryString = QueryBuilder.of("profileName", profileName).toQueryString();
-      String asciiUrl = this.url("invites" + "/$WORLD_ID/invite".replace("$WORLD_ID", String.valueOf(worldId)), queryString);
-      String json = this.execute(Request.put(asciiUrl, ""));
+      PlayerInfo playerInfo = new PlayerInfo();
+      playerInfo.setName(profileName);
+      String asciiUrl = this.url("invites" + "/$WORLD_ID".replace("$WORLD_ID", String.valueOf(worldId)));
+      String json = this.execute(Request.post(asciiUrl, gson.toJson(playerInfo)));
       return RealmsServer.parse(json);
    }
 
@@ -173,21 +190,15 @@ public class RealmsClient {
    }
 
    public void update(long worldId, String name, String motd) throws RealmsServiceException, UnsupportedEncodingException {
-      QueryBuilder qb = QueryBuilder.of("name", name);
-      if (motd != null) {
-         qb = qb.with("motd", motd);
-      }
-
-      String queryString = qb.toQueryString();
-      String asciiUrl = this.url("worlds" + "/$WORLD_ID".replace("$WORLD_ID", String.valueOf(worldId)), queryString);
-      this.execute(Request.put(asciiUrl, ""));
+      RealmsDescriptionDto realmsDescription = new RealmsDescriptionDto(name, motd);
+      String asciiUrl = this.url("worlds" + "/$WORLD_ID".replace("$WORLD_ID", String.valueOf(worldId)));
+      this.execute(Request.post(asciiUrl, gson.toJson(realmsDescription)));
    }
 
-   public void updateSlot(long worldId, RealmsOptions options) throws RealmsServiceException, UnsupportedEncodingException {
-      QueryBuilder qb = QueryBuilder.of("options", options.toJson());
-      String queryString = qb.toQueryString();
-      String asciiUrl = this.url("worlds" + "/$WORLD_ID/slot".replace("$WORLD_ID", String.valueOf(worldId)), queryString);
-      this.execute(Request.put(asciiUrl, ""));
+   public void updateSlot(long worldId, int slot, RealmsWorldOptions options) throws RealmsServiceException, UnsupportedEncodingException {
+      String asciiUrl = this.url("worlds" + "/$WORLD_ID/slot/$SLOT_ID".replace("$WORLD_ID", String.valueOf(worldId)).replace("$SLOT_ID", String.valueOf(slot)));
+      String json = options.toJson();
+      this.execute(Request.post(asciiUrl, json));
    }
 
    public boolean switchSlot(long worldId, int slot) throws RealmsServiceException {
@@ -219,17 +230,15 @@ public class RealmsClient {
       return Boolean.valueOf(this.execute(Request.put(asciiUrl, "")));
    }
 
-   public Ops op(long worldId, String profileName) throws RealmsServiceException {
-      String queryString = QueryBuilder.of("profileName", profileName).toQueryString();
-      String path = "/$WORLD_ID".replace("$WORLD_ID", String.valueOf(worldId));
-      String asciiUrl = this.url("ops" + path, queryString);
+   public Ops op(long worldId, String profileUuid) throws RealmsServiceException {
+      String path = "/$WORLD_ID/$PROFILE_UUID".replace("$WORLD_ID", String.valueOf(worldId)).replace("$PROFILE_UUID", profileUuid);
+      String asciiUrl = this.url("ops" + path);
       return Ops.parse(this.execute(Request.post(asciiUrl, "")));
    }
 
-   public Ops deop(long worldId, String profileName) throws RealmsServiceException {
-      String queryString = QueryBuilder.of("profileName", profileName).toQueryString();
-      String path = "/$WORLD_ID".replace("$WORLD_ID", String.valueOf(worldId));
-      String asciiUrl = this.url("ops" + path, queryString);
+   public Ops deop(long worldId, String profileUuid) throws RealmsServiceException {
+      String path = "/$WORLD_ID/$PROFILE_UUID".replace("$WORLD_ID", String.valueOf(worldId)).replace("$PROFILE_UUID", profileUuid);
+      String asciiUrl = this.url("ops" + path);
       return Ops.parse(this.execute(Request.delete(asciiUrl)));
    }
 
@@ -246,25 +255,16 @@ public class RealmsClient {
    }
 
    public Boolean resetWorldWithSeed(long worldId, String seed, Integer levelType, boolean generateStructures) throws RealmsServiceException, IOException {
-      QueryBuilder qb = QueryBuilder.empty();
-      if (seed != null && seed.length() > 0) {
-         qb = qb.with("seed", seed);
-      }
-
-      qb = qb.with("levelType", levelType).with("generateStructures", generateStructures);
-      String asciiUrl = this.url("worlds" + "/$WORLD_ID/reset".replace("$WORLD_ID", String.valueOf(worldId)), qb.toQueryString());
-      String json = this.execute(Request.put(asciiUrl, "", 30000, 80000));
+      RealmsWorldResetDto worldReset = new RealmsWorldResetDto(seed, -1L, levelType, generateStructures);
+      String asciiUrl = this.url("worlds" + "/$WORLD_ID/reset".replace("$WORLD_ID", String.valueOf(worldId)));
+      String json = this.execute(Request.post(asciiUrl, gson.toJson(worldReset), 30000, 80000));
       return Boolean.valueOf(json);
    }
 
    public Boolean resetWorldWithTemplate(long worldId, String worldTemplateId) throws RealmsServiceException, IOException {
-      QueryBuilder qb = QueryBuilder.empty();
-      if (worldTemplateId != null) {
-         qb = qb.with("template", worldTemplateId);
-      }
-
-      String asciiUrl = this.url("worlds" + "/$WORLD_ID/reset".replace("$WORLD_ID", String.valueOf(worldId)), qb.toQueryString());
-      String json = this.execute(Request.put(asciiUrl, "", 30000, 80000));
+      RealmsWorldResetDto worldReset = new RealmsWorldResetDto(null, Long.valueOf(worldTemplateId), -1, false);
+      String asciiUrl = this.url("worlds" + "/$WORLD_ID/reset".replace("$WORLD_ID", String.valueOf(worldId)));
+      String json = this.execute(Request.post(asciiUrl, gson.toJson(worldReset), 30000, 80000));
       return Boolean.valueOf(json);
    }
 
@@ -291,12 +291,6 @@ public class RealmsClient {
       this.execute(Request.put(asciiUrl, ""));
    }
 
-   public RealmsState fetchRealmsState() throws RealmsServiceException {
-      String asciiUrl = this.url("mco/buy");
-      String json = this.execute(Request.get(asciiUrl));
-      return RealmsState.parse(json);
-   }
-
    public String download(long worldId) throws RealmsServiceException {
       String asciiUrl = this.url("worlds" + "/$WORLD_ID/backups/download".replace("$WORLD_ID", String.valueOf(worldId)));
       return this.execute(Request.get(asciiUrl));
@@ -309,21 +303,11 @@ public class RealmsClient {
          oldUploadInfo.setToken(uploadToken);
       }
 
-      String content = gson.toJson(oldUploadInfo);
+      GsonBuilder builder = new GsonBuilder();
+      builder.excludeFieldsWithoutExposeAnnotation();
+      Gson the_gson = builder.create();
+      String content = the_gson.toJson(oldUploadInfo);
       return UploadInfo.parse(this.execute(Request.put(asciiUrl, content)));
-   }
-
-   public void uploadCancelled(long worldId, String uploadToken) throws RealmsServiceException {
-      String asciiUrl = this.url("worlds" + "/$WORLD_ID/backups/upload/cancelled".replace("$WORLD_ID", String.valueOf(worldId)));
-      UploadInfo oldUploadInfo = new UploadInfo();
-      oldUploadInfo.setToken(uploadToken);
-      String content = gson.toJson(oldUploadInfo);
-      this.execute(Request.put(asciiUrl, content));
-   }
-
-   public void uploadFinished(long worldId) throws RealmsServiceException {
-      String asciiUrl = this.url("worlds" + "/$WORLD_ID/backups/upload/finished".replace("$WORLD_ID", String.valueOf(worldId)));
-      this.execute(Request.put(asciiUrl, ""));
    }
 
    public void rejectInvitation(String invitationId) throws RealmsServiceException {
@@ -347,10 +331,12 @@ public class RealmsClient {
       return Boolean.valueOf(json);
    }
 
-   public Boolean createTrial() throws RealmsServiceException, IOException {
+   public RealmsServer createTrial(String name, String motd) throws RealmsServiceException, IOException {
+      RealmsDescriptionDto realmsDescription = new RealmsDescriptionDto(name, motd);
+      String json = gson.toJson(realmsDescription);
       String asciiUrl = this.url("trial");
-      String json = this.execute(Request.put(asciiUrl, ""));
-      return Boolean.valueOf(json);
+      String returnJson = this.execute(Request.post(asciiUrl, json, 5000, 10000));
+      return RealmsServer.parse(returnJson);
    }
 
    public void deleteWorld(long worldId) throws RealmsServiceException, IOException {
@@ -364,7 +350,7 @@ public class RealmsClient {
 
    private String url(String path, String queryString) {
       try {
-         URI uri = new URI("https", baseUrl, "/" + path, queryString, null);
+         URI uri = new URI(protocol, baseUrl, "/" + path, queryString, null);
          return uri.toASCIIString();
       } catch (URISyntaxException var4) {
          var4.printStackTrace();

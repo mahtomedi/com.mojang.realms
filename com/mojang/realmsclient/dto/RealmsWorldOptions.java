@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import com.mojang.realmsclient.util.JsonUtils;
 import net.minecraft.realms.RealmsScreen;
 
-public class RealmsOptions {
+public class RealmsWorldOptions {
    public Boolean pvp;
    public Boolean spawnAnimals;
    public Boolean spawnMonsters;
@@ -31,7 +31,7 @@ public class RealmsOptions {
    private static long templateIdDefault = -1L;
    private static String templateImageDefault = null;
 
-   public RealmsOptions(
+   public RealmsWorldOptions(
       Boolean pvp,
       Boolean spawnAnimals,
       Boolean spawnMonsters,
@@ -55,8 +55,8 @@ public class RealmsOptions {
       this.slotName = slotName;
    }
 
-   public static RealmsOptions getDefaults() {
-      return new RealmsOptions(
+   public static RealmsWorldOptions getDefaults() {
+      return new RealmsWorldOptions(
          pvpDefault,
          spawnAnimalsDefault,
          spawnMonstersDefault,
@@ -70,8 +70,8 @@ public class RealmsOptions {
       );
    }
 
-   public static RealmsOptions getEmptyDefaults() {
-      RealmsOptions options = new RealmsOptions(
+   public static RealmsWorldOptions getEmptyDefaults() {
+      RealmsWorldOptions options = new RealmsWorldOptions(
          pvpDefault,
          spawnAnimalsDefault,
          spawnMonstersDefault,
@@ -91,8 +91,8 @@ public class RealmsOptions {
       this.empty = empty;
    }
 
-   public static RealmsOptions parse(JsonObject jsonObject) {
-      RealmsOptions newOptions = new RealmsOptions(
+   public static RealmsWorldOptions parse(JsonObject jsonObject) {
+      RealmsWorldOptions newOptions = new RealmsWorldOptions(
          JsonUtils.getBooleanOr("pvp", jsonObject, pvpDefault),
          JsonUtils.getBooleanOr("spawnAnimals", jsonObject, spawnAnimalsDefault),
          JsonUtils.getBooleanOr("spawnMonsters", jsonObject, spawnMonstersDefault),
@@ -168,8 +168,8 @@ public class RealmsOptions {
       return jsonObject.toString();
    }
 
-   public RealmsOptions clone() {
-      return new RealmsOptions(
+   public RealmsWorldOptions clone() {
+      return new RealmsWorldOptions(
          this.pvp,
          this.spawnAnimals,
          this.spawnMonsters,

@@ -1,10 +1,27 @@
 package com.mojang.realmsclient.util;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import java.net.URI;
+import java.util.concurrent.TimeUnit;
+import net.minecraft.realms.Realms;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class RealmsUtil {
+   public static LoadingCache<String, String> nameCache = CacheBuilder.newBuilder()
+      .expireAfterWrite(60L, TimeUnit.MINUTES)
+      .build(new CacheLoader<String, String>() {
+         public String load(String uuid) throws Exception {
+            String name = Realms.uuidToName(uuid);
+            if (name == null) {
+               throw new Exception("Couldn't get username");
+            } else {
+               return name;
+            }
+         }
+      });
    private static final Logger LOGGER = LogManager.getLogger();
    private static final int MINUTES = 60;
    private static final int HOURS = 3600;

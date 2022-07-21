@@ -4,8 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
-import com.mojang.realmsclient.exception.RealmsServiceException;
-import java.io.IOException;
+import com.mojang.realmsclient.dto.RealmsServerPlayerLists;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 import net.minecraft.realms.Realms;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.opengl.Display;
 
 public class RealmsDataFetcher {
    private static final Logger LOGGER = LogManager.getLogger();
@@ -26,21 +24,25 @@ public class RealmsDataFetcher {
    private static final int SERVER_UPDATE_INTERVAL = 60;
    private static final int PENDING_INVITES_INTERVAL = 10;
    private static final int TRIAL_UPDATE_INTERVAL = 60;
+   private static final int LIVE_STATS_INTERVAL = 10;
    private volatile boolean stopped = true;
    private RealmsDataFetcher.ServerListUpdateTask serverListUpdateTask = new RealmsDataFetcher.ServerListUpdateTask();
    private RealmsDataFetcher.PendingInviteUpdateTask pendingInviteUpdateTask = new RealmsDataFetcher.PendingInviteUpdateTask();
    private RealmsDataFetcher.TrialAvailabilityTask trialAvailabilityTask = new RealmsDataFetcher.TrialAvailabilityTask();
+   private RealmsDataFetcher.LiveStatsTask liveStatsTask = new RealmsDataFetcher.LiveStatsTask();
    private Set<RealmsServer> removedServers = Sets.newHashSet();
    private List<RealmsServer> servers = Lists.newArrayList();
+   private RealmsServerPlayerLists livestats;
    private int pendingInvitesCount;
    private boolean trialAvailable = false;
    private ScheduledFuture<?> serverListScheduledFuture;
    private ScheduledFuture<?> pendingInviteScheduledFuture;
    private ScheduledFuture<?> trialAvailableScheduledFuture;
-   private Map<String, Boolean> fetchStatus = new ConcurrentHashMap(RealmsDataFetcher.Task.values().length);
+   private ScheduledFuture<?> liveStatsScheduledFuture;
+   private Map<RealmsDataFetcher.Task, Boolean> fetchStatus = new ConcurrentHashMap(RealmsDataFetcher.Task.values().length);
 
-   public RealmsDataFetcher() {
-      this.scheduleTasks();
+   public boolean isStopped() {
+      return this.stopped;
    }
 
    public synchronized void init() {
@@ -52,13 +54,38 @@ public class RealmsDataFetcher {
 
    }
 
-   public synchronized boolean isFetchedSinceLastTry(RealmsDataFetcher.Task task) {
-      Boolean result = (Boolean)this.fetchStatus.get(task.toString());
+   public synchronized void initWithSpecificTaskList(List<RealmsDataFetcher.Task> tasks) {
+      if (this.stopped) {
+         this.stopped = false;
+         this.cancelTasks();
+
+         for(RealmsDataFetcher.Task task : tasks) {
+            this.fetchStatus.put(task, false);
+            switch(task) {
+               case SERVER_LIST:
+                  this.serverListScheduledFuture = this.scheduler.scheduleAtFixedRate(this.serverListUpdateTask, 0L, 60L, TimeUnit.SECONDS);
+                  break;
+               case PENDING_INVITE:
+                  this.pendingInviteScheduledFuture = this.scheduler.scheduleAtFixedRate(this.pendingInviteUpdateTask, 0L, 10L, TimeUnit.SECONDS);
+                  break;
+               case TRIAL_AVAILABLE:
+                  this.trialAvailableScheduledFuture = this.scheduler.scheduleAtFixedRate(this.trialAvailabilityTask, 0L, 60L, TimeUnit.SECONDS);
+                  break;
+               case LIVE_STATS:
+                  this.liveStatsScheduledFuture = this.scheduler.scheduleAtFixedRate(this.liveStatsTask, 0L, 10L, TimeUnit.SECONDS);
+            }
+         }
+      }
+
+   }
+
+   public boolean isFetchedSinceLastTry(RealmsDataFetcher.Task task) {
+      Boolean result = (Boolean)this.fetchStatus.get(task);
       return result == null ? false : result;
    }
 
-   public synchronized void markClean() {
-      for(String task : this.fetchStatus.keySet()) {
+   public void markClean() {
+      for(RealmsDataFetcher.Task task : this.fetchStatus.keySet()) {
          this.fetchStatus.put(task, false);
       }
 
@@ -73,12 +100,16 @@ public class RealmsDataFetcher {
       return Lists.newArrayList(this.servers);
    }
 
-   public int getPendingInvitesCount() {
+   public synchronized int getPendingInvitesCount() {
       return this.pendingInvitesCount;
    }
 
-   public boolean isTrialAvailable() {
+   public synchronized boolean isTrialAvailable() {
       return this.trialAvailable;
+   }
+
+   public synchronized RealmsServerPlayerLists getLivestats() {
+      return this.livestats;
    }
 
    public synchronized void stop() {
@@ -88,21 +119,34 @@ public class RealmsDataFetcher {
 
    private void scheduleTasks() {
       for(RealmsDataFetcher.Task task : RealmsDataFetcher.Task.values()) {
-         this.fetchStatus.put(task.toString(), false);
+         this.fetchStatus.put(task, false);
       }
 
       this.serverListScheduledFuture = this.scheduler.scheduleAtFixedRate(this.serverListUpdateTask, 0L, 60L, TimeUnit.SECONDS);
       this.pendingInviteScheduledFuture = this.scheduler.scheduleAtFixedRate(this.pendingInviteUpdateTask, 0L, 10L, TimeUnit.SECONDS);
       this.trialAvailableScheduledFuture = this.scheduler.scheduleAtFixedRate(this.trialAvailabilityTask, 0L, 60L, TimeUnit.SECONDS);
+      this.liveStatsScheduledFuture = this.scheduler.scheduleAtFixedRate(this.liveStatsTask, 0L, 10L, TimeUnit.SECONDS);
    }
 
    private void cancelTasks() {
       try {
-         this.serverListScheduledFuture.cancel(false);
-         this.pendingInviteScheduledFuture.cancel(false);
-         this.trialAvailableScheduledFuture.cancel(false);
+         if (this.serverListScheduledFuture != null) {
+            this.serverListScheduledFuture.cancel(false);
+         }
+
+         if (this.pendingInviteScheduledFuture != null) {
+            this.pendingInviteScheduledFuture.cancel(false);
+         }
+
+         if (this.trialAvailableScheduledFuture != null) {
+            this.trialAvailableScheduledFuture.cancel(false);
+         }
+
+         if (this.liveStatsScheduledFuture != null) {
+            this.liveStatsScheduledFuture.cancel(false);
+         }
       } catch (Exception var2) {
-         LOGGER.error("Failed to cancel Realms tasks");
+         LOGGER.error("Failed to cancel Realms tasks", var2);
       }
 
    }
@@ -123,10 +167,6 @@ public class RealmsDataFetcher {
       this.servers = newServers;
    }
 
-   private synchronized void setTrialAvailabile(boolean trialAvailabile) {
-      this.trialAvailable = trialAvailabile;
-   }
-
    public synchronized void removeItem(RealmsServer server) {
       this.servers.remove(server);
       this.removedServers.add(server);
@@ -137,7 +177,32 @@ public class RealmsDataFetcher {
    }
 
    private boolean isActive() {
-      return !this.stopped && Display.isActive();
+      return !this.stopped;
+   }
+
+   private class LiveStatsTask implements Runnable {
+      private LiveStatsTask() {
+      }
+
+      public void run() {
+         if (RealmsDataFetcher.this.isActive()) {
+            this.getLiveStats();
+         }
+
+      }
+
+      private void getLiveStats() {
+         try {
+            RealmsClient client = RealmsClient.createRealmsClient();
+            if (client != null) {
+               RealmsDataFetcher.this.livestats = client.getLiveStats();
+               RealmsDataFetcher.this.fetchStatus.put(RealmsDataFetcher.Task.LIVE_STATS, true);
+            }
+         } catch (Exception var2) {
+            RealmsDataFetcher.LOGGER.error("Couldn't get live stats", var2);
+         }
+
+      }
    }
 
    private class PendingInviteUpdateTask implements Runnable {
@@ -156,9 +221,9 @@ public class RealmsDataFetcher {
             RealmsClient client = RealmsClient.createRealmsClient();
             if (client != null) {
                RealmsDataFetcher.this.pendingInvitesCount = client.pendingInvitesCount();
-               RealmsDataFetcher.this.fetchStatus.put(RealmsDataFetcher.Task.PENDING_INVITE.toString(), true);
+               RealmsDataFetcher.this.fetchStatus.put(RealmsDataFetcher.Task.PENDING_INVITE, true);
             }
-         } catch (RealmsServiceException var2) {
+         } catch (Exception var2) {
             RealmsDataFetcher.LOGGER.error("Couldn't get pending invite count", var2);
          }
 
@@ -184,15 +249,14 @@ public class RealmsDataFetcher {
                if (servers != null) {
                   RealmsDataFetcher.this.sort(servers);
                   RealmsDataFetcher.this.setServers(servers);
-                  RealmsDataFetcher.this.fetchStatus.put(RealmsDataFetcher.Task.SERVER_LIST.toString(), true);
+                  RealmsDataFetcher.this.fetchStatus.put(RealmsDataFetcher.Task.SERVER_LIST, true);
                } else {
                   RealmsDataFetcher.LOGGER.warn("Realms server list was null or empty");
                }
             }
-         } catch (RealmsServiceException var3) {
+         } catch (Exception var3) {
+            RealmsDataFetcher.this.fetchStatus.put(RealmsDataFetcher.Task.SERVER_LIST, true);
             RealmsDataFetcher.LOGGER.error("Couldn't get server list", var3);
-         } catch (IOException var4) {
-            RealmsDataFetcher.LOGGER.error("Couldn't parse response from server getting list");
          }
 
       }
@@ -201,7 +265,8 @@ public class RealmsDataFetcher {
    public static enum Task {
       SERVER_LIST,
       PENDING_INVITE,
-      TRIAL_AVAILABLE;
+      TRIAL_AVAILABLE,
+      LIVE_STATS;
    }
 
    private class TrialAvailabilityTask implements Runnable {
@@ -220,12 +285,10 @@ public class RealmsDataFetcher {
             RealmsClient client = RealmsClient.createRealmsClient();
             if (client != null) {
                RealmsDataFetcher.this.trialAvailable = client.trialAvailable();
-               RealmsDataFetcher.this.fetchStatus.put(RealmsDataFetcher.Task.TRIAL_AVAILABLE.toString(), true);
+               RealmsDataFetcher.this.fetchStatus.put(RealmsDataFetcher.Task.TRIAL_AVAILABLE, true);
             }
-         } catch (RealmsServiceException var2) {
+         } catch (Exception var2) {
             RealmsDataFetcher.LOGGER.error("Couldn't get trial availability", var2);
-         } catch (IOException var3) {
-            RealmsDataFetcher.LOGGER.error("Couldn't parse response from checking trial availability");
          }
 
       }

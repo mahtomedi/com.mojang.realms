@@ -14,11 +14,18 @@ mco.buy.realms.title=Buy a Realm
 mco.buy.realms.buy=I want one!
 
 mco.selectServer.play=Play
-mco.selectServer.configure=Configure
+mco.selectServer.configure=Configure Realm
 mco.selectServer.leave=Leave Realm
 mco.selectServer.create=Create Realm
-mco.selectServer.buy=Buy Realm
-mco.selectServer.whatisrealms=What is Realms?
+
+mco.selectServer.info=What is Realms?
+mco.selectServer.buy=Buy a Realm!
+mco.selectServer.trial=Get a trial!
+mco.selectServer.close=Close
+mco.selectServer.expiredTrial=Your trial has ended
+mco.selectServer.expiredList=Your Realm has expired
+mco.selectServer.expiredSubscribe=Subscribe
+mco.selectServer.expiredRenew=Renew
 
 mco.selectServer.expired=Expired Realm
 mco.selectServer.open=Open Realm
@@ -35,12 +42,14 @@ mco.selectServer.expires.days=Expires in %s days
 mco.selectServer.expires.day=Expires in a day
 mco.selectServer.expires.soon=Expires soon
 
+mco.selectServer.popup=Realms is a safe, simple way to enjoy an online Minecraft world with up to ten friends at a time.   It supports loads of minigames and plenty of custom worlds! Only the owner of the Realm needs to pay.
+
 mco.configure.world.settings.title=Settings
 
 mco.configure.world.title=Configure Realm:
 mco.configure.worlds.title=Worlds
-mco.configure.world.name=Name
-mco.configure.world.description=Description
+mco.configure.world.name=Realm Name
+mco.configure.world.description=Realm Description
 mco.configure.world.location=Location
 mco.configure.world.invited=Invited
 mco.configure.world.buttons.edit=Settings
@@ -80,7 +89,8 @@ mco.configure.current.minigame=Current
 mco.configure.world.subscription.title=Subscription Info
 mco.configure.world.subscription.timeleft=Time Left
 mco.configure.world.subscription.recurring.daysleft=Renewed automatically in
-mco.configure.world.subscription.less_than_a_day=less than a day
+mco.configure.world.subscription.less_than_a_day=Less than a day
+mco.configure.world.subscription.expired=Expired
 mco.configure.world.subscription.start=Start Date
 mco.configure.world.subscription.extend=Extend Subscription
 mco.configure.world.subscription.extendHere=Extend subscription here:
@@ -185,11 +195,13 @@ mco.connect.failed=Failed to connect to the realm
 mco.create.world=Create
 mco.create.world.reset.title=Creating world...
 
+mco.trial.title=Create a Realm
+
 mco.client.outdated.title=Client Outdated!
-mco.client.outdated.msg=Your client is outdated and not compatible with Realms, please consider updating it
+mco.client.outdated.msg=Your client is outdated and not compatible with Realms.\nPlease update to the most recent version of Minecraft.
 
 mco.client.incompatible.title=Client Incompatible!
-mco.client.incompatible.msg=Your client is not compatible with Realms!
+mco.client.incompatible.msg=Your client is not compatible with Realms.\nPlease use the most recent version of Minecraft.\nRealms is not compatible with snapshot versions.
 
 mco.backup.button.restore=Restore
 mco.backup.generate.world=Generate world
@@ -231,7 +243,7 @@ mco.upload.button.name=Upload
 mco.upload.verifying=Verifying your world
 mco.upload.preparing=Preparing your world data
 mco.upload.close.failure=Could not close your realm, please try again later
-mco.upload.size.failure=Selected world '%s' is too big!
+mco.upload.size.failure='%s' is too big!\nIt is %s. The maximum allowed size is %s.
 mco.upload.uploading=Uploading '%s'
 mco.upload.done=Upload done
 mco.upload.failed=Upload failed! (%s)
@@ -250,4 +262,4 @@ mco.errorMessage.6005=World is in admin lock state
 mco.errorMessage.connectionFailure=An error occurred, please try again later.
 
 mco.trial.unavailable=Sorry, trials are unavailable at this time!
-mco.trial.message=Interested in trying Realms? \n Get a free two week trial by clicking here!
+mco.trial.message=Want to get your own Realm? \n Click here for more info!

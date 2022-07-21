@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.TimeUnit;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
@@ -22,13 +23,15 @@ import org.apache.logging.log4j.Logger;
 public class FileUpload {
    private static final Logger LOGGER = LogManager.getLogger();
    private static final String UPLOAD_PATH = "/upload";
-   private static final String PORT = "8080";
    private volatile boolean cancelled = false;
    private volatile boolean finished = false;
    private HttpPost request;
    private int statusCode = -1;
    private String errorMessage;
-   private RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(120000).setConnectTimeout(120000).build();
+   private RequestConfig requestConfig = RequestConfig.custom()
+      .setSocketTimeout((int)TimeUnit.MINUTES.toMillis(10L))
+      .setConnectTimeout((int)TimeUnit.SECONDS.toMillis(15L))
+      .build();
    private Thread currentThread;
 
    public void upload(
@@ -44,7 +47,9 @@ public class FileUpload {
       if (this.currentThread == null) {
          this.currentThread = new Thread() {
             public void run() {
-               FileUpload.this.request = new HttpPost("http://" + uploadInfo.getUploadEndpoint() + ":" + "8080" + "/upload" + "/" + worldId + "/" + slotId);
+               FileUpload.this.request = new HttpPost(
+                  "http://" + uploadInfo.getUploadEndpoint() + ":" + uploadInfo.getPort() + "/upload" + "/" + worldId + "/" + slotId
+               );
                CloseableHttpClient client = null;
 
                try {
@@ -81,16 +86,20 @@ public class FileUpload {
                   }
 
                   FileUpload.this.statusCode = statusCode;
-                  String json = EntityUtils.toString(response.getEntity(), "UTF-8");
-                  if (json != null) {
-                     try {
-                        JsonParser parser = new JsonParser();
-                        FileUpload.this.errorMessage = parser.parse(json).getAsJsonObject().get("errorMsg").getAsString();
-                     } catch (Exception var17) {
+                  if (response.getEntity() != null) {
+                     String json = EntityUtils.toString(response.getEntity(), "UTF-8");
+                     if (json != null) {
+                        try {
+                           JsonParser parser = new JsonParser();
+                           FileUpload.this.errorMessage = parser.parse(json).getAsJsonObject().get("errorMsg").getAsString();
+                        } catch (Exception var17) {
+                        }
                      }
                   }
                } catch (Exception var18) {
-                  FileUpload.LOGGER.error("Caught exception while uploading: " + var18.getMessage());
+                  if (!FileUpload.this.cancelled) {
+                     FileUpload.LOGGER.error("Caught exception while uploading: ", var18);
+                  }
                } finally {
                   FileUpload.this.request.releaseConnection();
                   FileUpload.this.finished = true;

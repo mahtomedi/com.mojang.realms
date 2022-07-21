@@ -122,7 +122,7 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTempla
          case NONE:
             break;
          case GENERATE:
-            Realms.setScreen(new RealmsResetNormalWorldScreen(this));
+            Realms.setScreen(new RealmsResetNormalWorldScreen(this, this.title));
             break;
          case UPLOAD:
             Realms.setScreen(new RealmsSelectFileToUploadScreen(this.serverData.id, this.slot != -1 ? this.slot : this.serverData.activeSlot, this));

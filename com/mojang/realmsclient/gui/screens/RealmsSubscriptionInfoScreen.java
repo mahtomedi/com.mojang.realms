@@ -163,8 +163,8 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
    }
 
    private String daysLeftPresentation(int daysLeft) {
-      if (daysLeft == -1) {
-         return "Expired";
+      if (daysLeft == -1 && this.serverData.expired) {
+         return getLocalizedString("mco.configure.world.subscription.expired");
       } else if (daysLeft <= 1) {
          return getLocalizedString("mco.configure.world.subscription.less_than_a_day");
       } else {

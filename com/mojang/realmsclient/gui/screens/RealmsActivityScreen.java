@@ -1,14 +1,12 @@
 package com.mojang.realmsclient.gui.screens;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.ServerActivity;
 import com.mojang.realmsclient.dto.ServerActivityList;
 import com.mojang.realmsclient.exception.RealmsServiceException;
+import com.mojang.realmsclient.util.RealmsUtil;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,16 +54,6 @@ public class RealmsActivityScreen extends RealmsScreen {
    private double hourWidth = 0.0;
    private double minuteWidth = 0.0;
    private int BUTTON_BACK_ID = 0;
-   private static LoadingCache<String, String> activitiesNameCache = CacheBuilder.newBuilder().build(new CacheLoader<String, String>() {
-      public String load(String uuid) throws Exception {
-         String name = Realms.uuidToName(uuid);
-         if (name == null) {
-            throw new Exception("Couldn't get username");
-         } else {
-            return name;
-         }
-      }
-   });
 
    public RealmsActivityScreen(RealmsScreen lastScreen, RealmsServer serverData) {
       this.lastScreen = lastScreen;
@@ -149,7 +137,7 @@ public class RealmsActivityScreen extends RealmsScreen {
             String name = "";
 
             try {
-               name = (String)activitiesNameCache.get(sa.profileUuid);
+               name = (String)RealmsUtil.nameCache.get(sa.profileUuid);
             } catch (Exception var13) {
                LOGGER.error("Could not get name for " + sa.profileUuid, var13);
                continue;

@@ -13,7 +13,6 @@ import com.mojang.realmsclient.util.RealmsTextureManager;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicReference;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsMth;
@@ -32,7 +31,6 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
    private static final String EMPTY_FRAME_LOCATION = "realms:textures/gui/realms/empty_frame.png";
    private String toolTip;
    private final RealmsMainScreen lastScreen;
-   private AtomicReference<RealmsScreen> errorScreenToShow = new AtomicReference();
    private RealmsServer serverData;
    private final long serverId;
    private int left_x;
@@ -299,28 +297,26 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
 
    private void fetchServerData(final long worldId) {
       (new Thread() {
-            public void run() {
-               RealmsClient client = RealmsClient.createRealmsClient();
-   
-               try {
-                  RealmsConfigureWorldScreen.this.serverData = client.getOwnWorld(worldId);
-                  RealmsConfigureWorldScreen.this.disableButtons();
-                  if (RealmsConfigureWorldScreen.this.isMinigame()) {
-                     RealmsConfigureWorldScreen.this.showMinigameButtons();
-                  } else {
-                     RealmsConfigureWorldScreen.this.showRegularButtons();
-                  }
-               } catch (RealmsServiceException var3) {
-                  RealmsConfigureWorldScreen.LOGGER.error("Couldn't get own world");
-                  RealmsConfigureWorldScreen.this.errorScreenToShow
-                     .set(new RealmsGenericErrorScreen(var3.getMessage(), RealmsConfigureWorldScreen.this.lastScreen));
-               } catch (IOException var4) {
-                  RealmsConfigureWorldScreen.LOGGER.error("Couldn't parse response getting own world");
+         public void run() {
+            RealmsClient client = RealmsClient.createRealmsClient();
+
+            try {
+               RealmsConfigureWorldScreen.this.serverData = client.getOwnWorld(worldId);
+               RealmsConfigureWorldScreen.this.disableButtons();
+               if (RealmsConfigureWorldScreen.this.isMinigame()) {
+                  RealmsConfigureWorldScreen.this.showMinigameButtons();
+               } else {
+                  RealmsConfigureWorldScreen.this.showRegularButtons();
                }
-   
+            } catch (RealmsServiceException var3) {
+               RealmsConfigureWorldScreen.LOGGER.error("Couldn't get own world");
+               Realms.setScreen(new RealmsGenericErrorScreen(var3.getMessage(), RealmsConfigureWorldScreen.this.lastScreen));
+            } catch (IOException var4) {
+               RealmsConfigureWorldScreen.LOGGER.error("Couldn't parse response getting own world");
             }
-         })
-         .start();
+
+         }
+      }).start();
    }
 
    private void disableButtons() {
@@ -404,11 +400,6 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
    }
 
    protected void renderMousehoverTooltip(String msg, int x, int y) {
-      RealmsScreen errScr = (RealmsScreen)this.errorScreenToShow.getAndSet(null);
-      if (errScr != null) {
-         Realms.setScreen(errScr);
-      }
-
       if (msg != null) {
          int rx = x + 12;
          int ry = y - 12;

@@ -313,7 +313,7 @@ public class RealmsUploadScreen extends RealmsScreen {
                            uploadInfo,
                            Realms.getSessionId(),
                            Realms.getName(),
-                           "1.13",
+                           "1.13.1",
                            RealmsUploadScreen.this.uploadStatus
                         );
                         fileUpload.upload(
@@ -429,6 +429,7 @@ public class RealmsUploadScreen extends RealmsScreen {
       try {
          File file = File.createTempFile("realms-upload-file", ".tar.gz");
          tar = new TarArchiveOutputStream(new GZIPOutputStream(new FileOutputStream(file)));
+         tar.setLongFileMode(3);
          this.addFileToTarGz(tar, pathToDirectoryFile.getAbsolutePath(), "world", true);
          tar.finish();
          var4 = file;

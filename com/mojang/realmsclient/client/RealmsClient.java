@@ -227,7 +227,7 @@ public class RealmsClient {
 
    public void restoreWorld(long worldId, String backupId) throws RealmsServiceException {
       String asciiUrl = this.url("worlds" + "/$WORLD_ID/backups".replace("$WORLD_ID", String.valueOf(worldId)), "backupId=" + backupId);
-      this.execute(Request.put(asciiUrl, "", 40000, 40000));
+      this.execute(Request.put(asciiUrl, "", 40000, 600000));
    }
 
    public WorldTemplatePaginatedList fetchWorldTemplates(int page, int pageSize, RealmsServer.WorldType type) throws RealmsServiceException {
@@ -384,7 +384,7 @@ public class RealmsClient {
    private String execute(Request<?> r) throws RealmsServiceException {
       r.cookie("sid", this.sessionId);
       r.cookie("user", this.username);
-      r.cookie("version", "1.13");
+      r.cookie("version", "1.13.1");
       String realmsVersion = RealmsVersion.getVersion();
       if (realmsVersion != null) {
          r.cookie("realms_version", realmsVersion);

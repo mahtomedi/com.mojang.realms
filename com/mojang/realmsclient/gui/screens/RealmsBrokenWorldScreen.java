@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicReference;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsMth;
@@ -29,7 +28,6 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
    private static final String EMPTY_FRAME_LOCATION = "realms:textures/gui/realms/empty_frame.png";
    private final RealmsScreen lastScreen;
    private final RealmsMainScreen mainScreen;
-   private AtomicReference<RealmsScreen> errorScreenToShow = new AtomicReference();
    private RealmsServer serverData;
    private final long serverId;
    private String title = getLocalizedString("mco.brokenworld.title");
@@ -129,11 +127,6 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
    }
 
    public void render(int xm, int ym, float a) {
-      RealmsScreen errScr = (RealmsScreen)this.errorScreenToShow.getAndSet(null);
-      if (errScr != null) {
-         Realms.setScreen(errScr);
-      }
-
       this.renderBackground();
       super.render(xm, ym, a);
       this.drawCenteredString(this.title, this.width() / 2, 17, 16777215);
@@ -208,7 +201,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
                RealmsBrokenWorldScreen.this.addButtons();
             } catch (RealmsServiceException var3) {
                RealmsBrokenWorldScreen.LOGGER.error("Couldn't get own world");
-               RealmsBrokenWorldScreen.this.errorScreenToShow.set(new RealmsGenericErrorScreen(var3.getMessage(), RealmsBrokenWorldScreen.this.lastScreen));
+               Realms.setScreen(new RealmsGenericErrorScreen(var3.getMessage(), RealmsBrokenWorldScreen.this.lastScreen));
             } catch (IOException var4) {
                RealmsBrokenWorldScreen.LOGGER.error("Couldn't parse response getting own world");
             }
@@ -241,7 +234,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
                            RealmsBrokenWorldScreen.this, openServerTask
                         );
                         openWorldLongRunningTaskScreen.start();
-                        RealmsBrokenWorldScreen.this.errorScreenToShow.set(openWorldLongRunningTaskScreen);
+                        Realms.setScreen(openWorldLongRunningTaskScreen);
                      } else {
                         try {
                            RealmsBrokenWorldScreen.this.mainScreen
@@ -249,10 +242,10 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
                               .play(client.getOwnWorld(RealmsBrokenWorldScreen.this.serverId), RealmsBrokenWorldScreen.this);
                         } catch (RealmsServiceException var4) {
                            RealmsBrokenWorldScreen.LOGGER.error("Couldn't get own world");
-                           RealmsBrokenWorldScreen.this.errorScreenToShow.set(RealmsBrokenWorldScreen.this.lastScreen);
+                           Realms.setScreen(RealmsBrokenWorldScreen.this.lastScreen);
                         } catch (IOException var5) {
                            RealmsBrokenWorldScreen.LOGGER.error("Couldn't parse response getting own world");
-                           RealmsBrokenWorldScreen.this.errorScreenToShow.set(RealmsBrokenWorldScreen.this.lastScreen);
+                           Realms.setScreen(RealmsBrokenWorldScreen.this.lastScreen);
                         }
                      }
    

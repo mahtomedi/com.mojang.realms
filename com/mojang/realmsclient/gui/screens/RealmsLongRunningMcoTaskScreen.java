@@ -4,7 +4,6 @@ import com.mojang.realmsclient.exception.RealmsDefaultUncaughtExceptionHandler;
 import com.mojang.realmsclient.gui.ErrorCallback;
 import com.mojang.realmsclient.gui.LongRunningTask;
 import com.mojang.realmsclient.gui.RealmsConstants;
-import java.util.concurrent.atomic.AtomicReference;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsScreen;
@@ -17,7 +16,6 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements Erro
    private final int BUTTON_BACK_ID = 667;
    private final RealmsScreen lastScreen;
    private final LongRunningTask taskThread;
-   private AtomicReference<RealmsScreen> errorScreenToShow = new AtomicReference();
    private volatile String title = "";
    private volatile boolean error;
    private volatile String errorMessage;
@@ -47,10 +45,6 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements Erro
       "▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ _ _",
       "▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ _"
    };
-
-   public void setErrorScreen(RealmsScreen newScreen) {
-      this.errorScreenToShow.set(newScreen);
-   }
 
    public RealmsLongRunningMcoTaskScreen(RealmsScreen lastScreen, LongRunningTask task) {
       this.lastScreen = lastScreen;
@@ -96,11 +90,6 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements Erro
    }
 
    public void render(int xm, int ym, float a) {
-      RealmsScreen errScr = (RealmsScreen)this.errorScreenToShow.getAndSet(null);
-      if (errScr != null) {
-         Realms.setScreen(errScr);
-      }
-
       this.renderBackground();
       this.drawCenteredString(this.title, this.width() / 2, RealmsConstants.row(3), 16777215);
       if (!this.error) {

@@ -107,9 +107,9 @@ public class EditRealmsWorldScreen extends RealmsScreen implements RealmsConfirm
 
       try {
          String desc = this.descEdit.getValue() != null && !this.descEdit.getValue().trim().equals("") ? this.descEdit.getValue() : null;
-         client.update(this.serverData.id, this.nameEdit.getValue(), desc, this.serverData.difficulty, this.serverData.gameMode, this.serverData.options);
+         client.update(this.serverData.id, this.nameEdit.getValue(), desc, this.serverData.options);
          this.saveServerData();
-         Realms.setScreen(new ConfigureWorldScreen(this.onlineScreen, this.serverData.id));
+         Realms.setScreen(new RealmsConfigureWorldScreen(this.onlineScreen, this.serverData.id));
       } catch (RealmsServiceException var3) {
          LOGGER.error("Couldn't edit world");
          Realms.setScreen(new RealmsGenericErrorScreen(var3, this));
@@ -131,16 +131,25 @@ public class EditRealmsWorldScreen extends RealmsScreen implements RealmsConfirm
    }
 
    public void saveServerData(
-      int difficuly, int gameMode, boolean pvp, boolean spawnNPCs, boolean spawnAnimals, boolean spawnMonsters, int spawnProtection, boolean commandBlocks
+      int difficulty,
+      int gameMode,
+      boolean pvp,
+      boolean spawnNPCs,
+      boolean spawnAnimals,
+      boolean spawnMonsters,
+      int spawnProtection,
+      boolean commandBlocks,
+      boolean forceGameMode
    ) {
-      this.serverData.difficulty = difficuly;
-      this.serverData.gameMode = gameMode;
+      this.serverData.options.difficulty = difficulty;
+      this.serverData.options.gameMode = gameMode;
       this.serverData.options.pvp = pvp;
       this.serverData.options.spawnNPCs = spawnNPCs;
       this.serverData.options.spawnAnimals = spawnAnimals;
       this.serverData.options.spawnMonsters = spawnMonsters;
       this.serverData.options.spawnProtection = spawnProtection;
       this.serverData.options.commandBlocks = commandBlocks;
+      this.serverData.options.forceGameMode = forceGameMode;
    }
 
    public void render(int xm, int ym, float a) {

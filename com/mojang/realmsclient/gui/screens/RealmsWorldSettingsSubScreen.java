@@ -17,6 +17,7 @@ public class RealmsWorldSettingsSubScreen extends RealmsScreen {
    private static final int SPAWN_NPCS_BUTTON_ID = 7;
    private static final int SPAWN_PROTECTION_BUTTON_ID = 8;
    private static final int COMMANDBLOCKS_BUTTON_ID = 9;
+   private static final int FORCE_GAME_MODE_ID = 10;
    protected final EditRealmsWorldScreen parent;
    private int column1_x;
    private int column_width;
@@ -30,12 +31,14 @@ public class RealmsWorldSettingsSubScreen extends RealmsScreen {
    private Boolean spawnMonsters;
    private Integer spawnProtection;
    private Boolean commandBlocks;
+   private Boolean forceGameMode;
    private RealmsButton pvpButton;
    private RealmsButton spawnAnimalsButton;
    private RealmsButton spawnMonstersButton;
    private RealmsButton spawnNPCsButton;
    private RealmsSliderButton spawnProtectionButton;
    private RealmsButton commandBlocksButton;
+   private RealmsButton forceGameModeButton;
    String[] difficulties;
    String[] gameModes;
    String[][] gameModeHints;
@@ -61,7 +64,8 @@ public class RealmsWorldSettingsSubScreen extends RealmsScreen {
                   this.spawnAnimals,
                   this.spawnMonsters,
                   this.spawnProtection,
-                  this.commandBlocks
+                  this.commandBlocks,
+                  this.forceGameMode
                );
             this.parent.confirmResult(true, 0);
          } else if (button.id() == 1) {
@@ -89,6 +93,9 @@ public class RealmsWorldSettingsSubScreen extends RealmsScreen {
          } else if (button.id() == 9) {
             this.commandBlocks = !this.commandBlocks;
             button.msg(this.commandBlocksTitle());
+         } else if (button.id() == 10) {
+            this.forceGameMode = !this.forceGameMode;
+            button.msg(this.forceGameModeTitle());
          }
 
       }
@@ -106,26 +113,28 @@ public class RealmsWorldSettingsSubScreen extends RealmsScreen {
       this.column_width = 122;
       this.column2_x = this.width() / 2 + 10;
       this.createDifficultyAndGameMode();
-      this.difficultyIndex = this.serverData.difficulty;
-      this.gameModeIndex = this.serverData.gameMode;
+      this.difficultyIndex = this.serverData.options.difficulty;
+      this.gameModeIndex = this.serverData.options.gameMode;
       this.pvp = this.serverData.options.pvp;
       this.spawnAnimals = this.serverData.options.spawnAnimals;
       this.spawnMonsters = this.serverData.options.spawnMonsters;
       this.spawnNPCs = this.serverData.options.spawnNPCs;
       this.spawnProtection = this.serverData.options.spawnProtection;
       this.commandBlocks = this.serverData.options.commandBlocks;
-      this.buttonsAdd(this.pvpButton = newButton(4, this.column1_x, this.height() / 4 + 0, this.column_width, 20, this.pvpTitle()));
-      this.buttonsAdd(newButton(2, this.column1_x, this.height() / 4 + 24, this.column_width, 20, this.difficultyTitle()));
+      this.forceGameMode = this.serverData.options.forceGameMode;
+      this.buttonsAdd(this.pvpButton = newButton(4, this.column1_x, this.height() / 4 + 0 - 20, this.column_width, 20, this.pvpTitle()));
+      this.buttonsAdd(newButton(2, this.column1_x, this.height() / 4 + 24 - 20, this.column_width, 20, this.difficultyTitle()));
       this.buttonsAdd(
          this.spawnProtectionButton = new RealmsWorldSettingsSubScreen.SettingsSlider(
-            8, this.column1_x, this.height() / 4 + 48, this.column_width, 17, this.spawnProtection, 0.0F, 16.0F
+            8, this.column1_x, this.height() / 4 + 48 - 20, this.column_width, 17, this.spawnProtection, 0.0F, 16.0F
          )
       );
-      this.buttonsAdd(newButton(3, this.column1_x, this.height() / 4 + 72, this.column_width, 20, this.gameModeTitle()));
-      this.buttonsAdd(this.spawnAnimalsButton = newButton(5, this.column2_x, this.height() / 4 + 0, this.column_width, 20, this.spawnAnimalsTitle()));
-      this.buttonsAdd(this.spawnMonstersButton = newButton(6, this.column2_x, this.height() / 4 + 24, this.column_width, 20, this.spawnMonstersTitle()));
-      this.buttonsAdd(this.spawnNPCsButton = newButton(7, this.column2_x, this.height() / 4 + 48, this.column_width, 20, this.spawnNPCsTitle()));
-      this.buttonsAdd(this.commandBlocksButton = newButton(9, this.column2_x, this.height() / 4 + 72, this.column_width, 20, this.commandBlocksTitle()));
+      this.buttonsAdd(this.forceGameModeButton = newButton(10, this.column1_x, this.height() / 4 + 72 - 20, this.column_width, 20, this.forceGameModeTitle()));
+      this.buttonsAdd(newButton(3, this.column1_x, this.height() / 4 + 96 - 20, this.column_width, 20, this.gameModeTitle()));
+      this.buttonsAdd(this.spawnAnimalsButton = newButton(5, this.column2_x, this.height() / 4 + 0 - 20, this.column_width, 20, this.spawnAnimalsTitle()));
+      this.buttonsAdd(this.spawnMonstersButton = newButton(6, this.column2_x, this.height() / 4 + 24 - 20, this.column_width, 20, this.spawnMonstersTitle()));
+      this.buttonsAdd(this.spawnNPCsButton = newButton(7, this.column2_x, this.height() / 4 + 48 - 20, this.column_width, 20, this.spawnNPCsTitle()));
+      this.buttonsAdd(this.commandBlocksButton = newButton(9, this.column2_x, this.height() / 4 + 72 - 20, this.column_width, 20, this.commandBlocksTitle()));
       if (!this.serverData.worldType.equals(RealmsServer.WorldType.NORMAL)) {
          this.pvpButton.active(false);
          this.spawnAnimalsButton.active(false);
@@ -133,6 +142,7 @@ public class RealmsWorldSettingsSubScreen extends RealmsScreen {
          this.spawnMonstersButton.active(false);
          this.spawnProtectionButton.active(false);
          this.commandBlocksButton.active(false);
+         this.forceGameModeButton.active(false);
       }
 
       if (this.difficultyIndex == 0) {
@@ -204,6 +214,12 @@ public class RealmsWorldSettingsSubScreen extends RealmsScreen {
          + (this.commandBlocks ? getLocalizedString("mco.configure.world.on") : getLocalizedString("mco.configure.world.off"));
    }
 
+   private String forceGameModeTitle() {
+      return getLocalizedString("mco.configure.world.forceGameMode")
+         + ": "
+         + (this.forceGameMode ? getLocalizedString("mco.configure.world.on") : getLocalizedString("mco.configure.world.off"));
+   }
+
    public void render(int xm, int ym, float a) {
       this.renderBackground();
       this.drawCenteredString(getLocalizedString("mco.configure.world.edit.subscreen.title"), this.width() / 2, 17, 16777215);
@@ -212,8 +228,8 @@ public class RealmsWorldSettingsSubScreen extends RealmsScreen {
    }
 
    public void renderHints() {
-      this.drawString(this.gameModeHints[this.gameModeIndex][0], this.column1_x + 2, this.height() / 4 + 96 + 2, 10526880);
-      this.drawString(this.gameModeHints[this.gameModeIndex][1], this.column1_x + 2, this.height() / 4 + 96 + 2 + this.fontLineHeight(), 10526880);
+      this.drawString(this.gameModeHints[this.gameModeIndex][0], this.column1_x + 2, this.height() / 4 + 96 + 6, 10526880);
+      this.drawString(this.gameModeHints[this.gameModeIndex][1], this.column1_x + 2, this.height() / 4 + 96 + 6 + this.fontLineHeight(), 10526880);
    }
 
    public void mouseReleased(int x, int y, int buttonNum) {

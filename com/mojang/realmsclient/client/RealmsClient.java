@@ -70,12 +70,21 @@ public class RealmsClient {
    private static final String PATH_CLIENT_OUTDATED = "/client/outdated";
    private static final String PATH_TOS_AGREED = "/tos/agreed";
    private static final String PATH_MCO_BUY = "/buy";
+   private static final String PATH_STAGE_AVAILABLE = "/stageAvailable";
    private static Gson gson = new Gson();
 
    public static RealmsClient createRealmsClient() {
       String userName = Realms.userName();
       String sessionId = Realms.sessionId();
       return userName != null && sessionId != null ? new RealmsClient(sessionId, userName, Realms.getProxy()) : null;
+   }
+
+   public static void switchToStage() {
+      baseUrl = "mcoapi-stage.minecraft.net";
+   }
+
+   public static void switchToProd() {
+      baseUrl = "mcoapi.minecraft.net";
    }
 
    public RealmsClient(String sessionId, String username, Proxy proxy) {
@@ -120,6 +129,12 @@ public class RealmsClient {
       return Boolean.valueOf(json);
    }
 
+   public Boolean stageAvailable() throws RealmsServiceException, IOException {
+      String asciiUrl = this.url("mco/stageAvailable");
+      String json = this.execute(Request.get(asciiUrl));
+      return Boolean.valueOf(json);
+   }
+
    public Boolean clientOutdated() throws RealmsServiceException, IOException {
       String asciiUrl = this.url("mco/client/outdated");
       String json = this.execute(Request.get(asciiUrl));
@@ -148,13 +163,13 @@ public class RealmsClient {
       return BackupList.parse(json);
    }
 
-   public void update(long worldId, String name, String motd, int difficulty, int gameMode, RealmsOptions options) throws RealmsServiceException, UnsupportedEncodingException {
+   public void update(long worldId, String name, String motd, RealmsOptions options) throws RealmsServiceException, UnsupportedEncodingException {
       QueryBuilder qb = QueryBuilder.of("name", name);
       if (motd != null) {
          qb = qb.with("motd", motd);
       }
 
-      String queryString = qb.with("difficulty", difficulty).with("gameMode", gameMode).with("options", options.toJson()).toQueryString();
+      String queryString = qb.with("options", options.toJson()).toQueryString();
       String asciiUrl = this.url("worlds" + "/$WORLD_ID".replace("$WORLD_ID", String.valueOf(worldId)), queryString);
       this.execute(Request.put(asciiUrl, ""));
    }

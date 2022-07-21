@@ -10,12 +10,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 
-public class InviteScreen extends RealmsScreen {
+public class RealmsInviteScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
    private RealmsEditBox profileName;
    private RealmsServer serverData;
    private final RealmsScreen onlineScreen;
-   private final ConfigureWorldScreen configureScreen;
+   private final RealmsConfigureWorldScreen configureScreen;
    private final int BUTTON_INVITE = 0;
    private final int BUTTON_CANCEL = 1;
    private final int PROFILENAME_EDIT_BOX = 2;
@@ -24,7 +24,7 @@ public class InviteScreen extends RealmsScreen {
    private boolean showError;
    private RealmsButton inviteButton;
 
-   public InviteScreen(RealmsScreen onlineScreen, ConfigureWorldScreen configureScreen, RealmsServer serverData) {
+   public RealmsInviteScreen(RealmsScreen onlineScreen, RealmsConfigureWorldScreen configureScreen, RealmsServer serverData) {
       this.onlineScreen = onlineScreen;
       this.configureScreen = configureScreen;
       this.serverData = serverData;
@@ -63,7 +63,7 @@ public class InviteScreen extends RealmsScreen {
                RealmsServer realmsServer = client.invite(this.serverData.id, this.profileName.getValue());
                if (realmsServer != null) {
                   this.serverData.players = realmsServer.players;
-                  Realms.setScreen(new ConfigureWorldScreen(this.onlineScreen, this.serverData.id));
+                  Realms.setScreen(new RealmsConfigureWorldScreen(this.onlineScreen, this.serverData.id));
                } else {
                   this.showError(this.defaultErrorMsg);
                }

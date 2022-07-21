@@ -20,7 +20,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 
-public class SubscriptionScreen extends RealmsScreen {
+public class RealmsSubscriptionScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
    private final RealmsScreen lastScreen;
    private final RealmsServer serverData;
@@ -32,7 +32,7 @@ public class SubscriptionScreen extends RealmsScreen {
    private final String path = "/buy/realms";
    private boolean onLink;
 
-   public SubscriptionScreen(RealmsScreen lastScreen, RealmsServer serverData) {
+   public RealmsSubscriptionScreen(RealmsScreen lastScreen, RealmsServer serverData) {
       this.lastScreen = lastScreen;
       this.serverData = serverData;
    }

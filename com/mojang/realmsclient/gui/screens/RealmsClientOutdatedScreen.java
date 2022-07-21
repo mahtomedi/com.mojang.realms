@@ -4,11 +4,11 @@ import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsScreen;
 
-public class ClientOutdatedScreen extends RealmsScreen {
+public class RealmsClientOutdatedScreen extends RealmsScreen {
    private static final int BUTTON_BACK_ID = 0;
    private final RealmsScreen lastScreen;
 
-   public ClientOutdatedScreen(RealmsScreen lastScreen) {
+   public RealmsClientOutdatedScreen(RealmsScreen lastScreen) {
       this.lastScreen = lastScreen;
    }
 

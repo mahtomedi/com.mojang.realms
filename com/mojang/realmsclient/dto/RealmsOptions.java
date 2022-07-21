@@ -10,24 +10,53 @@ public class RealmsOptions {
    public Boolean spawnNPCs;
    public Integer spawnProtection;
    public Boolean commandBlocks;
+   public Boolean forceGameMode;
+   public Integer difficulty;
+   public Integer gameMode;
+   private static boolean forceGameModeDefault = false;
    private static boolean pvpDefault = true;
    private static boolean spawnAnimalsDefault = true;
    private static boolean spawnMonstersDefault = true;
    private static boolean spawnNPCsDefault = true;
    private static int spawnProtectionDefault = 0;
    private static boolean commandBlocksDefault = false;
+   private static int difficultyDefault = 1;
+   private static int gameModeDefault = 0;
 
-   public RealmsOptions(Boolean pvp, Boolean spawnAnimals, Boolean spawnMonsters, Boolean spawnNPCs, Integer spawnProtection, Boolean commandBlocks) {
+   public RealmsOptions(
+      Boolean pvp,
+      Boolean spawnAnimals,
+      Boolean spawnMonsters,
+      Boolean spawnNPCs,
+      Integer spawnProtection,
+      Boolean commandBlocks,
+      Integer difficulty,
+      Integer gameMode,
+      Boolean forceGameMode
+   ) {
       this.pvp = pvp;
       this.spawnAnimals = spawnAnimals;
       this.spawnMonsters = spawnMonsters;
       this.spawnNPCs = spawnNPCs;
       this.spawnProtection = spawnProtection;
       this.commandBlocks = commandBlocks;
+      this.difficulty = difficulty;
+      this.gameMode = gameMode;
+      this.forceGameMode = forceGameMode;
    }
 
    public static RealmsOptions getDefaults() {
-      return new RealmsOptions(pvpDefault, spawnAnimalsDefault, spawnMonstersDefault, spawnNPCsDefault, spawnProtectionDefault, commandBlocksDefault);
+      return new RealmsOptions(
+         pvpDefault,
+         spawnAnimalsDefault,
+         spawnMonstersDefault,
+         spawnNPCsDefault,
+         spawnProtectionDefault,
+         commandBlocksDefault,
+         difficultyDefault,
+         gameModeDefault,
+         forceGameModeDefault
+      );
    }
 
    public static RealmsOptions parse(JsonObject jsonObject) {
@@ -37,7 +66,10 @@ public class RealmsOptions {
          JsonUtils.getBooleanOr("spawnMonsters", jsonObject, spawnMonstersDefault),
          JsonUtils.getBooleanOr("spawnNPCs", jsonObject, spawnNPCsDefault),
          JsonUtils.getIntOr("spawnProtection", jsonObject, spawnProtectionDefault),
-         JsonUtils.getBooleanOr("commandBlocks", jsonObject, commandBlocksDefault)
+         JsonUtils.getBooleanOr("commandBlocks", jsonObject, commandBlocksDefault),
+         JsonUtils.getIntOr("difficulty", jsonObject, difficultyDefault),
+         JsonUtils.getIntOr("gameMode", jsonObject, gameModeDefault),
+         JsonUtils.getBooleanOr("forceGameMode", jsonObject, forceGameModeDefault)
       );
    }
 
@@ -65,6 +97,18 @@ public class RealmsOptions {
 
       if (this.commandBlocks != commandBlocksDefault) {
          jsonObject.addProperty("commandBlocks", this.commandBlocks);
+      }
+
+      if (this.difficulty != difficultyDefault) {
+         jsonObject.addProperty("difficulty", this.difficulty);
+      }
+
+      if (this.gameMode != gameModeDefault) {
+         jsonObject.addProperty("gameMode", this.gameMode);
+      }
+
+      if (this.forceGameMode != forceGameModeDefault) {
+         jsonObject.addProperty("forceGameMode", this.forceGameMode);
       }
 
       return jsonObject.toString();

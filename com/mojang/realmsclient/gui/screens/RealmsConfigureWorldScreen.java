@@ -19,7 +19,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
-public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmResultListener {
+public class RealmsConfigureWorldScreen extends RealmsScreen implements RealmsConfirmResultListener {
    private static final Logger LOGGER = LogManager.getLogger();
    private static final String TOGGLE_ON_ICON_LOCATION = "realms:textures/gui/realms/toggle_on_icon.png";
    private static final String TOGGLE_OFF_ICON_LOCATION = "realms:textures/gui/realms/toggle_off_icon.png";
@@ -32,14 +32,14 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
    private final RealmsScreen lastScreen;
    private RealmsServer serverData;
    private volatile long serverId;
-   private ConfigureWorldScreen.InvitedSelectionList invitedSelectionList;
+   private RealmsConfigureWorldScreen.InvitedSelectionList invitedSelectionList;
    private int column1_x;
    private int column_width;
    private int column2_x;
    private static final int BUTTON_OPEN_ID = 0;
    private static final int BUTTON_CLOSE_ID = 1;
    private static final int BUTTON_UNINVITE_ID = 3;
-   private static final int BUTTON_EDIT_ID = 5;
+   private static final int BUTTON_SETTING_ID = 5;
    private static final int BUTTON_SUBSCRIPTION_ID = 7;
    private static final int BUTTON_MINIGAME_ID = 8;
    private static final int BUTTON_BACK_ID = 10;
@@ -48,7 +48,7 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
    private static final int BUTTON_INVITE_ID = 13;
    private int selectedInvitedIndex = -1;
    private String selectedInvited;
-   private RealmsButton editButton;
+   private RealmsButton settingsButton;
    private RealmsButton minigameButton;
    private RealmsButton subscriptionButton;
    private RealmsButton editWorldButton;
@@ -59,7 +59,7 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
    private boolean closeButtonHovered = false;
    private volatile Set<String> ops;
 
-   public ConfigureWorldScreen(RealmsScreen lastScreen, long serverId) {
+   public RealmsConfigureWorldScreen(RealmsScreen lastScreen, long serverId) {
       this.lastScreen = lastScreen;
       this.serverId = serverId;
    }
@@ -84,7 +84,7 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
       Keyboard.enableRepeatEvents(true);
       this.buttonsClear();
       this.buttonsAdd(
-         this.editButton = newButton(5, this.column2_x, this.row(6), this.column_width, 20, getLocalizedString("mco.configure.world.buttons.edit"))
+         this.settingsButton = newButton(5, this.column2_x, this.row(6), this.column_width, 20, getLocalizedString("mco.configure.world.buttons.edit"))
       );
       this.buttonsAdd(
          this.editWorldButton = newButton(12, this.column2_x, this.row(4), this.column_width, 20, getLocalizedString("mco.configure.world.buttons.editworld"))
@@ -104,9 +104,9 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
       );
       this.buttonsAdd(this.inviteButton = newButton(13, this.column1_x, this.row(10), this.column_width + 10, 20, "+"));
       this.buttonsAdd(newButton(10, this.column2_x + this.column_width / 2 + 2, this.row(12), this.column_width / 2 - 2, 20, getLocalizedString("gui.back")));
-      this.invitedSelectionList = new ConfigureWorldScreen.InvitedSelectionList();
+      this.invitedSelectionList = new RealmsConfigureWorldScreen.InvitedSelectionList();
       this.invitedSelectionList.setLeftPos(this.column1_x);
-      this.editButton.active(false);
+      this.settingsButton.active(false);
       this.editWorldButton.active(false);
       this.minigameButton.active(false);
       this.subscriptionButton.active(false);
@@ -120,11 +120,11 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
             RealmsClient client = RealmsClient.createRealmsClient();
 
             try {
-               ConfigureWorldScreen.this.ops = client.getOpsFor(ConfigureWorldScreen.this.serverId).ops;
+               RealmsConfigureWorldScreen.this.ops = client.getOpsFor(RealmsConfigureWorldScreen.this.serverId).ops;
             } catch (RealmsServiceException var3) {
-               ConfigureWorldScreen.LOGGER.error("Couldn't fetch ops");
+               RealmsConfigureWorldScreen.LOGGER.error("Couldn't fetch ops");
             } catch (Exception var4) {
-               ConfigureWorldScreen.LOGGER.error("Couldn't parse response of fetching ops");
+               RealmsConfigureWorldScreen.LOGGER.error("Couldn't parse response of fetching ops");
             }
 
          }
@@ -158,13 +158,13 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
                Realms.setScreen(new StartMinigameWorldScreen(this, this.serverData));
             }
          } else if (button.id() == 7) {
-            Realms.setScreen(new SubscriptionScreen(this, this.serverData));
+            Realms.setScreen(new RealmsSubscriptionScreen(this, this.serverData));
          } else if (button.id() == 11) {
             Realms.setScreen(new ActivityScreen(this, this.serverData.id));
          } else if (button.id() == 12) {
             Realms.setScreen(new WorldManagementScreen(this, this.lastScreen, this.serverData.clone()));
          } else if (button.id() == 13) {
-            Realms.setScreen(new InviteScreen(this.lastScreen, this, this.serverData));
+            Realms.setScreen(new RealmsInviteScreen(this.lastScreen, this, this.serverData));
          }
 
       }
@@ -191,23 +191,23 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
             RealmsClient client = RealmsClient.createRealmsClient();
 
             try {
-               ConfigureWorldScreen.this.serverData = client.getOwnWorld(worldId);
-               ConfigureWorldScreen.this.fetchOps();
-               ConfigureWorldScreen.this.editButton.active(!ConfigureWorldScreen.this.serverData.expired);
-               ConfigureWorldScreen.this.minigameButton.active(!ConfigureWorldScreen.this.serverData.expired);
-               ConfigureWorldScreen.this.subscriptionButton.active(true);
-               ConfigureWorldScreen.this.activityButton.active(true);
-               ConfigureWorldScreen.this.editWorldButton.active(true);
-               boolean isMinigame = ConfigureWorldScreen.this.serverData.worldType.equals(RealmsServer.WorldType.MINIGAME);
+               RealmsConfigureWorldScreen.this.serverData = client.getOwnWorld(worldId);
+               RealmsConfigureWorldScreen.this.fetchOps();
+               RealmsConfigureWorldScreen.this.settingsButton.active(!RealmsConfigureWorldScreen.this.serverData.expired);
+               RealmsConfigureWorldScreen.this.minigameButton.active(!RealmsConfigureWorldScreen.this.serverData.expired);
+               RealmsConfigureWorldScreen.this.subscriptionButton.active(true);
+               RealmsConfigureWorldScreen.this.activityButton.active(true);
+               RealmsConfigureWorldScreen.this.editWorldButton.active(true);
+               boolean isMinigame = RealmsConfigureWorldScreen.this.serverData.worldType.equals(RealmsServer.WorldType.MINIGAME);
                if (isMinigame) {
-                  ConfigureWorldScreen.this.minigameButton.msg(RealmsScreen.getLocalizedString("mco.configure.world.buttons.modifyMiniGame"));
-                  ConfigureWorldScreen.this.editButton.active(false);
-                  ConfigureWorldScreen.this.editWorldButton.active(false);
+                  RealmsConfigureWorldScreen.this.minigameButton.msg(RealmsScreen.getLocalizedString("mco.configure.world.buttons.modifyMiniGame"));
+                  RealmsConfigureWorldScreen.this.settingsButton.active(false);
+                  RealmsConfigureWorldScreen.this.editWorldButton.active(false);
                }
             } catch (RealmsServiceException var3) {
-               ConfigureWorldScreen.LOGGER.error("Couldn't get own world");
+               RealmsConfigureWorldScreen.LOGGER.error("Couldn't get own world");
             } catch (IOException var4) {
-               ConfigureWorldScreen.LOGGER.error("Couldn't parse response getting own world");
+               RealmsConfigureWorldScreen.LOGGER.error("Couldn't parse response getting own world");
             }
 
          }
@@ -304,7 +304,7 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
             this.deleteFromInvitedList(this.selectedInvitedIndex);
          }
 
-         Realms.setScreen(new ConfigureWorldScreen(this.lastScreen, this.serverData.id));
+         Realms.setScreen(new RealmsConfigureWorldScreen(this.lastScreen, this.serverData.id));
       } else if (id == 1) {
          if (result) {
             this.closeTheWorld();
@@ -505,18 +505,18 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
    private class InvitedSelectionList extends RealmsClickableScrolledSelectionList {
       public InvitedSelectionList() {
          super(
-            ConfigureWorldScreen.this.column_width + 10,
-            ConfigureWorldScreen.this.row(10),
-            ConfigureWorldScreen.this.row(2),
-            ConfigureWorldScreen.this.row(10),
+            RealmsConfigureWorldScreen.this.column_width + 10,
+            RealmsConfigureWorldScreen.this.row(10),
+            RealmsConfigureWorldScreen.this.row(2),
+            RealmsConfigureWorldScreen.this.row(10),
             13
          );
       }
 
       public void customMouseEvent(int y0, int y1, int headerHeight, float yo, int itemHeight) {
          if (Mouse.isButtonDown(0) && this.ym() >= y0 && this.ym() <= y1) {
-            int x0 = ConfigureWorldScreen.this.column1_x;
-            int x1 = ConfigureWorldScreen.this.column1_x + ConfigureWorldScreen.this.column_width;
+            int x0 = RealmsConfigureWorldScreen.this.column1_x;
+            int x1 = RealmsConfigureWorldScreen.this.column1_x + RealmsConfigureWorldScreen.this.column_width;
             int clickSlotPos = this.ym() - y0 - headerHeight + (int)yo - 4;
             int slot = clickSlotPos / itemHeight;
             if (this.xm() >= x0 && this.xm() <= x1 && slot >= 0 && clickSlotPos >= 0 && slot < this.getItemCount()) {
@@ -527,20 +527,20 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
       }
 
       public void itemClicked(int clickSlotPos, int slot, int xm, int ym, int width) {
-         int removex = ConfigureWorldScreen.this.column1_x + ConfigureWorldScreen.this.column_width - 22;
+         int removex = RealmsConfigureWorldScreen.this.column1_x + RealmsConfigureWorldScreen.this.column_width - 22;
          int removey = clickSlotPos + 70 - this.getScroll();
          int mx = removex + 10;
          int my = removey - 3;
          System.out.println("xm: " + xm + " ym: " + ym);
          System.out.println("removeX: " + removex + " removey: " + removey);
          if (xm >= mx && xm <= mx + 9 && ym >= my && ym <= my + 9) {
-            if (slot >= 0 && slot < ConfigureWorldScreen.this.serverData.players.size()) {
-               String selectedPlayer = ((PlayerInfo)ConfigureWorldScreen.this.serverData.players.get(slot)).getName();
-               if (ConfigureWorldScreen.this.ops != null) {
-                  if (ConfigureWorldScreen.this.ops.contains(selectedPlayer)) {
-                     ConfigureWorldScreen.this.deop(slot);
+            if (slot >= 0 && slot < RealmsConfigureWorldScreen.this.serverData.players.size()) {
+               String selectedPlayer = ((PlayerInfo)RealmsConfigureWorldScreen.this.serverData.players.get(slot)).getName();
+               if (RealmsConfigureWorldScreen.this.ops != null) {
+                  if (RealmsConfigureWorldScreen.this.ops.contains(selectedPlayer)) {
+                     RealmsConfigureWorldScreen.this.deop(slot);
                   } else {
-                     ConfigureWorldScreen.this.op(slot);
+                     RealmsConfigureWorldScreen.this.op(slot);
                   }
                }
             }
@@ -549,22 +549,22 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
             && ym >= removey
             && ym <= removey + 9
             && slot >= 0
-            && slot < ConfigureWorldScreen.this.serverData.players.size()) {
-            ConfigureWorldScreen.this.uninvite(slot);
+            && slot < RealmsConfigureWorldScreen.this.serverData.players.size()) {
+            RealmsConfigureWorldScreen.this.uninvite(slot);
          }
 
       }
 
       public void renderBackground() {
-         ConfigureWorldScreen.this.renderBackground();
+         RealmsConfigureWorldScreen.this.renderBackground();
       }
 
       public int getScrollbarPosition() {
-         return ConfigureWorldScreen.this.column1_x + this.width() - 5;
+         return RealmsConfigureWorldScreen.this.column1_x + this.width() - 5;
       }
 
       public int getItemCount() {
-         return ConfigureWorldScreen.this.serverData == null ? 1 : ConfigureWorldScreen.this.serverData.players.size();
+         return RealmsConfigureWorldScreen.this.serverData == null ? 1 : RealmsConfigureWorldScreen.this.serverData.players.size();
       }
 
       public int getMaxPosition() {
@@ -572,8 +572,8 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
       }
 
       protected void renderItem(int i, int x, int y, int h, Tezzelator t, int mouseX, int mouseY) {
-         if (ConfigureWorldScreen.this.serverData != null) {
-            if (i < ConfigureWorldScreen.this.serverData.players.size()) {
+         if (RealmsConfigureWorldScreen.this.serverData != null) {
+            if (i < RealmsConfigureWorldScreen.this.serverData.players.size()) {
                this.renderInvitedItem(i, x, y, h);
             }
 
@@ -581,21 +581,25 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
       }
 
       private void renderInvitedItem(int i, int x, int y, int h) {
-         String invited = ((PlayerInfo)ConfigureWorldScreen.this.serverData.players.get(i)).getName();
-         ConfigureWorldScreen.this.drawString(invited, ConfigureWorldScreen.this.column1_x + 3 + 12, y + 1, 16777215);
-         if (ConfigureWorldScreen.this.ops != null && ConfigureWorldScreen.this.ops.contains(invited)) {
-            ConfigureWorldScreen.this.drawOpped(ConfigureWorldScreen.this.column1_x + ConfigureWorldScreen.this.column_width - 10, y + 1, this.xm(), this.ym());
+         PlayerInfo invited = (PlayerInfo)RealmsConfigureWorldScreen.this.serverData.players.get(i);
+         RealmsConfigureWorldScreen.this.drawString(invited.getName(), RealmsConfigureWorldScreen.this.column1_x + 3 + 12, y + 1, 16777215);
+         if (RealmsConfigureWorldScreen.this.ops != null && RealmsConfigureWorldScreen.this.ops.contains(invited.getName())) {
+            RealmsConfigureWorldScreen.this.drawOpped(
+               RealmsConfigureWorldScreen.this.column1_x + RealmsConfigureWorldScreen.this.column_width - 10, y + 1, this.xm(), this.ym()
+            );
          } else {
-            ConfigureWorldScreen.this.drawNormal(ConfigureWorldScreen.this.column1_x + ConfigureWorldScreen.this.column_width - 10, y + 1, this.xm(), this.ym());
+            RealmsConfigureWorldScreen.this.drawNormal(
+               RealmsConfigureWorldScreen.this.column1_x + RealmsConfigureWorldScreen.this.column_width - 10, y + 1, this.xm(), this.ym()
+            );
          }
 
-         ConfigureWorldScreen.this.drawRemoveIcon(
-            ConfigureWorldScreen.this.column1_x + ConfigureWorldScreen.this.column_width - 22, y + 2, this.xm(), this.ym()
+         RealmsConfigureWorldScreen.this.drawRemoveIcon(
+            RealmsConfigureWorldScreen.this.column1_x + RealmsConfigureWorldScreen.this.column_width - 22, y + 2, this.xm(), this.ym()
          );
-         RealmsScreen.bindFace(invited);
+         RealmsScreen.bindFace(invited.getUuid(), invited.getName());
          GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-         RealmsScreen.blit(ConfigureWorldScreen.this.column1_x + 2 + 2, y + 1, 8.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);
-         RealmsScreen.blit(ConfigureWorldScreen.this.column1_x + 2 + 2, y + 1, 40.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);
+         RealmsScreen.blit(RealmsConfigureWorldScreen.this.column1_x + 2 + 2, y + 1, 8.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);
+         RealmsScreen.blit(RealmsConfigureWorldScreen.this.column1_x + 2 + 2, y + 1, 40.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);
       }
    }
 }

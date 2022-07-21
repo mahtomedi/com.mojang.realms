@@ -75,7 +75,7 @@ public class CreateRealmsWorldScreen extends ScreenWithCallback<WorldTemplate> {
          } else if (button.id() == CREATE_BUTTON) {
             this.createWorld();
          } else if (button.id() == WORLD_TEMPLATE_BUTTON) {
-            Realms.setScreen(new McoWorldTemplateScreen(this, this.selectedWorldTemplate, false));
+            Realms.setScreen(new RealmsWorldTemplateScreen(this, this.selectedWorldTemplate, false));
          }
 
       }

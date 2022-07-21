@@ -141,7 +141,7 @@ public class ActivityScreen extends RealmsScreen {
                var13.printStackTrace();
             }
 
-            activityRow = new ActivityScreen.ActivityRow(sa.profileUuid, new ArrayList(), this.getColor(), name);
+            activityRow = new ActivityScreen.ActivityRow(sa.profileUuid, new ArrayList(), this.getColor(), name, sa.profileUuid);
             activityRow.activities.add(e);
             activityRows.add(activityRow);
          } else {
@@ -253,12 +253,14 @@ public class ActivityScreen extends RealmsScreen {
       List<ActivityScreen.Activity> activities;
       ActivityScreen.Color color;
       String name;
+      String uuid;
 
-      ActivityRow(String key, List<ActivityScreen.Activity> activities, ActivityScreen.Color color, String name) {
+      ActivityRow(String key, List<ActivityScreen.Activity> activities, ActivityScreen.Color color, String name, String uuid) {
          this.key = key;
          this.activities = activities;
          this.color = color;
          this.name = name;
+         this.uuid = uuid;
       }
    }
 
@@ -313,7 +315,7 @@ public class ActivityScreen extends RealmsScreen {
       }
 
       public int getMaxPosition() {
-         return this.getItemCount() * (ActivityScreen.this.fontLineHeight() + 1) + ActivityScreen.this.height() - 110;
+         return this.getItemCount() * (ActivityScreen.this.fontLineHeight() + 1) + 10;
       }
 
       protected void renderItem(int i, int x, int y, int h, Tezzelator t, int mouseX, int mouseY) {
@@ -439,7 +441,10 @@ public class ActivityScreen extends RealmsScreen {
                ++daysIndex;
             }
 
-            RealmsScreen.bindFace(((ActivityScreen.ActivityRow)ActivityScreen.this.activityMap.get(i)).name);
+            RealmsScreen.bindFace(
+               ((ActivityScreen.ActivityRow)ActivityScreen.this.activityMap.get(i)).uuid,
+               ((ActivityScreen.ActivityRow)ActivityScreen.this.activityMap.get(i)).name
+            );
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
             RealmsScreen.blit(10, y, 8.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);
             RealmsScreen.blit(10, y, 40.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);
@@ -448,7 +453,7 @@ public class ActivityScreen extends RealmsScreen {
       }
 
       public int getScrollbarPosition() {
-         return this.width() - 10;
+         return this.width() - 7;
       }
    }
 }

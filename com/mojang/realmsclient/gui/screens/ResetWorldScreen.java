@@ -101,7 +101,7 @@ public class ResetWorldScreen extends ScreenWithCallback<WorldTemplate> {
             String line3 = getLocalizedString("mco.configure.world.reset.question.line2");
             Realms.setScreen(new LongConfirmationScreen(this, LongConfirmationScreen.Type.Warning, line2, line3, 1));
          } else if (button.id() == 3) {
-            Realms.setScreen(new McoWorldTemplateScreen(this, this.selectedWorldTemplate, false));
+            Realms.setScreen(new RealmsWorldTemplateScreen(this, this.selectedWorldTemplate, false));
          } else if (button.id() == 4) {
             this.levelTypeIndex = (this.levelTypeIndex + 1) % this.levelTypes.length;
             button.msg(this.levelTypeTitle());
@@ -189,7 +189,7 @@ public class ResetWorldScreen extends ScreenWithCallback<WorldTemplate> {
 
                if (this.worldTemplate != null) {
                   client.resetWorldWithTemplate(this.worldId, this.worldTemplate.id);
-                  Realms.setScreen(new ConfigureWorldScreen(ResetWorldScreen.this.onlineScreen, this.worldId));
+                  Realms.setScreen(new RealmsConfigureWorldScreen(ResetWorldScreen.this.onlineScreen, this.worldId));
                   return;
                }
 
@@ -198,7 +198,7 @@ public class ResetWorldScreen extends ScreenWithCallback<WorldTemplate> {
                   return;
                }
 
-               Realms.setScreen(new ConfigureWorldScreen(ResetWorldScreen.this.onlineScreen, this.worldId));
+               Realms.setScreen(new RealmsConfigureWorldScreen(ResetWorldScreen.this.onlineScreen, this.worldId));
                return;
             } catch (RetryCallException var5) {
                if (this.aborted()) {

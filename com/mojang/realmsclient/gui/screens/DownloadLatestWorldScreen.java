@@ -136,9 +136,12 @@ public class DownloadLatestWorldScreen extends RealmsScreen {
    private void drawDownloadSpeed() {
       if (this.animTick % RealmsSharedConstants.TICKS_PER_SECOND == 0) {
          if (this.previousWrittenBytes != null) {
-            this.bytesPersSecond = 1000L
-               * (this.downloadStatus.bytesWritten - this.previousWrittenBytes)
-               / (System.currentTimeMillis() - this.previousTimeSnapshot);
+            long timeElapsed = System.currentTimeMillis() - this.previousTimeSnapshot;
+            if (timeElapsed == 0L) {
+               timeElapsed = 1L;
+            }
+
+            this.bytesPersSecond = 1000L * (this.downloadStatus.bytesWritten - this.previousWrittenBytes) / timeElapsed;
             this.drawDownloadSpeed0(this.bytesPersSecond);
          }
 

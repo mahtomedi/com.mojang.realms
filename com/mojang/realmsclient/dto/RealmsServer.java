@@ -24,12 +24,11 @@ public class RealmsServer extends ValueObject {
    public String motd;
    public RealmsServer.State state;
    public String owner;
+   public String ownerUUID;
    public List<PlayerInfo> players;
    public RealmsOptions options;
    public String ip;
    public boolean expired;
-   public int difficulty;
-   public int gameMode;
    public int daysLeft;
    public RealmsServer.WorldType worldType;
    public int protocol;
@@ -79,9 +78,8 @@ public class RealmsServer extends ValueObject {
          server.daysLeft = JsonUtils.getIntOr("daysLeft", node, 0);
          server.ip = JsonUtils.getStringOr("ip", node, null);
          server.expired = JsonUtils.getBooleanOr("expired", node, false);
-         server.difficulty = JsonUtils.getIntOr("difficulty", node, 0);
-         server.gameMode = JsonUtils.getIntOr("gameMode", node, 0);
          server.worldType = getWorldType(JsonUtils.getStringOr("worldType", node, RealmsServer.WorldType.NORMAL.name()));
+         server.ownerUUID = JsonUtils.getStringOr("ownerUUID", node, "");
          if (node.get("options") != null && !node.get("options").isJsonNull()) {
             JsonParser parser = new JsonParser();
             JsonElement element = parser.parse(node.get("options").getAsString());
@@ -207,12 +205,13 @@ public class RealmsServer extends ValueObject {
          this.options.spawnMonsters,
          this.options.spawnNPCs,
          this.options.spawnProtection,
-         this.options.commandBlocks
+         this.options.commandBlocks,
+         this.options.difficulty,
+         this.options.gameMode,
+         this.options.forceGameMode
       );
       server.ip = this.ip;
       server.expired = this.expired;
-      server.difficulty = this.difficulty;
-      server.gameMode = this.gameMode;
       server.daysLeft = this.daysLeft;
       server.protocol = this.protocol;
       server.status = this.status;
@@ -220,6 +219,7 @@ public class RealmsServer extends ValueObject {
       server.serverPing.nrOfPlayers = this.serverPing.nrOfPlayers;
       server.serverPing.lastPingSnapshot = this.serverPing.lastPingSnapshot;
       server.worldType = this.worldType;
+      server.ownerUUID = this.ownerUUID;
       return server;
    }
 

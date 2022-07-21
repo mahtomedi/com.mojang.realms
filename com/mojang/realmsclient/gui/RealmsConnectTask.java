@@ -71,7 +71,7 @@ public class RealmsConnectTask extends LongRunningTask {
             net.minecraft.realms.RealmsServerAddress address = net.minecraft.realms.RealmsServerAddress.parseString(a.address);
             this.realmsConnect.connect(address.getHost(), address.getPort());
          } else {
-            Realms.setScreen(this.onlineScreen);
+            this.error(RealmsScreen.getLocalizedString("mco.errorMessage.connectionFailure"));
          }
       }
 

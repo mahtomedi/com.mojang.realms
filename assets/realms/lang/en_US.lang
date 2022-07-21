@@ -79,6 +79,7 @@ mco.configure.world.spawnNPCs=Spawn NPCs
 mco.configure.world.spawnMonsters=Spawn Monsters
 mco.configure.world.spawnProtection=Spawn protection
 mco.configure.world.commandBlocks=Command Blocks
+mco.configure.world.forceGameMode=Force Game Mode
 
 mco.configure.world.on=On
 mco.configure.world.off=Off
@@ -161,6 +162,7 @@ mco.template.title.minigame=Realm Mini Games
 mco.template.button.select=Select
 mco.template.default.name=Select Template (Optional)
 mco.template.name=Template
+mco.template.info.tooltip=Publisher website
 
 mco.invites.button.accept=Accept
 mco.invites.button.reject=Reject
@@ -178,6 +180,7 @@ mco.upload.uploading=Uploading '%s'
 mco.upload.done=Upload done
 mco.upload.failed=Upload failed! (%s)
 mco.upload.cancelled=Upload cancelled
+mco.upload.hardcore=Hardcore worlds can't be uploaded!
 
 mco.activity.title=Player Activity
 mco.activity.noactivity=No activity for the past %s days
@@ -187,3 +190,5 @@ mco.errorMessage.6002=ToS not accepted
 mco.errorMessage.6003=Download limit reached
 mco.errorMessage.6004=Upload limit reached
 mco.errorMessage.6005=World is in admin lock state
+
+mco.errorMessage.connectionFailure=An error occured, please try again later.

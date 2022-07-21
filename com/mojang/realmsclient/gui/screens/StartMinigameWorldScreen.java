@@ -68,7 +68,7 @@ public class StartMinigameWorldScreen extends ScreenWithCallback<WorldTemplate> 
          } else if (button.id() == 1) {
             this.startMinigame();
          } else if (button.id() == WORLD_TEMPLATE_BUTTON) {
-            Realms.setScreen(new McoWorldTemplateScreen(this, this.selectedWorldTemplate, true));
+            Realms.setScreen(new RealmsWorldTemplateScreen(this, this.selectedWorldTemplate, true));
          }
 
       }

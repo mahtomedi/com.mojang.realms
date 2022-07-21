@@ -140,9 +140,12 @@ public class RealmsUploadScreen extends RealmsScreen {
    private void drawUploadSpeed() {
       if (this.animTick % RealmsSharedConstants.TICKS_PER_SECOND == 0) {
          if (this.previousWrittenBytes != null) {
-            this.bytesPersSecond = 1000L
-               * (this.uploadStatus.bytesWritten - this.previousWrittenBytes)
-               / (System.currentTimeMillis() - this.previousTimeSnapshot);
+            long timeElapsed = System.currentTimeMillis() - this.previousTimeSnapshot;
+            if (timeElapsed == 0L) {
+               timeElapsed = 1L;
+            }
+
+            this.bytesPersSecond = 1000L * (this.uploadStatus.bytesWritten - this.previousWrittenBytes) / timeElapsed;
             this.drawUploadSpeed0(this.bytesPersSecond);
          }
 

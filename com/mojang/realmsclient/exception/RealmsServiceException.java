@@ -1,6 +1,7 @@
 package com.mojang.realmsclient.exception;
 
 import com.mojang.realmsclient.client.RealmsError;
+import net.minecraft.realms.RealmsScreen;
 
 public class RealmsServiceException extends Exception {
    public final int httpResultCode;
@@ -26,7 +27,7 @@ public class RealmsServiceException extends Exception {
 
    public String toString() {
       return this.errorCode != -1
-         ? "Realms ( ErrorCode: " + this.errorCode + " ): " + this.errorMsg
+         ? "Realms ( ErrorCode: " + this.errorCode + " ): " + RealmsScreen.getLocalizedString("mco.errorMessage." + this.errorCode)
          : "Realms (" + this.httpResultCode + ") " + this.httpResponseContent;
    }
 }

@@ -27,7 +27,7 @@ public class WorldManagementScreen extends RealmsScreen {
    private static final String PLUS_ICON_LOCATION = "realms:textures/gui/realms/plus_icon.png";
    private static final String RESTORE_ICON_LOCATION = "realms:textures/gui/realms/restore_icon.png";
    private static int lastScrollPosition = -1;
-   private final ConfigureWorldScreen lastScreen;
+   private final RealmsConfigureWorldScreen lastScreen;
    private final RealmsScreen onlineScreen;
    private List<Backup> backups = Collections.emptyList();
    private String toolTip = null;
@@ -48,8 +48,8 @@ public class WorldManagementScreen extends RealmsScreen {
    private RealmsServer serverData;
    private static final String UPLOADED_KEY = "Uploaded";
 
-   public WorldManagementScreen(ConfigureWorldScreen configureWorldScreen, RealmsScreen onlineScreen, RealmsServer serverData) {
-      this.lastScreen = configureWorldScreen;
+   public WorldManagementScreen(RealmsConfigureWorldScreen realmsConfigureWorldScreen, RealmsScreen onlineScreen, RealmsServer serverData) {
+      this.lastScreen = realmsConfigureWorldScreen;
       this.onlineScreen = onlineScreen;
       this.serverData = serverData;
    }

@@ -31,7 +31,7 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
    private RealmsSelectFileToUploadScreen.WorldSelectionList worldSelectionList;
    private String worldLang;
    private String conversionLang;
-   private String[] gameModesLang = new String[3];
+   private String[] gameModesLang = new String[4];
    private String errorMessage = null;
 
    public RealmsSelectFileToUploadScreen(long worldId, RealmsScreen lastScreen) {
@@ -62,6 +62,7 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
       this.gameModesLang[Realms.survivalId()] = getLocalizedString("gameMode.survival");
       this.gameModesLang[Realms.creativeId()] = getLocalizedString("gameMode.creative");
       this.gameModesLang[Realms.adventureId()] = getLocalizedString("gameMode.adventure");
+      this.gameModesLang[3] = getLocalizedString("gameMode.spectator");
       int x1 = (this.width() / 2 - 170) / 2;
       int x2 = x1 + this.width() / 2;
       this.buttonsAdd(this.uploadButton = newButton(2, x1, this.height() - 42, 170, 20, getLocalizedString("mco.upload.button.name")));
@@ -86,7 +87,7 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
    }
 
    private void upload() {
-      if (this.selectedWorld != -1) {
+      if (this.selectedWorld != -1 && !((RealmsLevelSummary)this.levelList.get(this.selectedWorld)).isHardcore()) {
          RealmsLevelSummary selectedLevel = (RealmsLevelSummary)this.levelList.get(this.selectedWorld);
          Realms.setScreen(new RealmsUploadScreen(this.worldId, this.lastScreen, selectedLevel));
       }
@@ -134,7 +135,11 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
       public void selectItem(int item, boolean doubleClick, int xMouse, int yMouse) {
          RealmsSelectFileToUploadScreen.this.selectedWorld = item;
          RealmsSelectFileToUploadScreen.this.uploadButton
-            .active(RealmsSelectFileToUploadScreen.this.selectedWorld >= 0 && RealmsSelectFileToUploadScreen.this.selectedWorld < this.getItemCount());
+            .active(
+               RealmsSelectFileToUploadScreen.this.selectedWorld >= 0
+                  && RealmsSelectFileToUploadScreen.this.selectedWorld < this.getItemCount()
+                  && !((RealmsLevelSummary)RealmsSelectFileToUploadScreen.this.levelList.get(RealmsSelectFileToUploadScreen.this.selectedWorld)).isHardcore()
+            );
          RealmsSelectFileToUploadScreen.this.errorMessage = null;
       }
 
@@ -166,7 +171,7 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
          } else {
             info = RealmsSelectFileToUploadScreen.this.gameModesLang[levelSummary.getGameMode()];
             if (levelSummary.isHardcore()) {
-               info = ChatFormatting.DARK_RED + RealmsScreen.getLocalizedString("gameMode.hardcore") + ChatFormatting.RESET;
+               info = ChatFormatting.DARK_RED + RealmsScreen.getLocalizedString("mco.upload.hardcore") + ChatFormatting.RESET;
             }
 
             if (levelSummary.hasCheats()) {

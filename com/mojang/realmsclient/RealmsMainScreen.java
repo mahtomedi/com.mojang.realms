@@ -1533,10 +1533,11 @@ public class RealmsMainScreen extends RealmsScreen {
             }
 
             RealmsMainScreen.this.drawString(serverData.getName(), x + 2, y + 1, 16777215);
-            RealmsTextureManager.bindFace(serverData.ownerUUID);
-            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-            RealmsScreen.blit(x - 36, y, 8.0F, 8.0F, 8, 8, 32, 32, 64.0F, 64.0F);
-            RealmsScreen.blit(x - 36, y, 40.0F, 8.0F, 8, 8, 32, 32, 64.0F, 64.0F);
+            RealmsTextureManager.withBoundFace(serverData.ownerUUID, () -> {
+               GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+               RealmsScreen.blit(x - 36, y, 8.0F, 8.0F, 8, 8, 32, 32, 64.0F, 64.0F);
+               RealmsScreen.blit(x - 36, y, 40.0F, 8.0F, 8, 8, 32, 32, 64.0F, 64.0F);
+            });
          }
       }
 

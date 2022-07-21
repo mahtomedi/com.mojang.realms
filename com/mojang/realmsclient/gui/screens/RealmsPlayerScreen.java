@@ -345,10 +345,11 @@ public class RealmsPlayerScreen extends RealmsScreen {
          RealmsPlayerScreen.this.drawString(
             RealmsScreen.getLocalizedString("mco.configure.world.activityfeed.disabled"), RealmsPlayerScreen.this.column2_x, RealmsConstants.row(5), 10526880
          );
-         RealmsTextureManager.bindFace(invited.getUuid());
-         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-         RealmsScreen.blit(RealmsPlayerScreen.this.column1_x + 2 + 2, y + 1, 8.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);
-         RealmsScreen.blit(RealmsPlayerScreen.this.column1_x + 2 + 2, y + 1, 40.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);
+         RealmsTextureManager.withBoundFace(invited.getUuid(), () -> {
+            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+            RealmsScreen.blit(RealmsPlayerScreen.this.column1_x + 2 + 2, y + 1, 8.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);
+            RealmsScreen.blit(RealmsPlayerScreen.this.column1_x + 2 + 2, y + 1, 40.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);
+         });
       }
    }
 }

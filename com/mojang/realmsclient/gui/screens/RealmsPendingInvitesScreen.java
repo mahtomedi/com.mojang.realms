@@ -190,10 +190,11 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
          int dx = this.getScrollbarPosition() - 50;
          this.drawAccept(dx, y, mouseX, mouseY);
          this.drawReject(dx + 20, y, mouseX, mouseY);
-         RealmsTextureManager.bindFace(invite.worldOwnerUuid);
-         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-         RealmsScreen.blit(x - 36, y, 8.0F, 8.0F, 8, 8, 32, 32, 64.0F, 64.0F);
-         RealmsScreen.blit(x - 36, y, 40.0F, 8.0F, 8, 8, 32, 32, 64.0F, 64.0F);
+         RealmsTextureManager.withBoundFace(invite.worldOwnerUuid, () -> {
+            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+            RealmsScreen.blit(x - 36, y, 8.0F, 8.0F, 8, 8, 32, 32, 64.0F, 64.0F);
+            RealmsScreen.blit(x - 36, y, 40.0F, 8.0F, 8, 8, 32, 32, 64.0F, 64.0F);
+         });
       }
 
       private void drawAccept(int x, int y, int xm, int ym) {

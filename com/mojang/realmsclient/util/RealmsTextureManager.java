@@ -49,14 +49,33 @@ public class RealmsTextureManager {
       }
    }
 
-   public static void bindDefaultFace(UUID uuid) {
+   public static void withBoundFace(String uuid, Runnable r) {
+      withTextureRestore(() -> {
+         bindFace(uuid);
+         r.run();
+      });
+   }
+
+   private static void withTextureRestore(Runnable r) {
+      GL11.glPushAttrib(270336);
+
+      try {
+         r.run();
+      } finally {
+         GL11.glPopAttrib();
+      }
+
+   }
+
+   private static void bindDefaultFace(UUID uuid) {
       RealmsScreen.bind((uuid.hashCode() & 1) == 1 ? "minecraft:textures/entity/alex.png" : "minecraft:textures/entity/steve.png");
    }
 
-   public static void bindFace(final String uuid) {
+   private static void bindFace(final String uuid) {
       UUID actualUuid = UUIDTypeAdapter.fromString(uuid);
       if (textures.containsKey(uuid)) {
-         GL11.glBindTexture(3553, ((RealmsTextureManager.RealmsTexture)textures.get(uuid)).textureId);
+         int textureId = ((RealmsTextureManager.RealmsTexture)textures.get(uuid)).textureId;
+         GL11.glBindTexture(3553, textureId);
       } else if (skinFetchStatus.containsKey(uuid)) {
          if (!skinFetchStatus.get(uuid)) {
             bindDefaultFace(actualUuid);
@@ -125,7 +144,7 @@ public class RealmsTextureManager {
       }
    }
 
-   public static int getTextureId(String id, String image) {
+   private static int getTextureId(String id, String image) {
       int textureId;
       if (textures.containsKey(id)) {
          RealmsTextureManager.RealmsTexture texture = (RealmsTextureManager.RealmsTexture)textures.get(id);

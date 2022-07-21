@@ -217,4 +217,4 @@ mco.errorMessage.6003=Download limit reached
 mco.errorMessage.6004=Upload limit reached
 mco.errorMessage.6005=World is in admin lock state
 
-mco.errorMessage.connectionFailure=An error occured, please try again later.
+mco.errorMessage.connectionFailure=An error occurred, please try again later.

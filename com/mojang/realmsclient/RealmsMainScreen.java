@@ -44,6 +44,7 @@ public class RealmsMainScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
    private static boolean overrideConfigure = false;
    private static boolean stageEnabled = false;
+   private boolean dontSetConnectedToRealms = false;
    protected static final int BUTTON_BACK_ID = 0;
    protected static final int BUTTON_PLAY_ID = 1;
    protected static final int BUTTON_CONFIGURE_ID = 2;
@@ -97,7 +98,10 @@ public class RealmsMainScreen extends RealmsScreen {
    }
 
    public void init() {
-      Realms.setConnectedToRealms(false);
+      if (!this.dontSetConnectedToRealms) {
+         Realms.setConnectedToRealms(false);
+      }
+
       if (realmsGenericErrorScreen != null) {
          Realms.setScreen(realmsGenericErrorScreen);
       } else {
@@ -598,6 +602,7 @@ public class RealmsMainScreen extends RealmsScreen {
       RealmsServer server = this.findServer(serverId);
       if (server != null) {
          this.stopRealmsFetcherAndPinger();
+         this.dontSetConnectedToRealms = true;
          RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(this, new RealmsConnectTask(this, server));
          longRunningMcoTaskScreen.start();
          Realms.setScreen(longRunningMcoTaskScreen);

@@ -503,20 +503,16 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
          this.toolTip = getLocalizedString("mco.configure.world.slot.tooltip.active");
       }
 
-      int imageSize = 256;
       if (i == 1) {
          bind("textures/gui/title/background/panorama_0.png");
       } else if (i == 2) {
          bind("textures/gui/title/background/panorama_2.png");
       } else if (i == 3) {
          bind("textures/gui/title/background/panorama_3.png");
+      } else if (this.isMinigame()) {
+         bind(RealmsConstants.getMinigameImage(this.serverData.minigameId));
       } else {
-         imageSize = 160;
-         if (this.isMinigame()) {
-            bind(RealmsConstants.getMinigameImage(this.serverData.minigameId));
-         } else {
-            bind(RealmsConstants.getMinigameImage(this.randomMinigameImage));
-         }
+         bind(RealmsConstants.getMinigameImage(this.randomMinigameImage));
       }
 
       if (!active) {
@@ -526,10 +522,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
          GL11.glColor4f(c, c, c, 1.0F);
       }
 
-      GL11.glPushMatrix();
-      GL11.glScalef(0.5F, 0.5F, 0.5F);
-      RealmsScreen.blit(x * 2, y * 2, 0.0F, 0.0F, 160, 160, (float)imageSize, (float)imageSize);
-      GL11.glPopMatrix();
+      RealmsScreen.blit(x + 3, y + 3, 0.0F, 0.0F, 74, 74, 74.0F, 74.0F);
       bind("realms:textures/gui/realms/slot_frame.png");
       if (this.hoveredSlot == i) {
          GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -539,11 +532,8 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
          GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       }
 
-      GL11.glPushMatrix();
-      GL11.glScalef(0.5F, 0.5F, 0.5F);
-      RealmsScreen.blit(x * 2, y * 2, 0.0F, 0.0F, 160, 160, 160.0F, 160.0F);
-      GL11.glPopMatrix();
-      this.drawCenteredString(text, x + 40, y + 35, 16777215);
+      RealmsScreen.blit(x, y, 0.0F, 0.0F, 80, 80, 80.0F, 80.0F);
+      this.drawCenteredString(text, x + 40, y + 66, 16777215);
    }
 
    private void hideRegularButtons() {

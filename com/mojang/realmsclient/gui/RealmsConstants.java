@@ -9,8 +9,8 @@ public class RealmsConstants {
    public static final String GUI_ICONS_LOCATION = "textures/gui/icons.png";
    public static final String WORLD_TEMPLATE_IMAGES_LOCATION = "realms:textures/gui/realms/world_template_icons/$ID.png";
    public static final String WORLD_TEMPLATE_DEFAULT_IMAGE_LOCATION = "textures/gui/presets/isles.png";
-   public static final List<Integer> WORLD_TEMPLATE_IMAGE_IDS = Arrays.asList(6, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
-   public static final List<Integer> RANDOM_MINIGAME_IMAGES = Arrays.asList(8, 11, 12, 13, 14, 15, 19, 20);
+   public static final List<Integer> WORLD_TEMPLATE_IMAGE_IDS = Arrays.asList(6, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 24);
+   public static final List<Integer> RANDOM_MINIGAME_IMAGES = Arrays.asList(8, 11, 12, 13, 14, 15, 19, 20, 24);
    public static final int TITLE_HEIGHT = 17;
    public static final int COMPONENT_HEIGHT = 20;
    public static final int COLOR_WHITE = 16777215;

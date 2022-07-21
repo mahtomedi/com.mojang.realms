@@ -273,16 +273,10 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
       private void drawImage(int x, int y, int xm, int ym, int id) {
          RealmsScreen.bind(RealmsConstants.getMinigameImage(id));
          GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-         GL11.glPushMatrix();
-         GL11.glScalef(0.25F, 0.25F, 0.25F);
-         RealmsScreen.blit(x * 4, y * 4, 0.0F, 0.0F, 160, 160, 160.0F, 160.0F);
-         GL11.glPopMatrix();
+         RealmsScreen.blit(x + 1, y + 1, 0.0F, 0.0F, 38, 38, 38.0F, 38.0F);
          RealmsScreen.bind("realms:textures/gui/realms/slot_frame.png");
          GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-         GL11.glPushMatrix();
-         GL11.glScalef(0.25F, 0.25F, 0.25F);
-         RealmsScreen.blit(x * 4, y * 4, 0.0F, 0.0F, 160, 160, 160.0F, 160.0F);
-         GL11.glPopMatrix();
+         RealmsScreen.blit(x, y, 0.0F, 0.0F, 40, 40, 40.0F, 40.0F);
       }
 
       private void drawInfo(int x, int y, int xm, int ym, String link) {

@@ -30,19 +30,35 @@ public class Ping {
    }
 
    private static int ping(String host) {
-      long t = -now();
+      int timeout = 700;
+      long sum = 0L;
+      Socket socket = null;
 
-      for(int i = 0; i < 10; ++i) {
+      for(int i = 0; i < 5; ++i) {
          try {
-            SocketAddress sockaddr = new InetSocketAddress(host, 80);
-            Socket s = new Socket();
-            s.connect(sockaddr, 700);
-         } catch (Exception var6) {
+            SocketAddress sockAddr = new InetSocketAddress(host, 80);
+            socket = new Socket();
+            long t1 = now();
+            socket.connect(sockAddr, 700);
+            sum += now() - t1;
+         } catch (Exception var12) {
+            sum += 700L;
+         } finally {
+            close(socket);
          }
       }
 
-      t += now();
-      return (int)((double)t / 10.0);
+      return (int)((double)sum / 5.0);
+   }
+
+   private static void close(Socket socket) {
+      try {
+         if (socket != null) {
+            socket.close();
+         }
+      } catch (Throwable var2) {
+      }
+
    }
 
    private static long now() {

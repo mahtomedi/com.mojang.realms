@@ -80,9 +80,18 @@ public class RealmsUploadScreen extends RealmsScreen {
             Realms.setScreen(this.lastScreen);
          } else if (button.id() == 0) {
             this.cancelled = true;
+            Realms.setScreen(this.lastScreen);
          }
 
       }
+   }
+
+   public void keyPressed(char ch, int eventKey) {
+      if (eventKey == 1) {
+         this.cancelled = true;
+         Realms.setScreen(this.lastScreen);
+      }
+
    }
 
    public void render(int xm, int ym, float a) {

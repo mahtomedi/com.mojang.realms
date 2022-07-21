@@ -571,7 +571,7 @@ public class b extends RealmsScreen {
    private void f(RealmsServer selectedServer) {
       if (Realms.getUUID().equals(selectedServer.ownerUUID) || b) {
          this.z();
-         cvi minecraft = cvi.v();
+         cvk minecraft = cvk.u();
          minecraft.execute(() -> minecraft.a(new ad(this, selectedServer.id).getProxy()));
       }
 

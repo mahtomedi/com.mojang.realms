@@ -33,7 +33,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
    private static final String SLOT_FRAME_LOCATION = "realms:textures/gui/realms/slot_frame.png";
    private static final String EMPTY_FRAME_LOCATION = "realms:textures/gui/realms/empty_frame.png";
    private String toolTip;
-   private final RealmsMainScreen lastScreen;
+   private final RealmsScreen lastScreen;
    private RealmsServer serverData;
    private volatile long serverId;
    private int left_x;
@@ -64,7 +64,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
    private int clicks = 0;
    private boolean hoveredActiveSlot = false;
 
-   public RealmsConfigureWorldScreen(RealmsMainScreen lastScreen, long serverId) {
+   public RealmsConfigureWorldScreen(RealmsScreen lastScreen, long serverId) {
       this.lastScreen = lastScreen;
       this.serverId = serverId;
    }
@@ -300,7 +300,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
 
    private void backButtonClicked() {
       if (this.stateChanged) {
-         this.lastScreen.removeSelection();
+         ((RealmsMainScreen)this.lastScreen).removeSelection();
       }
 
       Realms.setScreen(this.lastScreen);
@@ -398,9 +398,9 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
             && this.hoveredActiveSlot
             && (this.serverData.state == RealmsServer.State.OPEN || this.serverData.state == RealmsServer.State.CLOSED)) {
             if (this.serverData.state == RealmsServer.State.OPEN) {
-               this.lastScreen.play(this.serverData, new RealmsConfigureWorldScreen(this.lastScreen.newScreen(), this.serverId));
+               ((RealmsMainScreen)this.lastScreen).play(this.serverData);
             } else {
-               this.openTheWorld(true, new RealmsConfigureWorldScreen(this.lastScreen.newScreen(), this.serverId));
+               this.openTheWorld(true, this);
             }
          }
 

@@ -97,6 +97,7 @@ mco.configure.world.subscription.less_than_a_day=Less than a day
 mco.configure.world.subscription.expired=Expired
 mco.configure.world.subscription.start=Start Date
 mco.configure.world.subscription.extend=Extend Subscription
+mco.configure.world.subscription.extendHere=Extend subscription here:
 mco.configure.world.subscription.day=Day
 mco.configure.world.subscription.month=Month
 mco.configure.world.subscription.days=Days
@@ -125,7 +126,7 @@ mco.create.world.subtitle=Optionally, select what world to put on your new Realm
 mco.create.world.skip=Skip
 
 mco.reset.world.title=Reset World
-mco.reset.world.warning=This will replace your Realm's current world!
+mco.reset.world.warning=This will delete your Realm's current world!
 mco.reset.world.seed=Seed (Optional)
 mco.reset.world.resetting.screen.title=Resetting World...
 mco.reset.world.generate=New world

@@ -9,8 +9,6 @@ import org.apache.logging.log4j.Logger;
 public class RealmsServerAddress extends ValueObject {
    private static final Logger LOGGER = LogManager.getLogger();
    public String address;
-   public String resourcePackUrl;
-   public String resourcePackHash;
 
    public static RealmsServerAddress parse(String json) {
       JsonParser parser = new JsonParser();
@@ -19,10 +17,8 @@ public class RealmsServerAddress extends ValueObject {
       try {
          JsonObject object = parser.parse(json).getAsJsonObject();
          serverAddress.address = JsonUtils.getStringOr("address", object, null);
-         serverAddress.resourcePackUrl = JsonUtils.getStringOr("resourcePackUrl", object, null);
-         serverAddress.resourcePackHash = JsonUtils.getStringOr("resourcePackHash", object, null);
       } catch (Exception var4) {
-         LOGGER.error("Could not parse RealmsServerAddress: " + var4.getMessage());
+         LOGGER.error("Could not parse McoServerAddress: " + var4.getMessage());
       }
 
       return serverAddress;

@@ -268,8 +268,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
                         Realms.setScreen(openWorldLongRunningTaskScreen);
                      } else {
                         try {
-                           ((RealmsMainScreen)RealmsBrokenWorldScreen.this.lastScreen)
-                              .play(client.getOwnWorld(RealmsBrokenWorldScreen.this.serverId), RealmsBrokenWorldScreen.this);
+                           ((RealmsMainScreen)RealmsBrokenWorldScreen.this.lastScreen).play(client.getOwnWorld(RealmsBrokenWorldScreen.this.serverId));
                         } catch (RealmsServiceException var4) {
                            RealmsBrokenWorldScreen.LOGGER.error("Couldn't get own world");
                            Realms.setScreen(RealmsBrokenWorldScreen.this.lastScreen);

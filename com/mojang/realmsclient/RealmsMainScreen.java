@@ -54,6 +54,8 @@ public class RealmsMainScreen extends RealmsScreen {
    private static final int LEAVE_ID = 2;
    private static final int BUTTON_BUY_ID = 3;
    private static final int BUTTON_TRY_ID = 4;
+   protected static final int RESOURCEPACK_ID = 100;
+   private RealmsServer resourcePackServer;
    private static final String ON_ICON_LOCATION = "realms:textures/gui/realms/on_icon.png";
    private static final String OFF_ICON_LOCATION = "realms:textures/gui/realms/off_icon.png";
    private static final String EXPIRED_ICON_LOCATION = "realms:textures/gui/realms/expired_icon.png";
@@ -109,7 +111,7 @@ public class RealmsMainScreen extends RealmsScreen {
    private int clicks = 0;
    private int lindex = 0;
    private char[] lchars = new char[]{'9', '8', '7', '4', '5', '6'};
-   private ReentrantLock connectLock = new ReentrantLock();
+   private static ReentrantLock connectLock = new ReentrantLock();
    private boolean expiredHover = false;
    private boolean mapOnlySupportsVersionHover = false;
 
@@ -159,7 +161,7 @@ public class RealmsMainScreen extends RealmsScreen {
       if (realmsGenericErrorScreen != null) {
          Realms.setScreen(realmsGenericErrorScreen);
       } else {
-         this.connectLock = new ReentrantLock();
+         connectLock = new ReentrantLock();
          if (checkedClientCompatability && !this.hasParentalConsent()) {
             this.checkParentalConsent();
          }
@@ -340,7 +342,7 @@ public class RealmsMainScreen extends RealmsScreen {
                if (this.isSelfOwnedServer(server) && RealmsUtil.mapIsBrokenByUpdate(server)) {
                   this.navigateToBrokenWorldScreen(server);
                } else {
-                  this.play(server, this);
+                  this.play(server);
                }
                break;
             case 2:
@@ -572,6 +574,16 @@ public class RealmsMainScreen extends RealmsScreen {
          }
 
          Realms.setScreen(this);
+      } else if (id == 100) {
+         if (!result) {
+            if (connectLock.isHeldByCurrentThread()) {
+               connectLock.unlock();
+            }
+
+            Realms.setScreen(this);
+         } else {
+            this.connectToServer(this.resourcePackServer);
+         }
       }
 
    }
@@ -964,14 +976,14 @@ public class RealmsMainScreen extends RealmsScreen {
       return x1 <= xm && xm <= x2 && y1 <= ym && ym <= y2;
    }
 
-   public void play(RealmsServer server, RealmsScreen cancelScreen) {
+   public void play(RealmsServer server) {
       if (server != null) {
          try {
-            if (!this.connectLock.tryLock(1L, TimeUnit.SECONDS)) {
+            if (!connectLock.tryLock(1L, TimeUnit.SECONDS)) {
                return;
             }
 
-            if (this.connectLock.getHoldCount() > 1) {
+            if (connectLock.getHoldCount() > 1) {
                return;
             }
          } catch (InterruptedException var4) {
@@ -979,14 +991,22 @@ public class RealmsMainScreen extends RealmsScreen {
          }
 
          this.dontSetConnectedToRealms = true;
-         this.connectToServer(server, cancelScreen);
+         if (server.resourcePackUrl != null && server.resourcePackHash != null) {
+            this.resourcePackServer = server;
+            this.saveListScrollPosition();
+            String line2 = getLocalizedString("mco.configure.world.resourcepack.question.line1");
+            String line3 = getLocalizedString("mco.configure.world.resourcepack.question.line2");
+            Realms.setScreen(new RealmsLongConfirmationScreen(this, RealmsLongConfirmationScreen.Type.Info, line2, line3, true, 100));
+         } else {
+            this.connectToServer(server);
+         }
       }
 
    }
 
-   private void connectToServer(RealmsServer server, RealmsScreen cancelScreen) {
+   private void connectToServer(RealmsServer server) {
       RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(
-         cancelScreen, new RealmsTasks.RealmsGetServerDetailsTask(cancelScreen, server, this.connectLock)
+         this, new RealmsTasks.RealmsGetServerDetailsTask(this, server)
       );
       longRunningMcoTaskScreen.start();
       Realms.setScreen(longRunningMcoTaskScreen);
@@ -1161,7 +1181,7 @@ public class RealmsMainScreen extends RealmsScreen {
       GL11.glPopMatrix();
    }
 
-   public RealmsMainScreen newScreen() {
+   public RealmsScreen newScreen() {
       return new RealmsMainScreen(this.lastScreen);
    }
 
@@ -1213,7 +1233,7 @@ public class RealmsMainScreen extends RealmsScreen {
                if (RealmsMainScreen.this.isSelfOwnedServer(server) && RealmsUtil.mapIsBrokenByUpdate(server)) {
                   RealmsMainScreen.this.navigateToBrokenWorldScreen(server);
                } else {
-                  RealmsMainScreen.this.play(RealmsMainScreen.this.findServer(RealmsMainScreen.this.selectedServerId), RealmsMainScreen.this);
+                  RealmsMainScreen.this.play(RealmsMainScreen.this.findServer(RealmsMainScreen.this.selectedServerId));
                }
             }
 

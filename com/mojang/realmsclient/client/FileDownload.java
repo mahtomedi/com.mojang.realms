@@ -259,7 +259,6 @@ public class FileDownload {
             }
          }
       } catch (Exception var22) {
-         LOGGER.error("Error getting level list", var22);
          this.error = true;
          return;
       }
@@ -308,7 +307,6 @@ public class FileDownload {
             }
          }
       } catch (Exception var20) {
-         LOGGER.error("Error extracting world", var20);
          this.error = true;
       } finally {
          if (tarIn != null) {
@@ -375,7 +373,6 @@ public class FileDownload {
                FileDownload.this.extracting = true;
                FileDownload.this.untarGzipArchive(this.worldName, this.tempFile, this.levelStorageSource);
             } catch (IOException var3) {
-               FileDownload.LOGGER.error("Error extracting archive", var3);
                FileDownload.this.error = true;
             }
          }

@@ -9,7 +9,6 @@ import com.mojang.realmsclient.util.RealmsUtil;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.util.concurrent.locks.ReentrantLock;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsScreen;
@@ -75,7 +74,7 @@ public class RealmsTermsScreen extends RealmsScreen {
       try {
          client.agreeToTos();
          RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(
-            this.lastScreen, new RealmsTasks.RealmsGetServerDetailsTask(this.lastScreen, this.realmsServer, new ReentrantLock())
+            this.lastScreen, new RealmsTasks.RealmsGetServerDetailsTask(this.lastScreen, this.realmsServer)
          );
          longRunningMcoTaskScreen.start();
          Realms.setScreen(longRunningMcoTaskScreen);

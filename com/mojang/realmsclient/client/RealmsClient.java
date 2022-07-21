@@ -57,7 +57,7 @@ public class RealmsClient {
    private static final String PATH_PUT_INTO_MINIGAMES_MODE = "/minigames/$MINIGAME_ID/$WORLD_ID";
    private static final String PATH_AVAILABLE = "/available";
    private static final String PATH_TEMPLATES = "/templates/$WORLD_TYPE";
-   private static final String PATH_WORLD_JOIN = "/v1/$ID/join/pc";
+   private static final String PATH_WORLD_JOIN = "/$ID/join";
    private static final String PATH_WORLD_GET = "/$ID";
    private static final String PATH_WORLD_INVITES = "/$WORLD_ID";
    private static final String PATH_WORLD_UNINVITE = "/$WORLD_ID/invite/$UUID";
@@ -149,7 +149,7 @@ public class RealmsClient {
    }
 
    public RealmsServerAddress join(long worldId) throws RealmsServiceException, IOException {
-      String asciiUrl = this.url("worlds" + "/v1/$ID/join/pc".replace("$ID", "" + worldId));
+      String asciiUrl = this.url("worlds" + "/$ID/join".replace("$ID", "" + worldId));
       String json = this.execute(Request.get(asciiUrl, 5000, 30000));
       return RealmsServerAddress.parse(json);
    }

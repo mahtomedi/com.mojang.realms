@@ -263,18 +263,11 @@ public class RealmsUploadScreen extends RealmsScreen {
                         RealmsUploadScreen.this.status = RealmsScreen.getLocalizedString("mco.upload.done");
                         RealmsUploadScreen.this.backButton.msg(RealmsScreen.getLocalizedString("gui.done"));
                         UploadTokenCache.invalidate(wid);
-                        return;
                      } else {
-                        if (fileUpload.getStatusCode() == 400 && fileUpload.getErrorMessage() != null) {
-                           RealmsUploadScreen.this.errorMessage = RealmsScreen.getLocalizedString(
-                              "mco.upload.failed", new Object[]{fileUpload.getErrorMessage()}
-                           );
-                        } else {
-                           RealmsUploadScreen.this.errorMessage = RealmsScreen.getLocalizedString("mco.upload.failed", new Object[]{fileUpload.getStatusCode()});
-                        }
-   
-                        return;
+                        RealmsUploadScreen.this.errorMessage = RealmsScreen.getLocalizedString("mco.upload.failed", new Object[]{fileUpload.getStatusCode()});
                      }
+   
+                     return;
                   }
                } catch (IOException var29) {
                   RealmsUploadScreen.this.errorMessage = RealmsScreen.getLocalizedString("mco.upload.failed", new Object[]{var29.getMessage()});

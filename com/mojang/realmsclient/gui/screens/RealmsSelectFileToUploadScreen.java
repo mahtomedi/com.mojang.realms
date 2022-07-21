@@ -57,7 +57,7 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
          this.loadLevelList();
       } catch (Exception var3) {
          LOGGER.error("Couldn't load level list", var3);
-         Realms.setScreen(new RealmsErrorScreen("Unable to load worlds", var3.getMessage(), this.lastScreen));
+         Realms.setScreen(new RealmsErrorScreen("Unable to load worlds", var3.getMessage()));
          return;
       }
 

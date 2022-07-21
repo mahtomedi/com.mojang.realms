@@ -27,7 +27,7 @@ public class RealmsServiceException extends Exception {
 
    public String toString() {
       return this.errorCode != -1
-         ? RealmsScreen.getLocalizedString("mco.errorMessage." + this.errorCode) + " - " + this.errorCode
+         ? "Realms ( ErrorCode: " + this.errorCode + " ): " + RealmsScreen.getLocalizedString("mco.errorMessage." + this.errorCode)
          : "Realms (" + this.httpResultCode + ") " + this.httpResponseContent;
    }
 }

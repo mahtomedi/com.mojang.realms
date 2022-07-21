@@ -39,16 +39,10 @@ public class RealmsSettingsScreen extends RealmsScreen {
       this.nameEdit = this.newEditBox(2, center, RealmsConstants.row(1), 212, 20);
       this.nameEdit.setFocus(true);
       this.nameEdit.setMaxLength(32);
-      if (this.serverData.getName() != null) {
-         this.nameEdit.setValue(this.serverData.getName());
-      }
-
+      this.nameEdit.setValue(this.serverData.getName());
       this.descEdit = this.newEditBox(3, center, RealmsConstants.row(5), 212, 20);
       this.descEdit.setMaxLength(32);
-      if (this.serverData.getDescription() != null) {
-         this.descEdit.setValue(this.serverData.getDescription());
-      }
-
+      this.descEdit.setValue(this.serverData.getDescription());
    }
 
    public void removed() {

@@ -1,5 +1,6 @@
 package com.mojang.realmsclient.client;
 
+import com.mojang.realmsclient.RealmsVersion;
 import com.mojang.realmsclient.dto.UploadInfo;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,6 +26,7 @@ public class FileUpload {
    private HttpPost request;
    private int statusCode = -1;
    private RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(120000).setConnectTimeout(120000).build();
+   private Thread currentThread;
 
    public void upload(
       final File file,
@@ -35,15 +37,35 @@ public class FileUpload {
       final String clientVersion,
       final UploadStatus uploadStatus
    ) {
-      (new Thread() {
+      if (this.currentThread == null) {
+         this.currentThread = new Thread() {
             public void run() {
                FileUpload.this.request = new HttpPost("http://" + uploadInfo.getUploadEndpoint() + ":" + "8080" + "/upload" + "/" + worldId);
                CloseableHttpClient client = null;
-   
+
                try {
                   client = HttpClientBuilder.create().setDefaultRequestConfig(FileUpload.this.requestConfig).build();
-                  FileUpload.this.request
-                     .setHeader("Cookie", "sid=" + sessionId + ";token=" + uploadInfo.getToken() + ";user=" + username + ";version=" + clientVersion);
+                  String realmsVersion = RealmsVersion.getVersion();
+                  if (realmsVersion != null) {
+                     FileUpload.this.request
+                        .setHeader(
+                           "Cookie",
+                           "sid="
+                              + sessionId
+                              + ";token="
+                              + uploadInfo.getToken()
+                              + ";user="
+                              + username
+                              + ";version="
+                              + clientVersion
+                              + ";realms_version="
+                              + realmsVersion
+                        );
+                  } else {
+                     FileUpload.this.request
+                        .setHeader("Cookie", "sid=" + sessionId + ";token=" + uploadInfo.getToken() + ";user=" + username + ";version=" + clientVersion);
+                  }
+
                   uploadStatus.totalBytes = file.length();
                   FileUpload.CustomInputStreamEntity entity = new FileUpload.CustomInputStreamEntity(new FileInputStream(file), file.length(), uploadStatus);
                   entity.setContentType("application/octet-stream");
@@ -53,26 +75,27 @@ public class FileUpload {
                   if (statusCode == 401) {
                      FileUpload.LOGGER.debug("Realms server returned 401: " + response.getFirstHeader("WWW-Authenticate"));
                   }
-   
+
                   FileUpload.this.statusCode = statusCode;
-               } catch (Exception var13) {
-                  FileUpload.LOGGER.debug("Caught exception while uploading: " + var13.getMessage());
+               } catch (Exception var14) {
+                  FileUpload.LOGGER.error("Caught exception while uploading: " + var14.getMessage());
                } finally {
                   FileUpload.this.request.releaseConnection();
                   FileUpload.this.finished = true;
                   if (client != null) {
                      try {
                         client.close();
-                     } catch (IOException var12) {
-                        FileUpload.LOGGER.debug("Failed to close Realms upload client");
+                     } catch (IOException var13) {
+                        FileUpload.LOGGER.error("Failed to close Realms upload client");
                      }
                   }
-   
+
                }
-   
+
             }
-         })
-         .start();
+         };
+         this.currentThread.start();
+      }
    }
 
    public void cancel() {

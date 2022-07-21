@@ -1,5 +1,7 @@
 package com.mojang.realmsclient.client;
 
+import com.google.gson.Gson;
+import com.mojang.realmsclient.RealmsVersion;
 import com.mojang.realmsclient.dto.BackupList;
 import com.mojang.realmsclient.dto.McoOptions;
 import com.mojang.realmsclient.dto.McoServer;
@@ -7,6 +9,7 @@ import com.mojang.realmsclient.dto.McoServerAddress;
 import com.mojang.realmsclient.dto.McoServerList;
 import com.mojang.realmsclient.dto.Ops;
 import com.mojang.realmsclient.dto.PendingInvitesList;
+import com.mojang.realmsclient.dto.PingResult;
 import com.mojang.realmsclient.dto.RealmsState;
 import com.mojang.realmsclient.dto.ServerActivityList;
 import com.mojang.realmsclient.dto.Subscription;
@@ -29,7 +32,6 @@ public class RealmsClient {
    private static final Logger LOGGER = LogManager.getLogger();
    private final String sessionId;
    private final String username;
-   private final String clientVersion;
    private static String baseUrl = "mcoapi.minecraft.net";
    private static final String WORLDS_RESOURCE_PATH = "worlds";
    private static final String INVITES_RESOURCE_PATH = "invites";
@@ -37,6 +39,7 @@ public class RealmsClient {
    private static final String SUBSCRIPTION_RESOURCE = "subscriptions";
    private static final String ACTIVITIES_RESOURCE = "activities";
    private static final String OPS_RESOURCE = "ops";
+   private static final String REGIONS_RESOURCE = "regions/ping/stat";
    private static final String PATH_INITIALIZE = "/$WORLD_ID/initialize";
    private static final String PATH_GET_ACTIVTIES = "/$WORLD_ID";
    private static final String PATH_GET_SUBSCRIPTION = "/$WORLD_ID";
@@ -67,17 +70,17 @@ public class RealmsClient {
    private static final String PATH_CLIENT_OUTDATED = "/client/outdated";
    private static final String PATH_TOS_AGREED = "/tos/agreed";
    private static final String PATH_MCO_BUY = "/buy";
+   private static Gson gson = new Gson();
 
    public static RealmsClient createRealmsClient() {
       String userName = Realms.userName();
       String sessionId = Realms.sessionId();
-      return userName != null && sessionId != null ? new RealmsClient(sessionId, userName, RealmsSharedConstants.VERSION_STRING, Realms.getProxy()) : null;
+      return userName != null && sessionId != null ? new RealmsClient(sessionId, userName, Realms.getProxy()) : null;
    }
 
-   public RealmsClient(String sessionId, String username, String clientVersion, Proxy proxy) {
+   public RealmsClient(String sessionId, String username, Proxy proxy) {
       this.sessionId = sessionId;
       this.username = username;
-      this.clientVersion = clientVersion;
       RealmsClientConfig.setProxy(proxy);
    }
 
@@ -274,9 +277,15 @@ public class RealmsClient {
       return this.execute(Request.get(asciiUrl));
    }
 
-   public UploadInfo upload(long worldId) throws RealmsServiceException {
+   public UploadInfo upload(long worldId, String uploadToken) throws RealmsServiceException {
       String asciiUrl = this.url("worlds" + "/$WORLD_ID/backups/upload".replace("$WORLD_ID", String.valueOf(worldId)));
-      return UploadInfo.parse(this.execute(Request.get(asciiUrl)));
+      UploadInfo oldUploadInfo = new UploadInfo();
+      if (uploadToken != null) {
+         oldUploadInfo.setToken(uploadToken);
+      }
+
+      String content = gson.toJson(oldUploadInfo);
+      return UploadInfo.parse(this.execute(Request.put(asciiUrl, content)));
    }
 
    public void uploadFinished(long worldId) throws RealmsServiceException {
@@ -292,6 +301,11 @@ public class RealmsClient {
    public void agreeToTos() throws RealmsServiceException {
       String asciiUrl = this.url("mco/tos/agreed");
       this.execute(Request.post(asciiUrl, ""));
+   }
+
+   public void sendPingResults(PingResult pingResult) throws RealmsServiceException {
+      String asciiUrl = this.url("regions/ping/stat");
+      this.execute(Request.post(asciiUrl, gson.toJson(pingResult)));
    }
 
    private String url(String path) {
@@ -311,24 +325,33 @@ public class RealmsClient {
    private String execute(Request<?> r) throws RealmsServiceException {
       r.cookie("sid", this.sessionId);
       r.cookie("user", this.username);
-      r.cookie("version", this.clientVersion);
+      r.cookie("version", RealmsSharedConstants.VERSION_STRING);
+      String realmsVersion = RealmsVersion.getVersion();
+      if (realmsVersion != null) {
+         r.cookie("realms_version", realmsVersion);
+      }
 
       try {
          int responseCode = r.responseCode();
          if (responseCode == 503) {
             int pauseTime = r.getRetryAfterHeader();
             throw new RetryCallException(pauseTime);
-         } else if (responseCode >= 200 && responseCode < 300) {
-            return r.text();
-         } else if (responseCode == 401) {
-            String authenticationHeader = r.getHeader("WWW-Authenticate");
-            LOGGER.info("Could not authorize you against Realms server: " + authenticationHeader);
-            throw new RealmsServiceException(r.responseCode(), authenticationHeader, r.errorCode(), authenticationHeader);
          } else {
-            throw new RealmsServiceException(r.responseCode(), r.text(), r.errorCode(), r.errorMsg());
+            String responseText = r.text();
+            if (responseCode >= 200 && responseCode < 300) {
+               return responseText;
+            } else if (responseCode == 401) {
+               String authenticationHeader = r.getHeader("WWW-Authenticate");
+               LOGGER.info("Could not authorize you against Realms server: " + authenticationHeader);
+               throw new RealmsServiceException(responseCode, authenticationHeader, -1, authenticationHeader);
+            } else if (responseText != null && responseText.length() != 0) {
+               throw new RealmsServiceException(responseCode, responseText, new RealmsError(responseText));
+            } else {
+               throw new RealmsServiceException(responseCode, responseText, responseCode, "");
+            }
          }
-      } catch (McoHttpException var4) {
-         throw new RealmsServiceException(500, "Server not available!", -1, "");
+      } catch (McoHttpException var6) {
+         throw new RealmsServiceException(500, "Could not connect to Realms: " + var6.getMessage(), -1, "");
       }
    }
 }

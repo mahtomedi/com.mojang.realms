@@ -2,8 +2,11 @@ package com.mojang.realmsclient;
 
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.mojang.realmsclient.client.Ping;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.McoServer;
+import com.mojang.realmsclient.dto.PingResult;
+import com.mojang.realmsclient.dto.RegionPingResult;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.exception.RetryCallException;
 import com.mojang.realmsclient.gui.BuyRealmsScreen;
@@ -21,6 +24,7 @@ import com.mojang.realmsclient.gui.RealmsGenericErrorScreen;
 import java.io.IOException;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -37,6 +41,7 @@ import org.lwjgl.opengl.GL11;
 
 public class RealmsMainScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
+   private static final boolean overrideConfigure = false;
    protected static final int BACK_BUTTON_ID = 0;
    protected static final int PLAY_BUTTON_ID = 1;
    protected static final int BUY_BUTTON_ID = 2;
@@ -72,6 +77,7 @@ public class RealmsMainScreen extends RealmsScreen {
    private static volatile boolean mcoEnabled;
    private static boolean checkedMcoAvailability;
    private static RealmsScreen realmsGenericErrorScreen = null;
+   private static boolean regionsPinged = false;
    private boolean onLink = false;
 
    public RealmsMainScreen(RealmsScreen lastScreen) {
@@ -108,7 +114,7 @@ public class RealmsMainScreen extends RealmsScreen {
       McoServer server = this.findServer(this.selectedServerId);
       this.playButton.active(server != null && server.state == McoServer.State.OPEN && !server.expired);
       this.configureButton.active(server != null && server.state != McoServer.State.ADMIN_LOCK && server.owner.equals(Realms.getName()));
-      this.leaveButton.active(server != null && server.state != McoServer.State.ADMIN_LOCK && !server.owner.equals(Realms.getName()));
+      this.leaveButton.active(server != null && !server.owner.equals(Realms.getName()));
    }
 
    public void tick() {
@@ -117,8 +123,13 @@ public class RealmsMainScreen extends RealmsScreen {
          realmsDataFetcher.init();
          if (realmsDataFetcher.isFetchedSinceLastTry(RealmsDataFetcher.Task.SERVER_LIST)) {
             List<McoServer> newServers = realmsDataFetcher.getServers();
+            boolean ownsNonExpiredRealmServer = false;
 
             for(McoServer retrievedServer : newServers) {
+               if (this.isSelfOwnedNonExpiredServer(retrievedServer)) {
+                  ownsNonExpiredRealmServer = true;
+               }
+
                for(McoServer oldServer : this.mcoServers) {
                   if (retrievedServer.id == oldServer.id) {
                      retrievedServer.latestStatFrom(oldServer);
@@ -128,6 +139,10 @@ public class RealmsMainScreen extends RealmsScreen {
             }
 
             this.mcoServers = newServers;
+            if (!regionsPinged && ownsNonExpiredRealmServer) {
+               regionsPinged = true;
+               this.pingRegions();
+            }
          }
 
          if (realmsDataFetcher.isFetchedSinceLastTry(RealmsDataFetcher.Task.PENDING_INVITE)) {
@@ -136,6 +151,37 @@ public class RealmsMainScreen extends RealmsScreen {
 
          realmsDataFetcher.markClean();
       }
+   }
+
+   private void pingRegions() {
+      (new Thread() {
+         public void run() {
+            List<RegionPingResult> regionPingResultList = Ping.pingAllRegions();
+            RealmsClient client = RealmsClient.createRealmsClient();
+            PingResult pingResult = new PingResult();
+            pingResult.pingResults = regionPingResultList;
+            pingResult.worldIds = RealmsMainScreen.this.getOwnedNonExpiredWorldIds();
+
+            try {
+               client.sendPingResults(pingResult);
+            } catch (Throwable var5) {
+               RealmsMainScreen.LOGGER.warn("Could not send ping result to Realms: ", var5);
+            }
+
+         }
+      }).start();
+   }
+
+   private List<Long> getOwnedNonExpiredWorldIds() {
+      List<Long> ids = new ArrayList();
+
+      for(McoServer server : this.mcoServers) {
+         if (this.isSelfOwnedNonExpiredServer(server)) {
+            ids.add(server.id);
+         }
+      }
+
+      return ids;
    }
 
    private boolean isMcoEnabled() {
@@ -339,20 +385,6 @@ public class RealmsMainScreen extends RealmsScreen {
       this.selectedServerId = -1L;
    }
 
-   private McoServer getOwnWorld(long worldId) {
-      RealmsClient client = RealmsClient.createRealmsClient();
-
-      try {
-         return client.getOwnWorld(worldId);
-      } catch (RealmsServiceException var5) {
-         LOGGER.error("Couldn't get own world");
-      } catch (IOException var6) {
-         LOGGER.error("Couldn't parse response getting own world");
-      }
-
-      return null;
-   }
-
    public void keyPressed(char ch, int eventKey) {
       if (eventKey == 28 || eventKey == 156) {
          this.buttonClicked(this.playButton);
@@ -466,8 +498,8 @@ public class RealmsMainScreen extends RealmsScreen {
    }
 
    private boolean inPendingInvitationArea(int xm, int ym) {
-      int x1 = this.width() / 2 + 56;
-      int x2 = this.width() / 2 + 78;
+      int x1 = this.width() / 2 + 50;
+      int x2 = this.width() / 2 + 66;
       int y1 = 13;
       int y2 = 27;
       return x1 <= xm && xm <= x2 && y1 <= ym && ym <= y2;
@@ -482,6 +514,14 @@ public class RealmsMainScreen extends RealmsScreen {
          Realms.setScreen(longRunningMcoTaskScreen);
       }
 
+   }
+
+   private boolean isSelfOwnedServer(McoServer serverData) {
+      return serverData.owner != null && serverData.owner.equals(Realms.getName());
+   }
+
+   private boolean isSelfOwnedNonExpiredServer(McoServer serverData) {
+      return serverData.owner != null && serverData.owner.equals(Realms.getName()) && !serverData.expired;
    }
 
    private void drawExpired(int x, int y, int xm, int ym) {
@@ -592,6 +632,14 @@ public class RealmsMainScreen extends RealmsScreen {
       GL11.glPopMatrix();
    }
 
+   static {
+      String version = RealmsVersion.getVersion();
+      if (version != null) {
+         LOGGER.info("Realms library version == " + version);
+      }
+
+   }
+
    private class ServerSelectionList extends MCRSelectionList {
       public ServerSelectionList() {
          super(RealmsMainScreen.this.width(), RealmsMainScreen.this.height(), 32, RealmsMainScreen.this.height() - 64, 36);
@@ -612,14 +660,8 @@ public class RealmsMainScreen extends RealmsScreen {
                Realms.setScreen(new CreateOnlineWorldScreen(server.id, RealmsMainScreen.this));
             }
 
-            RealmsMainScreen.this.configureButton.active(server.state != McoServer.State.ADMIN_LOCK);
-            RealmsMainScreen.this.leaveButton.active(server.state != McoServer.State.ADMIN_LOCK);
-            if (!this.isSelfOwnedServer(server)) {
-               RealmsMainScreen.this.configureButton.active(false);
-            } else {
-               RealmsMainScreen.this.leaveButton.active(false);
-            }
-
+            RealmsMainScreen.this.configureButton.active(RealmsMainScreen.this.isSelfOwnedServer(server) && server.state != McoServer.State.ADMIN_LOCK);
+            RealmsMainScreen.this.leaveButton.active(!RealmsMainScreen.this.isSelfOwnedServer(server));
             RealmsMainScreen.this.playButton.active(server.state == McoServer.State.OPEN && !server.expired);
             if (doubleClick && RealmsMainScreen.this.playButton.active()) {
                RealmsMainScreen.this.play(RealmsMainScreen.this.selectedServerId);
@@ -665,7 +707,7 @@ public class RealmsMainScreen extends RealmsScreen {
       private void renderMcoServerItem(int i, int x, int y) {
          final McoServer serverData = (McoServer)RealmsMainScreen.this.mcoServers.get(i);
          int nameColor = -1;
-         if (this.isSelfOwnedServer(serverData)) {
+         if (RealmsMainScreen.this.isSelfOwnedServer(serverData)) {
             nameColor = -8388737;
          }
 
@@ -701,7 +743,7 @@ public class RealmsMainScreen extends RealmsScreen {
                RealmsMainScreen.this.drawExpired(x + dx, y + dy, this.xm, this.ym);
             } else if (serverData.state == McoServer.State.CLOSED) {
                RealmsMainScreen.this.drawClose(x + dx, y + dy, this.xm, this.ym);
-            } else if (this.isSelfOwnedServer(serverData) && serverData.daysLeft < 7) {
+            } else if (RealmsMainScreen.this.isSelfOwnedServer(serverData) && serverData.daysLeft < 7) {
                this.showStatus(x - 14, y, serverData);
                RealmsMainScreen.this.drawExpiring(x + dx, y + dy, this.xm, this.ym, serverData.daysLeft);
             } else if (serverData.state == McoServer.State.OPEN) {
@@ -748,10 +790,6 @@ public class RealmsMainScreen extends RealmsScreen {
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
             RealmsScreen.bind("textures/gui/icons.png");
          }
-      }
-
-      private boolean isSelfOwnedServer(McoServer serverData) {
-         return serverData.owner.equals(Realms.getName());
       }
    }
 }

@@ -2,8 +2,6 @@ package com.mojang.realmsclient.gui;
 
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.McoServer;
-import com.mojang.realmsclient.exception.RealmsServiceException;
-import java.io.IOException;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsEditBox;
@@ -68,11 +66,8 @@ public class InviteScreen extends RealmsScreen {
                } else {
                   this.showError(this.defaultErrorMsg);
                }
-            } catch (RealmsServiceException var4) {
+            } catch (Exception var4) {
                LOGGER.error("Couldn't invite user");
-               this.showError(var4.httpResponseContent);
-            } catch (IOException var5) {
-               LOGGER.error("Couldn't parse response inviting user", var5);
                this.showError(this.defaultErrorMsg);
             }
          }

@@ -5,9 +5,6 @@ import com.mojang.realmsclient.dto.Backup;
 import com.mojang.realmsclient.dto.McoServer;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.exception.RetryCallException;
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
 import java.net.URI;
 import java.text.DateFormat;
 import java.util.Collections;
@@ -173,13 +170,10 @@ public class WorldManagementScreen extends RealmsScreen {
 
       try {
          String downloadLink = client.download(this.serverData.id);
-         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-         clipboard.setContents(new StringSelection(downloadLink), null);
-         this.browseTo(downloadLink);
-         Realms.setScreen(new BackupLinkScreen(this, downloadLink));
-      } catch (RealmsServiceException var4) {
+         Realms.setScreen(new DownloadLatestWorldScreen(this, downloadLink, this.serverData.name));
+      } catch (RealmsServiceException var3) {
          LOGGER.error("Couldn't download world data");
-         Realms.setScreen(new RealmsGenericErrorScreen(var4, this));
+         Realms.setScreen(new RealmsGenericErrorScreen(var3, this));
       }
 
    }

@@ -319,13 +319,26 @@ public class ActivityScreen extends RealmsScreen {
                ActivityScreen.this.maxKeyWidth = keyWidth + 5;
             }
 
-            int keyRightPadding = 15;
+            int keyRightPadding = 25;
             int activityPoint = ActivityScreen.this.maxKeyWidth + keyRightPadding;
             int spaceLeft = ActivityScreen.this.matrixWidth - activityPoint;
             int days = ActivityScreen.this.dayList.size() < 1 ? 1 : ActivityScreen.this.dayList.size();
             int dayWidth = spaceLeft / days - 10;
             double hourWidth = (double)dayWidth / 24.0;
             double minuteWidth = hourWidth / 60.0;
+            GL11.glDisable(3553);
+            t.begin();
+            t.color(
+               ((ActivityScreen.ActivityRow)ActivityScreen.this.activityMap.get(i)).color.r,
+               ((ActivityScreen.ActivityRow)ActivityScreen.this.activityMap.get(i)).color.g,
+               ((ActivityScreen.ActivityRow)ActivityScreen.this.activityMap.get(i)).color.b
+            );
+            t.vertex((double)(activityPoint - 8), (double)(y + 7), 0.0);
+            t.vertex((double)(activityPoint - 3), (double)(y + 7), 0.0);
+            t.vertex((double)(activityPoint - 3), (double)(y + 2), 0.0);
+            t.vertex((double)(activityPoint - 8), (double)(y + 2), 0.0);
+            t.end();
+            GL11.glEnable(3553);
             GL11.glDisable(3553);
             t.begin();
             t.color(8421504);

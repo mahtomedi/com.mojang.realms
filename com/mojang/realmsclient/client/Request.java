@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 
@@ -28,8 +29,10 @@ public abstract class Request<T extends Request> {
 
          this.connection.setConnectTimeout(connectTimeout);
          this.connection.setReadTimeout(readTimeout);
-      } catch (Exception var5) {
-         throw new McoHttpException("Failed URL: " + url, var5);
+      } catch (MalformedURLException var5) {
+         throw new McoHttpException(var5.getMessage(), var5);
+      } catch (IOException var6) {
+         throw new McoHttpException(var6.getMessage(), var6);
       }
    }
 
@@ -57,7 +60,7 @@ public abstract class Request<T extends Request> {
          this.connect();
          return this.connection.getResponseCode();
       } catch (Exception var2) {
-         throw new McoHttpException("Failed URL: " + this.url, var2);
+         throw new McoHttpException(var2.getMessage(), var2);
       }
    }
 
@@ -88,7 +91,7 @@ public abstract class Request<T extends Request> {
          this.dispose();
          return result;
       } catch (IOException var2) {
-         throw new McoHttpException("Failed URL: " + this.url, var2);
+         throw new McoHttpException(var2.getMessage(), var2);
       }
    }
 
@@ -182,15 +185,6 @@ public abstract class Request<T extends Request> {
       return new Request.Put(url, content.getBytes(), connectTimeoutMillis, readTimeoutMillis);
    }
 
-   public int errorCode() {
-      try {
-         String errorCode = this.connection.getHeaderField("Error-Code");
-         return Integer.valueOf(errorCode);
-      } catch (Exception var2) {
-         return -1;
-      }
-   }
-
    public String getHeader(String header) {
       return getHeader(this.connection, header);
    }
@@ -199,14 +193,6 @@ public abstract class Request<T extends Request> {
       try {
          return connection.getHeaderField(header);
       } catch (Exception var3) {
-         return "";
-      }
-   }
-
-   public String errorMsg() {
-      try {
-         return this.connection.getHeaderField("Error-Msg");
-      } catch (Exception var2) {
          return "";
       }
    }
@@ -223,7 +209,7 @@ public abstract class Request<T extends Request> {
             this.connection.connect();
             return this;
          } catch (Exception var2) {
-            throw new McoHttpException("Failed URL: " + this.url, var2);
+            throw new McoHttpException(var2.getMessage(), var2);
          }
       }
    }
@@ -241,7 +227,7 @@ public abstract class Request<T extends Request> {
             this.connection.setRequestMethod("GET");
             return this;
          } catch (Exception var2) {
-            throw new McoHttpException("Failed URL: " + this.url, var2);
+            throw new McoHttpException(var2.getMessage(), var2);
          }
       }
    }
@@ -256,6 +242,10 @@ public abstract class Request<T extends Request> {
 
       public Request.Post doConnect() {
          try {
+            if (this.content != null) {
+               this.connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+            }
+
             this.connection.setDoInput(true);
             this.connection.setDoOutput(true);
             this.connection.setUseCaches(false);
@@ -265,7 +255,7 @@ public abstract class Request<T extends Request> {
             out.flush();
             return this;
          } catch (Exception var2) {
-            throw new McoHttpException("Failed URL: " + this.url, var2);
+            throw new McoHttpException(var2.getMessage(), var2);
          }
       }
    }
@@ -280,6 +270,10 @@ public abstract class Request<T extends Request> {
 
       public Request.Put doConnect() {
          try {
+            if (this.content != null) {
+               this.connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+            }
+
             this.connection.setDoOutput(true);
             this.connection.setDoInput(true);
             this.connection.setRequestMethod("PUT");
@@ -288,7 +282,7 @@ public abstract class Request<T extends Request> {
             os.flush();
             return this;
          } catch (Exception var2) {
-            throw new McoHttpException("Failed URL: " + this.url, var2);
+            throw new McoHttpException(var2.getMessage(), var2);
          }
       }
    }

@@ -1,15 +1,21 @@
 package com.mojang.realmsclient.gui;
 
 import com.mojang.realmsclient.dto.Backup;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsScreen;
+import net.minecraft.realms.Tezzelator;
 import org.lwjgl.input.Keyboard;
 
 public class BackupInfoScreen extends RealmsScreen {
    private final RealmsScreen lastScreen;
    private final int BUTTON_BACK_ID = 0;
    private final Backup backup;
+   private List<String> keys = new ArrayList();
+   private BackupInfoScreen.BackupInfoList backupInfoList;
    String[] difficulties = new String[]{
       getLocalizedString("options.difficulty.peaceful"),
       getLocalizedString("options.difficulty.easy"),
@@ -25,6 +31,12 @@ public class BackupInfoScreen extends RealmsScreen {
    public BackupInfoScreen(RealmsScreen lastScreen, Backup backup) {
       this.lastScreen = lastScreen;
       this.backup = backup;
+      if (backup.changeList != null) {
+         for(Entry<String, String> entry : backup.changeList.entrySet()) {
+            this.keys.add(entry.getKey());
+         }
+      }
+
    }
 
    public void tick() {
@@ -32,7 +44,8 @@ public class BackupInfoScreen extends RealmsScreen {
 
    public void init() {
       Keyboard.enableRepeatEvents(true);
-      this.buttonsAdd(newButton(0, this.width() / 2 - 100, this.height() / 4 + 120 + 12, getLocalizedString("gui.back")));
+      this.buttonsAdd(newButton(0, this.width() / 2 - 100, this.height() / 4 + 120 + 24, getLocalizedString("gui.back")));
+      this.backupInfoList = new BackupInfoScreen.BackupInfoList();
    }
 
    public void removed() {
@@ -57,18 +70,8 @@ public class BackupInfoScreen extends RealmsScreen {
 
    public void render(int xm, int ym, float a) {
       this.renderBackground();
-      int y = 17;
       this.drawCenteredString("Changes from last backup", this.width() / 2, 10, 16777215);
-      y += 30;
-
-      for(String key : this.backup.changeList.keySet()) {
-         this.drawString(key, this.width() / 2 - 100, y, 16777215);
-         y += 12;
-         String metadataValue = (String)this.backup.changeList.get(key);
-         this.drawString(this.checkForSpecificMetadata(key, metadataValue), this.width() / 2 - 100, y, 10526880);
-         y += 14;
-      }
-
+      this.backupInfoList.render(xm, ym, a);
       super.render(xm, ym, a);
    }
 
@@ -94,6 +97,45 @@ public class BackupInfoScreen extends RealmsScreen {
          return this.gameModes[Integer.parseInt(value)];
       } catch (Exception var3) {
          return "UNKNOWN";
+      }
+   }
+
+   private class BackupInfoList extends MovableScrolledSelectionList {
+      public BackupInfoList() {
+         super(0, 30, BackupInfoScreen.this.width(), BackupInfoScreen.this.height() - 84, 30);
+      }
+
+      @Override
+      protected int getNumberOfItems() {
+         return BackupInfoScreen.this.backup.changeList.size();
+      }
+
+      @Override
+      protected void selectItem(int item, boolean doubleClick) {
+      }
+
+      @Override
+      protected boolean isSelectedItem(int item) {
+         return false;
+      }
+
+      @Override
+      protected int getMaxPosition() {
+         return this.getNumberOfItems() * 30;
+      }
+
+      @Override
+      protected void renderBackground() {
+      }
+
+      @Override
+      protected void renderItem(int i, int x, int y, int h, Tezzelator t) {
+         String key = (String)BackupInfoScreen.this.keys.get(i);
+         BackupInfoScreen.this.drawString(key, BackupInfoScreen.this.width() / 2 - 40, y, 16777215);
+         String metadataValue = (String)BackupInfoScreen.this.backup.changeList.get(key);
+         BackupInfoScreen.this.drawString(
+            BackupInfoScreen.this.checkForSpecificMetadata(key, metadataValue), BackupInfoScreen.this.width() / 2 - 40, y + 12, 10526880
+         );
       }
    }
 }

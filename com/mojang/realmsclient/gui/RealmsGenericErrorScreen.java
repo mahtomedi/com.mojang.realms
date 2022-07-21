@@ -24,7 +24,7 @@ public class RealmsGenericErrorScreen extends RealmsScreen {
    private void errorMessage(RealmsServiceException realmsServiceException) {
       if (realmsServiceException.errorCode != -1) {
          this.line1 = "Realms (" + realmsServiceException.errorCode + "):";
-         this.line2 = realmsServiceException.errorMsg;
+         this.line2 = getLocalizedString("mco.errorMessage." + realmsServiceException.errorCode);
       } else {
          this.line1 = "An error occurred (" + realmsServiceException.httpResultCode + "):";
          this.line2 = realmsServiceException.httpResponseContent;

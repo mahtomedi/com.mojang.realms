@@ -17,7 +17,7 @@ public class RealmsClientOutdatedScreen extends RealmsScreen {
 
    public void init() {
       this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 100, RealmsConstants.row(12), "Back") {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             Realms.setScreen(RealmsClientOutdatedScreen.this.lastScreen);
          }
       });

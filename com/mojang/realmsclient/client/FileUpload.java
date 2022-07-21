@@ -17,6 +17,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import net.minecraft.Util;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
@@ -63,8 +64,8 @@ public class FileUpload {
 
    public void upload(Consumer<UploadResult> callback) {
       if (this.uploadTask == null) {
-         this.uploadTask = CompletableFuture.supplyAsync(() -> this.requestUpload(0));
-         this.uploadTask.thenAcceptAsync(callback);
+         this.uploadTask = CompletableFuture.supplyAsync(() -> this.requestUpload(0), Util.backgroundExecutor());
+         this.uploadTask.thenAccept(callback);
       }
    }
 

@@ -8,7 +8,6 @@ import com.mojang.realmsclient.dto.RealmsWorldOptions;
 import com.mojang.realmsclient.dto.WorldTemplate;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.gui.RealmsConstants;
-import com.mojang.realmsclient.gui.RealmsHideableButton;
 import com.mojang.realmsclient.util.RealmsTasks;
 import com.mojang.realmsclient.util.RealmsTextureManager;
 import java.io.IOException;
@@ -51,10 +50,10 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
    private RealmsButton playersButton;
    private RealmsButton settingsButton;
    private RealmsButton subscriptionButton;
-   private RealmsHideableButton optionsButton;
-   private RealmsHideableButton backupButton;
-   private RealmsHideableButton resetWorldButton;
-   private RealmsHideableButton switchMinigameButton;
+   private RealmsButton optionsButton;
+   private RealmsButton backupButton;
+   private RealmsButton resetWorldButton;
+   private RealmsButton switchMinigameButton;
    private boolean stateChanged;
    private int hoveredSlot = -1;
    private int animTick;
@@ -78,7 +77,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
          this.playersButton = new RealmsButton(
             2, this.centerButton(0, 3), RealmsConstants.row(0), 100, 20, getLocalizedString("mco.configure.world.buttons.players")
          ) {
-            public void onClick(double mouseX, double mouseY) {
+            public void onPress() {
                Realms.setScreen(new RealmsPlayerScreen(RealmsConfigureWorldScreen.this, RealmsConfigureWorldScreen.this.serverData));
             }
          }
@@ -87,7 +86,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
          this.settingsButton = new RealmsButton(
             3, this.centerButton(1, 3), RealmsConstants.row(0), 100, 20, getLocalizedString("mco.configure.world.buttons.settings")
          ) {
-            public void onClick(double mouseX, double mouseY) {
+            public void onPress() {
                Realms.setScreen(new RealmsSettingsScreen(RealmsConfigureWorldScreen.this, RealmsConfigureWorldScreen.this.serverData.clone()));
             }
          }
@@ -96,7 +95,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
          this.subscriptionButton = new RealmsButton(
             4, this.centerButton(2, 3), RealmsConstants.row(0), 100, 20, getLocalizedString("mco.configure.world.buttons.subscription")
          ) {
-            public void onClick(double mouseX, double mouseY) {
+            public void onPress() {
                Realms.setScreen(
                   new RealmsSubscriptionInfoScreen(
                      RealmsConfigureWorldScreen.this, RealmsConfigureWorldScreen.this.serverData.clone(), RealmsConfigureWorldScreen.this.lastScreen
@@ -106,11 +105,10 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
          }
       );
       this.buttonsAdd(
-         this.optionsButton = new RealmsHideableButton(
+         this.optionsButton = new RealmsButton(
             5, this.leftButton(0), RealmsConstants.row(13) - 5, 90, 20, getLocalizedString("mco.configure.world.buttons.options")
          ) {
-            @Override
-            public void clicked(double mx, double my) {
+            public void onPress() {
                Realms.setScreen(
                   new RealmsSlotOptionsScreen(
                      RealmsConfigureWorldScreen.this,
@@ -123,11 +121,8 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
          }
       );
       this.buttonsAdd(
-         this.backupButton = new RealmsHideableButton(
-            6, this.leftButton(1), RealmsConstants.row(13) - 5, 90, 20, getLocalizedString("mco.configure.world.backup")
-         ) {
-            @Override
-            public void clicked(double mx, double my) {
+         this.backupButton = new RealmsButton(6, this.leftButton(1), RealmsConstants.row(13) - 5, 90, 20, getLocalizedString("mco.configure.world.backup")) {
+            public void onPress() {
                Realms.setScreen(
                   new RealmsBackupScreen(
                      RealmsConfigureWorldScreen.this, RealmsConfigureWorldScreen.this.serverData.clone(), RealmsConfigureWorldScreen.this.serverData.activeSlot
@@ -137,11 +132,10 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
          }
       );
       this.buttonsAdd(
-         this.resetWorldButton = new RealmsHideableButton(
+         this.resetWorldButton = new RealmsButton(
             7, this.leftButton(2), RealmsConstants.row(13) - 5, 90, 20, getLocalizedString("mco.configure.world.buttons.resetworld")
          ) {
-            @Override
-            public void clicked(double mx, double my) {
+            public void onPress() {
                Realms.setScreen(
                   new RealmsResetWorldScreen(
                      RealmsConfigureWorldScreen.this, RealmsConfigureWorldScreen.this.serverData.clone(), RealmsConfigureWorldScreen.this.getNewScreen()
@@ -151,11 +145,10 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
          }
       );
       this.buttonsAdd(
-         this.switchMinigameButton = new RealmsHideableButton(
+         this.switchMinigameButton = new RealmsButton(
             8, this.leftButton(0), RealmsConstants.row(13) - 5, 100, 20, getLocalizedString("mco.configure.world.buttons.switchminigame")
          ) {
-            @Override
-            public void clicked(double mx, double my) {
+            public void onPress() {
                RealmsSelectWorldTemplateScreen minigameScreen = new RealmsSelectWorldTemplateScreen(
                   RealmsConfigureWorldScreen.this, null, RealmsServer.WorldType.MINIGAME
                );
@@ -165,7 +158,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
          }
       );
       this.buttonsAdd(new RealmsButton(0, this.right_x - 80 + 8, RealmsConstants.row(13) - 5, 70, 20, getLocalizedString("gui.back")) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             RealmsConfigureWorldScreen.this.backButtonClicked();
          }
       });
@@ -565,7 +558,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
       this.hide(this.resetWorldButton);
    }
 
-   private void hide(RealmsHideableButton button) {
+   private void hide(RealmsButton button) {
       button.setVisible(false);
       this.removeButton(button);
    }
@@ -576,7 +569,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
       this.show(this.resetWorldButton);
    }
 
-   private void show(RealmsHideableButton button) {
+   private void show(RealmsButton button) {
       button.setVisible(true);
       this.buttonsAdd(button);
    }

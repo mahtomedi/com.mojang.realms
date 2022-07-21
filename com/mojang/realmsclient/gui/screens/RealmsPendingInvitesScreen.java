@@ -51,7 +51,7 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
          }
       }).start();
       this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 75, this.height() - 32, 153, 20, getLocalizedString("gui.done")) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             Realms.setScreen(new RealmsMainScreen(RealmsPendingInvitesScreen.this.lastScreen));
          }
       });

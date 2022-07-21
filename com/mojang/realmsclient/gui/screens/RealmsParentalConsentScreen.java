@@ -23,12 +23,12 @@ public class RealmsParentalConsentScreen extends RealmsScreen {
       String back = getLocalizedString("gui.back");
       int buttonWidth = Math.max(this.fontWidth(updateAccount), this.fontWidth(back)) + 30;
       this.buttonsAdd(new RealmsButton(0, this.width() / 2 - (buttonWidth + 5), RealmsConstants.row(13), buttonWidth, 20, back) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             Realms.setScreen(RealmsParentalConsentScreen.this.nextScreen);
          }
       });
       this.buttonsAdd(new RealmsButton(1, this.width() / 2 + 5, RealmsConstants.row(13), buttonWidth, 20, updateAccount) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             RealmsUtil.browseTo("https://minecraft.net/update-account");
          }
       });

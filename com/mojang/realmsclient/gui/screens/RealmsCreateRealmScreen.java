@@ -39,13 +39,13 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
       this.setKeyboardHandlerSendRepeatsToGui(true);
       this.buttonsAdd(
          this.createButton = new RealmsButton(0, this.width() / 2 - 100, this.height() / 4 + 120 + 17, 97, 20, getLocalizedString("mco.create.world")) {
-            public void onClick(double mouseX, double mouseY) {
+            public void onPress() {
                RealmsCreateRealmScreen.this.createWorld();
             }
          }
       );
       this.buttonsAdd(new RealmsButton(1, this.width() / 2 + 5, this.height() / 4 + 120 + 17, 95, 20, getLocalizedString("gui.cancel")) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             Realms.setScreen(RealmsCreateRealmScreen.this.lastScreen);
          }
       });
@@ -74,9 +74,6 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
          case 257:
          case 335:
             this.createWorld();
-            return true;
-         case 258:
-            this.focusNext();
             return true;
          default:
             this.createButton.active(this.valid());

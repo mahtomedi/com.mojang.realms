@@ -45,12 +45,12 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
       };
       this.setKeyboardHandlerSendRepeatsToGui(true);
       this.buttonsAdd(new RealmsButton(0, this.width() / 2 + 8, RealmsConstants.row(12), 97, 20, getLocalizedString("gui.back")) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             Realms.setScreen(RealmsResetNormalWorldScreen.this.lastScreen);
          }
       });
       this.buttonsAdd(this.resetButton = new RealmsButton(1, this.width() / 2 - 102, RealmsConstants.row(12), 97, 20, this.buttonTitle) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             RealmsResetNormalWorldScreen.this.onReset();
          }
       });
@@ -61,18 +61,18 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
       this.focusOn(this.seedEdit);
       this.buttonsAdd(
          this.levelTypeButton = new RealmsButton(2, this.width() / 2 - 102, RealmsConstants.row(4), 205, 20, this.levelTypeTitle()) {
-            public void onClick(double mouseX, double mouseY) {
+            public void onPress() {
                RealmsResetNormalWorldScreen.this.levelTypeIndex = (RealmsResetNormalWorldScreen.this.levelTypeIndex + 1)
                   % RealmsResetNormalWorldScreen.this.levelTypes.length;
-               this.msg(RealmsResetNormalWorldScreen.this.levelTypeTitle());
+               this.setMessage(RealmsResetNormalWorldScreen.this.levelTypeTitle());
             }
          }
       );
       this.buttonsAdd(
          this.generateStructuresButton = new RealmsButton(3, this.width() / 2 - 102, RealmsConstants.row(6) - 2, 205, 20, this.generateStructuresTitle()) {
-            public void onClick(double mouseX, double mouseY) {
+            public void onPress() {
                RealmsResetNormalWorldScreen.this.generateStructures = !RealmsResetNormalWorldScreen.this.generateStructures;
-               this.msg(RealmsResetNormalWorldScreen.this.generateStructuresTitle());
+               this.setMessage(RealmsResetNormalWorldScreen.this.generateStructuresTitle());
             }
          }
       );

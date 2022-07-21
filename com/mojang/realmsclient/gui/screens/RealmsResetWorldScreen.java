@@ -74,7 +74,7 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTempla
 
    public void init() {
       this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 40, RealmsConstants.row(14) - 10, 80, 20, this.buttonTitle) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             Realms.setScreen(RealmsResetWorldScreen.this.lastScreen);
          }
       });

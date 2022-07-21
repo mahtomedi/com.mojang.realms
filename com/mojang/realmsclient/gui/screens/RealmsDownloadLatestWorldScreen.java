@@ -53,7 +53,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
    public void init() {
       this.setKeyboardHandlerSendRepeatsToGui(true);
       this.buttonsAdd(this.cancelButton = new RealmsButton(0, this.width() / 2 - 100, this.height() - 42, 200, 20, getLocalizedString("gui.cancel")) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             RealmsDownloadLatestWorldScreen.this.cancelled = true;
             RealmsDownloadLatestWorldScreen.this.backButtonClicked();
          }
@@ -241,7 +241,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
                         if (fileDownload.isError()) {
                            fileDownload.cancel();
                            RealmsDownloadLatestWorldScreen.this.errorMessage = RealmsScreen.getLocalizedString("mco.download.failed");
-                           RealmsDownloadLatestWorldScreen.this.cancelButton.msg(RealmsScreen.getLocalizedString("gui.done"));
+                           RealmsDownloadLatestWorldScreen.this.cancelButton.setMessage(RealmsScreen.getLocalizedString("gui.done"));
                            return;
                         }
    
@@ -264,7 +264,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
    
                      RealmsDownloadLatestWorldScreen.this.finished = true;
                      RealmsDownloadLatestWorldScreen.this.status = RealmsScreen.getLocalizedString("mco.download.done");
-                     RealmsDownloadLatestWorldScreen.this.cancelButton.msg(RealmsScreen.getLocalizedString("gui.done"));
+                     RealmsDownloadLatestWorldScreen.this.cancelButton.setMessage(RealmsScreen.getLocalizedString("gui.done"));
                      return;
                   }
                } catch (InterruptedException var9) {

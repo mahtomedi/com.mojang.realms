@@ -39,13 +39,13 @@ public class RealmsTermsScreen extends RealmsScreen {
       int column2X = this.width() / 2 + 4;
       this.buttonsAdd(
          this.agreeButton = new RealmsButton(1, column1X, RealmsConstants.row(12), columnWidth, 20, getLocalizedString("mco.terms.buttons.agree")) {
-            public void onClick(double mouseX, double mouseY) {
+            public void onPress() {
                RealmsTermsScreen.this.agreedToTos();
             }
          }
       );
       this.buttonsAdd(new RealmsButton(2, column2X, RealmsConstants.row(12), columnWidth, 20, getLocalizedString("mco.terms.buttons.disagree")) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             Realms.setScreen(RealmsTermsScreen.this.lastScreen);
          }
       });

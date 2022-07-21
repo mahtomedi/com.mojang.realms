@@ -124,14 +124,14 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
             20,
             getLocalizedString(this.worldType == RealmsServer.WorldType.MINIGAME ? "gui.cancel" : "gui.back")
          ) {
-            public void onClick(double mouseX, double mouseY) {
+            public void onPress() {
                RealmsSelectWorldTemplateScreen.this.backButtonClicked();
             }
          }
       );
       this.buttonsAdd(
          this.selectButton = new RealmsButton(1, this.width() / 2 - 154, this.height() - 32, 153, 20, getLocalizedString("mco.template.button.select")) {
-            public void onClick(double mouseX, double mouseY) {
+            public void onPress() {
                RealmsSelectWorldTemplateScreen.this.selectTemplate();
             }
          }

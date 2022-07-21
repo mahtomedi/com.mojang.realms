@@ -30,18 +30,18 @@ public class RealmsLongConfirmationScreen extends RealmsScreen {
    public void init() {
       if (this.yesNoQuestion) {
          this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 105, RealmsConstants.row(8), 100, 20, this.yesButton) {
-            public void onClick(double mouseX, double mouseY) {
+            public void onPress() {
                RealmsLongConfirmationScreen.this.parent.confirmResult(true, RealmsLongConfirmationScreen.this.id);
             }
          });
          this.buttonsAdd(new RealmsButton(1, this.width() / 2 + 5, RealmsConstants.row(8), 100, 20, this.noButton) {
-            public void onClick(double mouseX, double mouseY) {
+            public void onPress() {
                RealmsLongConfirmationScreen.this.parent.confirmResult(false, RealmsLongConfirmationScreen.this.id);
             }
          });
       } else {
          this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 50, RealmsConstants.row(8), 100, 20, this.okButton) {
-            public void onClick(double mouseX, double mouseY) {
+            public void onPress() {
                RealmsLongConfirmationScreen.this.parent.confirmResult(true, RealmsLongConfirmationScreen.this.id);
             }
          });

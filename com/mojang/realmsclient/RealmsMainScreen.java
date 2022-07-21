@@ -189,12 +189,12 @@ public class RealmsMainScreen extends RealmsScreen {
 
    public void addButtons() {
       this.buttonsAdd(this.playButton = new RealmsButton(1, this.width() / 2 - 98, this.height() - 32, 98, 20, getLocalizedString("mco.selectServer.play")) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             RealmsMainScreen.this.onPlay();
          }
       });
       this.buttonsAdd(this.backButton = new RealmsButton(0, this.width() / 2 + 6, this.height() - 32, 98, 20, getLocalizedString("gui.back")) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             if (!RealmsMainScreen.this.justClosedPopup) {
                Realms.setScreen(RealmsMainScreen.this.lastScreen);
             }
@@ -846,7 +846,7 @@ public class RealmsMainScreen extends RealmsScreen {
          if (this.hasFetchedServers && this.realmsServers.isEmpty()) {
             this.buttonsClear();
             this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 49, this.height() - 32, 98, 20, getLocalizedString("gui.back")) {
-               public void onClick(double mouseX, double mouseY) {
+               public void onPress() {
                   Realms.setScreen(RealmsMainScreen.this.lastScreen);
                }
             });
@@ -855,7 +855,7 @@ public class RealmsMainScreen extends RealmsScreen {
          if (this.trialsAvailable && !this.createdTrial) {
             buttonHeight -= 10;
             this.buttonsAdd(new RealmsButton(4, this.width() / 2 + 52, buttonHeight, 98, 20, getLocalizedString("mco.selectServer.trial")) {
-               public void onClick(double mouseX, double mouseY) {
+               public void onPress() {
                   RealmsMainScreen.this.createTrial();
                }
             });
@@ -863,7 +863,7 @@ public class RealmsMainScreen extends RealmsScreen {
          }
 
          this.buttonsAdd(new RealmsButton(3, this.width() / 2 + 52, buttonHeight, 98, 20, getLocalizedString("mco.selectServer.buy")) {
-            public void onClick(double mouseX, double mouseY) {
+            public void onPress() {
                RealmsUtil.browseTo("https://minecraft.net/realms");
             }
          });

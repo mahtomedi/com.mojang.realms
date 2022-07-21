@@ -53,7 +53,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
       this.setKeyboardHandlerSendRepeatsToGui(true);
       this.buttonsAdd(
          new RealmsButton(1, this.column2_x, RealmsConstants.row(1), this.column_width + 10, 20, getLocalizedString("mco.configure.world.buttons.invite")) {
-            public void onClick(double mouseX, double mouseY) {
+            public void onPress() {
                Realms.setScreen(new RealmsInviteScreen(RealmsPlayerScreen.this.lastScreen, RealmsPlayerScreen.this, RealmsPlayerScreen.this.serverData));
             }
          }
@@ -61,7 +61,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
       RealmsButton activityFeedButton = new RealmsButton(
          3, this.column2_x, RealmsConstants.row(3), this.column_width + 10, 20, getLocalizedString("mco.configure.world.buttons.activity")
       ) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             Realms.setScreen(new RealmsActivityScreen(RealmsPlayerScreen.this, RealmsPlayerScreen.this.serverData));
          }
       };
@@ -71,7 +71,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
          new RealmsButton(
             0, this.column2_x + this.column_width / 2 + 2, RealmsConstants.row(12), this.column_width / 2 + 10 - 2, 20, getLocalizedString("gui.back")
          ) {
-            public void onClick(double mouseX, double mouseY) {
+            public void onPress() {
                RealmsPlayerScreen.this.backButtonClicked();
             }
          }

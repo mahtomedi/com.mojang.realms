@@ -67,12 +67,12 @@ public class RealmsUploadScreen extends RealmsScreen {
    public void init() {
       this.setKeyboardHandlerSendRepeatsToGui(true);
       this.backButton = new RealmsButton(1, this.width() / 2 - 100, this.height() - 42, 200, 20, getLocalizedString("gui.back")) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             RealmsUploadScreen.this.onBack();
          }
       };
       this.buttonsAdd(this.cancelButton = new RealmsButton(0, this.width() / 2 - 100, this.height() - 42, 200, 20, getLocalizedString("gui.cancel")) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             RealmsUploadScreen.this.onCancel();
          }
       });
@@ -322,7 +322,7 @@ public class RealmsUploadScreen extends RealmsScreen {
                               if (uploadResult.statusCode >= 200 && uploadResult.statusCode < 300) {
                                  RealmsUploadScreen.this.uploadFinished = true;
                                  RealmsUploadScreen.this.status = RealmsScreen.getLocalizedString("mco.upload.done");
-                                 RealmsUploadScreen.this.backButton.msg(RealmsScreen.getLocalizedString("gui.done"));
+                                 RealmsUploadScreen.this.backButton.setMessage(RealmsScreen.getLocalizedString("gui.done"));
                                  UploadTokenCache.invalidate(wid);
                               } else if (uploadResult.statusCode == 400 && uploadResult.errorMessage != null) {
                                  RealmsUploadScreen.this.errorMessage = RealmsScreen.getLocalizedString(

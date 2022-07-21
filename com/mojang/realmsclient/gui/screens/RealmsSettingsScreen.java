@@ -36,13 +36,13 @@ public class RealmsSettingsScreen extends RealmsScreen {
       int center = this.width() / 2 - 106;
       this.buttonsAdd(
          this.doneButton = new RealmsButton(1, center - 2, RealmsConstants.row(12), 106, 20, getLocalizedString("mco.configure.world.buttons.done")) {
-            public void onClick(double mouseX, double mouseY) {
+            public void onPress() {
                RealmsSettingsScreen.this.save();
             }
          }
       );
       this.buttonsAdd(new RealmsButton(0, this.width() / 2 + 2, RealmsConstants.row(12), 106, 20, getLocalizedString("gui.cancel")) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             Realms.setScreen(RealmsSettingsScreen.this.configureWorldScreen);
          }
       });
@@ -55,7 +55,7 @@ public class RealmsSettingsScreen extends RealmsScreen {
             20,
             getLocalizedString(this.serverData.state.equals(RealmsServer.State.OPEN) ? "mco.configure.world.buttons.close" : "mco.configure.world.buttons.open")
          ) {
-            public void onClick(double mouseX, double mouseY) {
+            public void onPress() {
                if (RealmsSettingsScreen.this.serverData.state.equals(RealmsServer.State.OPEN)) {
                   String line2 = RealmsScreen.getLocalizedString("mco.configure.world.close.question.line1");
                   String line3 = RealmsScreen.getLocalizedString("mco.configure.world.close.question.line2");
@@ -107,9 +107,6 @@ public class RealmsSettingsScreen extends RealmsScreen {
          case 257:
          case 335:
             this.save();
-            return true;
-         case 258:
-            this.focusNext();
             return true;
          default:
             return super.keyPressed(eventKey, scancode, mods);

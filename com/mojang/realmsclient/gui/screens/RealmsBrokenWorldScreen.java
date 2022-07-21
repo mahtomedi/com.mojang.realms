@@ -60,7 +60,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
       this.left_x = this.width() / 2 - 150;
       this.right_x = this.width() / 2 + 190;
       this.buttonsAdd(new RealmsButton(0, this.right_x - 80 + 8, RealmsConstants.row(13) - 5, 70, 20, getLocalizedString("gui.back")) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             RealmsBrokenWorldScreen.this.backButtonClicked();
          }
       });
@@ -90,7 +90,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
 
          if (this.slotsThatHasBeenDownloaded.contains(entry.getKey())) {
             downloadButton.active(false);
-            downloadButton.msg(getLocalizedString("mco.brokenworld.downloaded"));
+            downloadButton.setMessage(getLocalizedString("mco.brokenworld.downloaded"));
          }
 
          this.buttonsAdd(downloadButton);
@@ -103,7 +103,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
                20,
                getLocalizedString("mco.brokenworld.reset")
             ) {
-               public void onClick(double mouseX, double mouseY) {
+               public void onPress() {
                   int slot = RealmsBrokenWorldScreen.resetButtonIds.indexOf(this.id()) + 1;
                   RealmsResetWorldScreen realmsResetWorldScreen = new RealmsResetWorldScreen(
                      RealmsBrokenWorldScreen.this, RealmsBrokenWorldScreen.this.serverData, RealmsBrokenWorldScreen.this
@@ -324,7 +324,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
          super(id, x, RealmsConstants.row(8), 80, 20, msg);
       }
 
-      public void onClick(double mouseX, double mouseY) {
+      public void onPress() {
          String line2 = RealmsScreen.getLocalizedString("mco.configure.world.restore.download.question.line1");
          String line3 = RealmsScreen.getLocalizedString("mco.configure.world.restore.download.question.line2");
          Realms.setScreen(new RealmsLongConfirmationScreen(RealmsBrokenWorldScreen.this, RealmsLongConfirmationScreen.Type.Info, line2, line3, true, this.id()));
@@ -336,7 +336,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
          super(id, x, RealmsConstants.row(8), 80, 20, msg);
       }
 
-      public void onClick(double mouseX, double mouseY) {
+      public void onPress() {
          int slot = RealmsBrokenWorldScreen.playButtonIds.indexOf(this.id()) + 1;
          if (((RealmsWorldOptions)RealmsBrokenWorldScreen.this.serverData.slots.get(slot)).empty) {
             RealmsResetWorldScreen resetWorldScreen = new RealmsResetWorldScreen(

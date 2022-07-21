@@ -67,7 +67,7 @@ public class RealmsActivityScreen extends RealmsScreen {
       this.matrixWidth = this.width();
       this.list = new RealmsActivityScreen.DetailsList();
       this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 100, this.height() - 30, 200, 20, getLocalizedString("gui.back")) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             Realms.setScreen(RealmsActivityScreen.this.lastScreen);
          }
       });

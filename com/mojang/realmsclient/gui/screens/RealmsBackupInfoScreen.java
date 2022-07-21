@@ -46,7 +46,7 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
    public void init() {
       this.setKeyboardHandlerSendRepeatsToGui(true);
       this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 100, this.height() / 4 + 120 + 24, getLocalizedString("gui.back")) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             Realms.setScreen(RealmsBackupInfoScreen.this.lastScreen);
          }
       });

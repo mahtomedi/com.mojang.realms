@@ -77,7 +77,7 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements Erro
    public void init() {
       this.task.init();
       this.buttonsAdd(new RealmsButton(666, this.width() / 2 - 106, RealmsConstants.row(12), 212, 20, getLocalizedString("gui.cancel")) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             RealmsLongRunningMcoTaskScreen.this.cancelOrBackButtonClicked();
          }
       });
@@ -109,7 +109,7 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements Erro
       this.errorMessage = errorMessage;
       this.buttonsClear();
       this.buttonsAdd(new RealmsButton(667, this.width() / 2 - 106, this.height() / 4 + 120 + 12, getLocalizedString("gui.back")) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             RealmsLongRunningMcoTaskScreen.this.cancelOrBackButtonClicked();
          }
       });

@@ -64,13 +64,13 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
       this.gameModesLang[Realms.adventureId()] = getLocalizedString("gameMode.adventure");
       this.gameModesLang[Realms.spectatorId()] = getLocalizedString("gameMode.spectator");
       this.buttonsAdd(new RealmsButton(1, this.width() / 2 + 6, this.height() - 32, 153, 20, getLocalizedString("gui.back")) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             Realms.setScreen(RealmsSelectFileToUploadScreen.this.lastScreen);
          }
       });
       this.buttonsAdd(
          this.uploadButton = new RealmsButton(2, this.width() / 2 - 154, this.height() - 32, 153, 20, getLocalizedString("mco.upload.button.name")) {
-            public void onClick(double mouseX, double mouseY) {
+            public void onPress() {
                RealmsSelectFileToUploadScreen.this.upload();
             }
          }

@@ -100,12 +100,12 @@ public class RealmsBackupScreen extends RealmsScreen {
 
    private void postInit() {
       this.buttonsAdd(this.downloadButton = new RealmsButton(2, this.width() - 135, 32, 120, 20, getLocalizedString("mco.backup.button.download")) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             RealmsBackupScreen.this.downloadClicked();
          }
       });
       this.buttonsAdd(new RealmsButton(0, this.width() - 100, this.height() - 35, 85, 20, getLocalizedString("gui.back")) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             Realms.setScreen(RealmsBackupScreen.this.lastScreen);
          }
       });

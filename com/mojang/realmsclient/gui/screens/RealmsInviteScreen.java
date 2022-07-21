@@ -37,13 +37,13 @@ public class RealmsInviteScreen extends RealmsScreen {
       this.setKeyboardHandlerSendRepeatsToGui(true);
       this.buttonsAdd(
          this.inviteButton = new RealmsButton(0, this.width() / 2 - 100, RealmsConstants.row(10), getLocalizedString("mco.configure.world.buttons.invite")) {
-            public void onClick(double mouseX, double mouseY) {
+            public void onPress() {
                RealmsInviteScreen.this.onInvite();
             }
          }
       );
       this.buttonsAdd(new RealmsButton(1, this.width() / 2 - 100, RealmsConstants.row(12), getLocalizedString("gui.cancel")) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             Realms.setScreen(RealmsInviteScreen.this.lastScreen);
          }
       });
@@ -81,10 +81,7 @@ public class RealmsInviteScreen extends RealmsScreen {
    }
 
    public boolean keyPressed(int eventKey, int scancode, int mods) {
-      if (eventKey == 258) {
-         this.focusNext();
-         return true;
-      } else if (eventKey == 257 || eventKey == 335) {
+      if (eventKey == 257 || eventKey == 335) {
          this.onInvite();
          return true;
       } else if (eventKey == 256) {

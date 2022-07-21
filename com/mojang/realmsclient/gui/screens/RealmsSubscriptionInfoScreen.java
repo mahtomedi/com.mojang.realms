@@ -43,7 +43,7 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
       this.setKeyboardHandlerSendRepeatsToGui(true);
       this.buttonsAdd(
          new RealmsButton(2, this.width() / 2 - 100, RealmsConstants.row(6), getLocalizedString("mco.configure.world.subscription.extend")) {
-            public void onClick(double mouseX, double mouseY) {
+            public void onPress() {
                String extensionUrl = "https://account.mojang.com/buy/realms?sid="
                   + RealmsSubscriptionInfoScreen.this.serverData.remoteSubscriptionId
                   + "&pid="
@@ -54,14 +54,14 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
          }
       );
       this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 100, RealmsConstants.row(12), getLocalizedString("gui.back")) {
-         public void onClick(double mouseX, double mouseY) {
+         public void onPress() {
             Realms.setScreen(RealmsSubscriptionInfoScreen.this.lastScreen);
          }
       });
       if (this.serverData.expired) {
          this.buttonsAdd(
             new RealmsButton(1, this.width() / 2 - 100, RealmsConstants.row(10), getLocalizedString("mco.configure.world.delete.button")) {
-               public void onClick(double mouseX, double mouseY) {
+               public void onPress() {
                   String line2 = RealmsScreen.getLocalizedString("mco.configure.world.delete.question.line1");
                   String line3 = RealmsScreen.getLocalizedString("mco.configure.world.delete.question.line2");
                   Realms.setScreen(

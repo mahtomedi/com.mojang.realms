@@ -1,0 +1,289 @@
+package com.mojang.realmsclient.client;
+
+import com.mojang.realmsclient.exception.McoHttpException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.Proxy;
+import java.net.URL;
+
+public abstract class Request<T extends Request> {
+   protected HttpURLConnection connection;
+   private boolean connected;
+   protected String url;
+   private static final int DEFAULT_READ_TIMEOUT = 60000;
+   private static final int DEFAULT_CONNECT_TIMEOUT = 5000;
+
+   public Request(String url, int connectTimeout, int readTimeout) {
+      try {
+         this.url = url;
+         Proxy proxy = RealmsClientConfig.getProxy();
+         if (proxy != null) {
+            this.connection = (HttpURLConnection)new URL(url).openConnection(proxy);
+         } else {
+            this.connection = (HttpURLConnection)new URL(url).openConnection();
+         }
+
+         this.connection.setConnectTimeout(connectTimeout);
+         this.connection.setReadTimeout(readTimeout);
+      } catch (Exception var5) {
+         throw new McoHttpException("Failed URL: " + url, var5);
+      }
+   }
+
+   public void cookie(String key, String value) {
+      cookie(this.connection, key, value);
+   }
+
+   public static void cookie(HttpURLConnection connection, String key, String value) {
+      String cookie = connection.getRequestProperty("Cookie");
+      if (cookie == null) {
+         connection.setRequestProperty("Cookie", key + "=" + value);
+      } else {
+         connection.setRequestProperty("Cookie", cookie + ";" + key + "=" + value);
+      }
+
+   }
+
+   public T header(String name, String value) {
+      this.connection.addRequestProperty(name, value);
+      return (T)this;
+   }
+
+   public int responseCode() {
+      try {
+         this.connect();
+         return this.connection.getResponseCode();
+      } catch (Exception var2) {
+         throw new McoHttpException("Failed URL: " + this.url, var2);
+      }
+   }
+
+   public int getRetryAfterHeader() {
+      return getRetryAfterHeader(this.connection);
+   }
+
+   public static int getRetryAfterHeader(HttpURLConnection connection) {
+      String pauseTime = connection.getHeaderField("Retry-After");
+
+      try {
+         return Integer.valueOf(pauseTime);
+      } catch (Exception var3) {
+         return 5;
+      }
+   }
+
+   public String text() {
+      try {
+         this.connect();
+         String result = null;
+         if (this.responseCode() >= 400) {
+            result = this.read(this.connection.getErrorStream());
+         } else {
+            result = this.read(this.connection.getInputStream());
+         }
+
+         this.dispose();
+         return result;
+      } catch (IOException var2) {
+         throw new McoHttpException("Failed URL: " + this.url, var2);
+      }
+   }
+
+   private String read(InputStream in) throws IOException {
+      if (in == null) {
+         return "";
+      } else {
+         InputStreamReader streamReader = new InputStreamReader(in, "UTF-8");
+         StringBuilder sb = new StringBuilder();
+
+         for(int x = streamReader.read(); x != -1; x = streamReader.read()) {
+            sb.append((char)x);
+         }
+
+         return sb.toString();
+      }
+   }
+
+   private void dispose() {
+      byte[] bytes = new byte[1024];
+
+      try {
+         int count = 0;
+         InputStream in = this.connection.getInputStream();
+
+         while(in.read(bytes) > 0) {
+         }
+
+         in.close();
+      } catch (Exception var6) {
+         try {
+            InputStream errorStream = this.connection.getErrorStream();
+            int ret = 0;
+            if (errorStream == null) {
+               return;
+            }
+
+            while(errorStream.read(bytes) > 0) {
+            }
+
+            errorStream.close();
+         } catch (IOException var5) {
+         }
+      }
+
+   }
+
+   protected T connect() {
+      if (!this.connected) {
+         T t = this.doConnect();
+         this.connected = true;
+         return t;
+      } else {
+         return (T)this;
+      }
+   }
+
+   protected abstract T doConnect();
+
+   public static Request<?> get(String url) {
+      return new Request.Get(url, 5000, 60000);
+   }
+
+   public static Request<?> get(String url, int connectTimeoutMillis, int readTimeoutMillis) {
+      return new Request.Get(url, connectTimeoutMillis, readTimeoutMillis);
+   }
+
+   public static Request<?> post(String uri, String content) {
+      return new Request.Post(uri, content.getBytes(), 5000, 60000);
+   }
+
+   public static Request<?> post(String uri, String content, int connectTimeoutMillis, int readTimeoutMillis) {
+      return new Request.Post(uri, content.getBytes(), connectTimeoutMillis, readTimeoutMillis);
+   }
+
+   public static Request<?> delete(String url) {
+      return new Request.Delete(url, 5000, 60000);
+   }
+
+   public static Request<?> put(String url, String content) {
+      return new Request.Put(url, content.getBytes(), 5000, 60000);
+   }
+
+   public static Request<?> put(String url, String content, int connectTimeoutMillis, int readTimeoutMillis) {
+      return new Request.Put(url, content.getBytes(), connectTimeoutMillis, readTimeoutMillis);
+   }
+
+   public int errorCode() {
+      try {
+         String errorCode = this.connection.getHeaderField("Error-Code");
+         return Integer.valueOf(errorCode);
+      } catch (Exception var2) {
+         return -1;
+      }
+   }
+
+   public String getHeader(String header) {
+      return getHeader(this.connection, header);
+   }
+
+   public static String getHeader(HttpURLConnection connection, String header) {
+      try {
+         return connection.getHeaderField(header);
+      } catch (Exception var3) {
+         return "";
+      }
+   }
+
+   public String errorMsg() {
+      try {
+         return this.connection.getHeaderField("Error-Msg");
+      } catch (Exception var2) {
+         return "";
+      }
+   }
+
+   public static class Delete extends Request<Request.Delete> {
+      public Delete(String uri, int connectTimeout, int readTimeout) {
+         super(uri, connectTimeout, readTimeout);
+      }
+
+      public Request.Delete doConnect() {
+         try {
+            this.connection.setDoOutput(true);
+            this.connection.setRequestMethod("DELETE");
+            this.connection.connect();
+            return this;
+         } catch (Exception var2) {
+            throw new McoHttpException("Failed URL: " + this.url, var2);
+         }
+      }
+   }
+
+   public static class Get extends Request<Request.Get> {
+      public Get(String uri, int connectTimeout, int readTimeout) {
+         super(uri, connectTimeout, readTimeout);
+      }
+
+      public Request.Get doConnect() {
+         try {
+            this.connection.setDoInput(true);
+            this.connection.setDoOutput(true);
+            this.connection.setUseCaches(false);
+            this.connection.setRequestMethod("GET");
+            return this;
+         } catch (Exception var2) {
+            throw new McoHttpException("Failed URL: " + this.url, var2);
+         }
+      }
+   }
+
+   public static class Post extends Request<Request.Post> {
+      private byte[] content;
+
+      public Post(String uri, byte[] content, int connectTimeout, int readTimeout) {
+         super(uri, connectTimeout, readTimeout);
+         this.content = content;
+      }
+
+      public Request.Post doConnect() {
+         try {
+            this.connection.setDoInput(true);
+            this.connection.setDoOutput(true);
+            this.connection.setUseCaches(false);
+            this.connection.setRequestMethod("POST");
+            OutputStream out = this.connection.getOutputStream();
+            out.write(this.content);
+            out.flush();
+            return this;
+         } catch (Exception var2) {
+            throw new McoHttpException("Failed URL: " + this.url, var2);
+         }
+      }
+   }
+
+   public static class Put extends Request<Request.Put> {
+      private byte[] content;
+
+      public Put(String uri, byte[] content, int connectTimeout, int readTimeout) {
+         super(uri, connectTimeout, readTimeout);
+         this.content = content;
+      }
+
+      public Request.Put doConnect() {
+         try {
+            this.connection.setDoOutput(true);
+            this.connection.setDoInput(true);
+            this.connection.setRequestMethod("PUT");
+            OutputStream os = this.connection.getOutputStream();
+            os.write(this.content);
+            os.flush();
+            return this;
+         } catch (Exception var2) {
+            throw new McoHttpException("Failed URL: " + this.url, var2);
+         }
+      }
+   }
+}

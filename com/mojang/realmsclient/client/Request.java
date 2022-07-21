@@ -270,10 +270,6 @@ public abstract class Request<T extends Request> {
 
       public Request.Put doConnect() {
          try {
-            if (this.content != null) {
-               this.connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-            }
-
             this.connection.setDoOutput(true);
             this.connection.setDoInput(true);
             this.connection.setRequestMethod("PUT");

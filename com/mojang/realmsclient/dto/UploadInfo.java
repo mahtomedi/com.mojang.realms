@@ -9,8 +9,8 @@ import org.apache.logging.log4j.Logger;
 public class UploadInfo {
    private static final Logger LOGGER = LogManager.getLogger();
    private boolean worldClosed;
-   private String token = "";
-   private String uploadEndpoint = "";
+   private String token;
+   private String uploadEndpoint;
 
    public static UploadInfo parse(String json) {
       UploadInfo uploadInfo = new UploadInfo();
@@ -38,9 +38,5 @@ public class UploadInfo {
 
    public boolean isWorldClosed() {
       return this.worldClosed;
-   }
-
-   public void setToken(String token) {
-      this.token = token;
    }
 }

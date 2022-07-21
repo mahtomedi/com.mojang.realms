@@ -436,8 +436,8 @@ public class ActivityScreen extends RealmsScreen {
 
             RealmsScreen.bindFace(((ActivityScreen.ActivityRow)ActivityScreen.this.activityMap.get(i)).name);
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-            RealmsScreen.blit(10, y, 8.0F, 8.0F, 8, 8, 8, 8, 64.0F, 32.0F);
-            RealmsScreen.blit(10, y, 40.0F, 8.0F, 8, 8, 8, 8, 64.0F, 32.0F);
+            RealmsScreen.blit(10, y, 8.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);
+            RealmsScreen.blit(10, y, 40.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);
          }
 
       }

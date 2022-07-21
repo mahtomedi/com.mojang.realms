@@ -560,8 +560,8 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
          ConfigureWorldScreen.this.drawRemoveIcon(this.x1 - 32, y + 2, this.xm, this.ym);
          RealmsScreen.bindFace(invited);
          GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-         RealmsScreen.blit(x + 2, y + 1, 8.0F, 8.0F, 8, 8, 8, 8, 64.0F, 32.0F);
-         RealmsScreen.blit(x + 2, y + 1, 40.0F, 8.0F, 8, 8, 8, 8, 64.0F, 32.0F);
+         RealmsScreen.blit(x + 2, y + 1, 8.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);
+         RealmsScreen.blit(x + 2, y + 1, 40.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);
       }
    }
 }

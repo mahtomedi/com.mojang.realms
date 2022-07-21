@@ -498,8 +498,8 @@ public class RealmsMainScreen extends RealmsScreen {
    }
 
    private boolean inPendingInvitationArea(int xm, int ym) {
-      int x1 = this.width() / 2 + 50;
-      int x2 = this.width() / 2 + 66;
+      int x1 = this.width() / 2 + 56;
+      int x2 = this.width() / 2 + 78;
       int y1 = 13;
       int y2 = 27;
       return x1 <= xm && xm <= x2 && y1 <= ym && ym <= y2;
@@ -776,8 +776,8 @@ public class RealmsMainScreen extends RealmsScreen {
             RealmsMainScreen.this.drawString(serverData.owner, x + 2, y + 12 + 11, 5000268);
             RealmsScreen.bindFace(serverData.owner);
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-            RealmsScreen.blit(x - 36, y, 8.0F, 8.0F, 8, 8, 32, 32, 64.0F, 32.0F);
-            RealmsScreen.blit(x - 36, y, 40.0F, 8.0F, 8, 8, 32, 32, 64.0F, 32.0F);
+            RealmsScreen.blit(x - 36, y, 8.0F, 8.0F, 8, 8, 32, 32, 64.0F, 64.0F);
+            RealmsScreen.blit(x - 36, y, 40.0F, 8.0F, 8, 8, 32, 32, 64.0F, 64.0F);
          }
       }
 

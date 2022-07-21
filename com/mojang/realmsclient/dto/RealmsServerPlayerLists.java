@@ -7,10 +7,13 @@ import com.google.gson.JsonParser;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import net.minecraft.obfuscate.DontObfuscateOrShrink;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import realms.l;
 
-public class RealmsServerPlayerLists extends ValueObject {
+@DontObfuscateOrShrink
+public class RealmsServerPlayerLists extends l {
    private static final Logger LOGGER = LogManager.getLogger();
    public List<RealmsServerPlayerList> servers;
 

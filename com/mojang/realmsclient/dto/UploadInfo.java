@@ -3,11 +3,14 @@ package com.mojang.realmsclient.dto;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
-import com.mojang.realmsclient.util.JsonUtils;
+import net.minecraft.obfuscate.DontObfuscateOrShrink;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import realms.bd;
+import realms.l;
 
-public class UploadInfo {
+@DontObfuscateOrShrink
+public class UploadInfo extends l {
    private static final Logger LOGGER = LogManager.getLogger();
    @Expose
    private boolean worldClosed;
@@ -23,10 +26,10 @@ public class UploadInfo {
       try {
          JsonParser parser = new JsonParser();
          JsonObject jsonObject = parser.parse(json).getAsJsonObject();
-         uploadInfo.worldClosed = JsonUtils.getBooleanOr("worldClosed", jsonObject, false);
-         uploadInfo.token = JsonUtils.getStringOr("token", jsonObject, null);
-         uploadInfo.uploadEndpoint = JsonUtils.getStringOr("uploadEndpoint", jsonObject, null);
-         uploadInfo.port = JsonUtils.getIntOr("port", jsonObject, 8080);
+         uploadInfo.worldClosed = bd.a("worldClosed", jsonObject, false);
+         uploadInfo.token = bd.a("token", jsonObject, null);
+         uploadInfo.uploadEndpoint = bd.a("uploadEndpoint", jsonObject, null);
+         uploadInfo.port = bd.a("port", jsonObject, 8080);
       } catch (Exception var4) {
          LOGGER.error("Could not parse UploadInfo: " + var4.getMessage());
       }

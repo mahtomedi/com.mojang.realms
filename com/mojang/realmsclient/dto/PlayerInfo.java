@@ -1,6 +1,10 @@
 package com.mojang.realmsclient.dto;
 
-public class PlayerInfo {
+import net.minecraft.obfuscate.DontObfuscateOrShrink;
+import realms.l;
+
+@DontObfuscateOrShrink
+public class PlayerInfo extends l {
    private String name;
    private String uuid;
    private boolean operator = false;

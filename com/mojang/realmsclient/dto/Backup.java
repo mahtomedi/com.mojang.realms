@@ -2,15 +2,18 @@ package com.mojang.realmsclient.dto;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.realmsclient.util.JsonUtils;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import net.minecraft.obfuscate.DontObfuscateOrShrink;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import realms.bd;
+import realms.l;
 
-public class Backup extends ValueObject {
+@DontObfuscateOrShrink
+public class Backup extends l {
    private static final Logger LOGGER = LogManager.getLogger();
    public String backupId;
    public Date lastModifiedDate;
@@ -24,9 +27,9 @@ public class Backup extends ValueObject {
       Backup backup = new Backup();
 
       try {
-         backup.backupId = JsonUtils.getStringOr("backupId", object, "");
-         backup.lastModifiedDate = JsonUtils.getDateOr("lastModifiedDate", object);
-         backup.size = JsonUtils.getLongOr("size", object, 0L);
+         backup.backupId = bd.a("backupId", object, "");
+         backup.lastModifiedDate = bd.a("lastModifiedDate", object);
+         backup.size = bd.a("size", object, 0L);
          if (object.has("metadata")) {
             JsonObject metadataObject = object.getAsJsonObject("metadata");
 

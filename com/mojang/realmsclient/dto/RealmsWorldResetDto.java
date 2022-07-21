@@ -1,6 +1,10 @@
 package com.mojang.realmsclient.dto;
 
-public class RealmsWorldResetDto {
+import net.minecraft.obfuscate.DontObfuscateOrShrink;
+import realms.l;
+
+@DontObfuscateOrShrink
+public class RealmsWorldResetDto extends l {
    private final String seed;
    private final long worldTemplateId;
    private final int levelType;

@@ -2,15 +2,18 @@ package com.mojang.realmsclient.dto;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.mojang.realmsclient.util.JsonUtils;
+import net.minecraft.obfuscate.DontObfuscateOrShrink;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import realms.bd;
+import realms.l;
 
-public class Subscription extends ValueObject {
+@DontObfuscateOrShrink
+public class Subscription extends l {
    private static final Logger LOGGER = LogManager.getLogger();
    public long startDate;
    public int daysLeft;
-   public Subscription.SubscriptionType type = Subscription.SubscriptionType.NORMAL;
+   public Subscription.a type = Subscription.a.a;
 
    public static Subscription parse(String json) {
       Subscription sub = new Subscription();
@@ -18,9 +21,9 @@ public class Subscription extends ValueObject {
       try {
          JsonParser parser = new JsonParser();
          JsonObject jsonObject = parser.parse(json).getAsJsonObject();
-         sub.startDate = JsonUtils.getLongOr("startDate", jsonObject, 0L);
-         sub.daysLeft = JsonUtils.getIntOr("daysLeft", jsonObject, 0);
-         sub.type = typeFrom(JsonUtils.getStringOr("subscriptionType", jsonObject, Subscription.SubscriptionType.NORMAL.name()));
+         sub.startDate = bd.a("startDate", jsonObject, 0L);
+         sub.daysLeft = bd.a("daysLeft", jsonObject, 0);
+         sub.type = typeFrom(bd.a("subscriptionType", jsonObject, Subscription.a.a.name()));
       } catch (Exception var4) {
          LOGGER.error("Could not parse Subscription: " + var4.getMessage());
       }
@@ -28,16 +31,16 @@ public class Subscription extends ValueObject {
       return sub;
    }
 
-   private static Subscription.SubscriptionType typeFrom(String subscriptionType) {
+   private static Subscription.a typeFrom(String subscriptionType) {
       try {
-         return Subscription.SubscriptionType.valueOf(subscriptionType);
+         return Subscription.a.valueOf(subscriptionType);
       } catch (Exception var2) {
-         return Subscription.SubscriptionType.NORMAL;
+         return Subscription.a.a;
       }
    }
 
-   public static enum SubscriptionType {
-      NORMAL,
-      RECURRING;
+   public static enum a {
+      a,
+      b;
    }
 }

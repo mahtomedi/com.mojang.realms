@@ -6,10 +6,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.util.Iterator;
 import java.util.List;
+import net.minecraft.obfuscate.DontObfuscateOrShrink;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import realms.l;
 
-public class PendingInvitesList extends ValueObject {
+@DontObfuscateOrShrink
+public class PendingInvitesList extends l {
    private static final Logger LOGGER = LogManager.getLogger();
    public List<PendingInvite> pendingInvites = Lists.newArrayList();
 

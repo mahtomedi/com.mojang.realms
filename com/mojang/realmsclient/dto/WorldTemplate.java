@@ -1,11 +1,14 @@
 package com.mojang.realmsclient.dto;
 
 import com.google.gson.JsonObject;
-import com.mojang.realmsclient.util.JsonUtils;
+import net.minecraft.obfuscate.DontObfuscateOrShrink;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import realms.bd;
+import realms.l;
 
-public class WorldTemplate extends ValueObject {
+@DontObfuscateOrShrink
+public class WorldTemplate extends l {
    private static final Logger LOGGER = LogManager.getLogger();
    public String id;
    public String name;
@@ -15,21 +18,21 @@ public class WorldTemplate extends ValueObject {
    public String image;
    public String trailer;
    public String recommendedPlayers;
-   public WorldTemplate.WorldTemplateType type;
+   public WorldTemplate.a type;
 
    public static WorldTemplate parse(JsonObject node) {
       WorldTemplate template = new WorldTemplate();
 
       try {
-         template.id = JsonUtils.getStringOr("id", node, "");
-         template.name = JsonUtils.getStringOr("name", node, "");
-         template.version = JsonUtils.getStringOr("version", node, "");
-         template.author = JsonUtils.getStringOr("author", node, "");
-         template.link = JsonUtils.getStringOr("link", node, "");
-         template.image = JsonUtils.getStringOr("image", node, null);
-         template.trailer = JsonUtils.getStringOr("trailer", node, "");
-         template.recommendedPlayers = JsonUtils.getStringOr("recommendedPlayers", node, "");
-         template.type = WorldTemplate.WorldTemplateType.valueOf(JsonUtils.getStringOr("type", node, WorldTemplate.WorldTemplateType.WORLD_TEMPLATE.name()));
+         template.id = bd.a("id", node, "");
+         template.name = bd.a("name", node, "");
+         template.version = bd.a("version", node, "");
+         template.author = bd.a("author", node, "");
+         template.link = bd.a("link", node, "");
+         template.image = bd.a("image", node, null);
+         template.trailer = bd.a("trailer", node, "");
+         template.recommendedPlayers = bd.a("recommendedPlayers", node, "");
+         template.type = WorldTemplate.a.valueOf(bd.a("type", node, WorldTemplate.a.a.name()));
       } catch (Exception var3) {
          LOGGER.error("Could not parse WorldTemplate: " + var3.getMessage());
       }
@@ -37,11 +40,11 @@ public class WorldTemplate extends ValueObject {
       return template;
    }
 
-   public static enum WorldTemplateType {
-      WORLD_TEMPLATE,
-      MINIGAME,
-      ADVENTUREMAP,
-      EXPERIENCE,
-      INSPIRATION;
+   public static enum a {
+      a,
+      b,
+      c,
+      d,
+      e;
    }
 }

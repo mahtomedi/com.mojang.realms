@@ -5,8 +5,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.util.HashSet;
 import java.util.Set;
+import net.minecraft.obfuscate.DontObfuscateOrShrink;
+import realms.l;
 
-public class Ops {
+@DontObfuscateOrShrink
+public class Ops extends l {
    public Set<String> ops = new HashSet();
 
    public static Ops parse(String json) {

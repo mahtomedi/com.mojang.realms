@@ -2,11 +2,14 @@ package com.mojang.realmsclient.dto;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.mojang.realmsclient.util.JsonUtils;
+import net.minecraft.obfuscate.DontObfuscateOrShrink;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import realms.bd;
+import realms.l;
 
-public class WorldDownload {
+@DontObfuscateOrShrink
+public class WorldDownload extends l {
    private static final Logger LOGGER = LogManager.getLogger();
    public String downloadLink;
    public String resourcePackUrl;
@@ -18,9 +21,9 @@ public class WorldDownload {
       WorldDownload worldDownload = new WorldDownload();
 
       try {
-         worldDownload.downloadLink = JsonUtils.getStringOr("downloadLink", jsonObject, "");
-         worldDownload.resourcePackUrl = JsonUtils.getStringOr("resourcePackUrl", jsonObject, "");
-         worldDownload.resourcePackHash = JsonUtils.getStringOr("resourcePackHash", jsonObject, "");
+         worldDownload.downloadLink = bd.a("downloadLink", jsonObject, "");
+         worldDownload.resourcePackUrl = bd.a("resourcePackUrl", jsonObject, "");
+         worldDownload.resourcePackHash = bd.a("resourcePackHash", jsonObject, "");
       } catch (Exception var5) {
          LOGGER.error("Could not parse WorldDownload: " + var5.getMessage());
       }

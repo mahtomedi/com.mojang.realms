@@ -3,15 +3,18 @@ package com.mojang.realmsclient.dto;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.mojang.realmsclient.util.JsonUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import net.minecraft.obfuscate.DontObfuscateOrShrink;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import realms.bd;
+import realms.l;
 
-public class WorldTemplatePaginatedList extends ValueObject {
+@DontObfuscateOrShrink
+public class WorldTemplatePaginatedList extends l {
    private static final Logger LOGGER = LogManager.getLogger();
    public List<WorldTemplate> templates;
    public int page;
@@ -51,9 +54,9 @@ public class WorldTemplatePaginatedList extends ValueObject {
             }
          }
 
-         list.page = JsonUtils.getIntOr("page", object, 0);
-         list.size = JsonUtils.getIntOr("size", object, 0);
-         list.total = JsonUtils.getIntOr("total", object, 0);
+         list.page = bd.a("page", object, 0);
+         list.size = bd.a("size", object, 0);
+         list.total = bd.a("total", object, 0);
       } catch (Exception var5) {
          LOGGER.error("Could not parse WorldTemplatePaginatedList: " + var5.getMessage());
       }

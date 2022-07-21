@@ -1,9 +1,12 @@
 package com.mojang.realmsclient.dto;
 
 import com.google.gson.JsonObject;
-import com.mojang.realmsclient.util.JsonUtils;
+import net.minecraft.obfuscate.DontObfuscateOrShrink;
+import realms.bd;
+import realms.l;
 
-public class ServerActivity {
+@DontObfuscateOrShrink
+public class ServerActivity extends l {
    public String profileUuid;
    public long joinTime;
    public long leaveTime;
@@ -12,9 +15,9 @@ public class ServerActivity {
       ServerActivity sa = new ServerActivity();
 
       try {
-         sa.profileUuid = JsonUtils.getStringOr("profileUuid", element, null);
-         sa.joinTime = JsonUtils.getLongOr("joinTime", element, Long.MIN_VALUE);
-         sa.leaveTime = JsonUtils.getLongOr("leaveTime", element, Long.MIN_VALUE);
+         sa.profileUuid = bd.a("profileUuid", element, null);
+         sa.joinTime = bd.a("joinTime", element, Long.MIN_VALUE);
+         sa.leaveTime = bd.a("leaveTime", element, Long.MIN_VALUE);
       } catch (Exception var3) {
       }
 

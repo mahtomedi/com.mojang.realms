@@ -3,11 +3,14 @@ package com.mojang.realmsclient.dto;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.mojang.realmsclient.util.JsonUtils;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.obfuscate.DontObfuscateOrShrink;
+import realms.bd;
+import realms.l;
 
-public class ServerActivityList {
+@DontObfuscateOrShrink
+public class ServerActivityList extends l {
    public long periodInMillis;
    public List<ServerActivity> serverActivities = new ArrayList();
 
@@ -18,7 +21,7 @@ public class ServerActivityList {
       try {
          JsonElement jsonElement = parser.parse(json);
          JsonObject object = jsonElement.getAsJsonObject();
-         activityList.periodInMillis = JsonUtils.getLongOr("periodInMillis", object, -1L);
+         activityList.periodInMillis = bd.a("periodInMillis", object, -1L);
          JsonElement activityArray = object.get("playerActivityDto");
          if (activityArray != null && activityArray.isJsonArray()) {
             for(JsonElement element : activityArray.getAsJsonArray()) {

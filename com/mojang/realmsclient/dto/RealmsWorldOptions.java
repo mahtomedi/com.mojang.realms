@@ -1,10 +1,13 @@
 package com.mojang.realmsclient.dto;
 
 import com.google.gson.JsonObject;
-import com.mojang.realmsclient.util.JsonUtils;
+import net.minecraft.obfuscate.DontObfuscateOrShrink;
 import net.minecraft.realms.RealmsScreen;
+import realms.bd;
+import realms.l;
 
-public class RealmsWorldOptions {
+@DontObfuscateOrShrink
+public class RealmsWorldOptions extends l {
    public Boolean pvp;
    public Boolean spawnAnimals;
    public Boolean spawnMonsters;
@@ -73,20 +76,20 @@ public class RealmsWorldOptions {
 
    public static RealmsWorldOptions parse(JsonObject jsonObject) {
       RealmsWorldOptions newOptions = new RealmsWorldOptions(
-         JsonUtils.getBooleanOr("pvp", jsonObject, true),
-         JsonUtils.getBooleanOr("spawnAnimals", jsonObject, true),
-         JsonUtils.getBooleanOr("spawnMonsters", jsonObject, true),
-         JsonUtils.getBooleanOr("spawnNPCs", jsonObject, true),
-         JsonUtils.getIntOr("spawnProtection", jsonObject, 0),
-         JsonUtils.getBooleanOr("commandBlocks", jsonObject, false),
-         JsonUtils.getIntOr("difficulty", jsonObject, 2),
-         JsonUtils.getIntOr("gameMode", jsonObject, 0),
-         JsonUtils.getBooleanOr("forceGameMode", jsonObject, false),
-         JsonUtils.getStringOr("slotName", jsonObject, "")
+         bd.a("pvp", jsonObject, true),
+         bd.a("spawnAnimals", jsonObject, true),
+         bd.a("spawnMonsters", jsonObject, true),
+         bd.a("spawnNPCs", jsonObject, true),
+         bd.a("spawnProtection", jsonObject, 0),
+         bd.a("commandBlocks", jsonObject, false),
+         bd.a("difficulty", jsonObject, 2),
+         bd.a("gameMode", jsonObject, 0),
+         bd.a("forceGameMode", jsonObject, false),
+         bd.a("slotName", jsonObject, "")
       );
-      newOptions.templateId = JsonUtils.getLongOr("worldTemplateId", jsonObject, -1L);
-      newOptions.templateImage = JsonUtils.getStringOr("worldTemplateImage", jsonObject, templateImageDefault);
-      newOptions.adventureMap = JsonUtils.getBooleanOr("adventureMap", jsonObject, false);
+      newOptions.templateId = bd.a("worldTemplateId", jsonObject, -1L);
+      newOptions.templateImage = bd.a("worldTemplateImage", jsonObject, templateImageDefault);
+      newOptions.adventureMap = bd.a("adventureMap", jsonObject, false);
       return newOptions;
    }
 

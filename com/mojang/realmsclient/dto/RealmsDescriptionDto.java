@@ -1,6 +1,10 @@
 package com.mojang.realmsclient.dto;
 
-public class RealmsDescriptionDto {
+import net.minecraft.obfuscate.DontObfuscateOrShrink;
+import realms.l;
+
+@DontObfuscateOrShrink
+public class RealmsDescriptionDto extends l {
    public String name;
    public String description;
 

@@ -295,6 +295,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
                }
             } catch (RealmsServiceException var3) {
                RealmsConfigureWorldScreen.LOGGER.error("Couldn't get own world");
+               Realms.setScreen(new RealmsGenericErrorScreen(var3.getMessage(), RealmsConfigureWorldScreen.this.lastScreen));
             } catch (IOException var4) {
                RealmsConfigureWorldScreen.LOGGER.error("Couldn't parse response getting own world");
             }

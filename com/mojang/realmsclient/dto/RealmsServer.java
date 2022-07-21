@@ -66,6 +66,7 @@ public class RealmsServer extends ValueObject {
       this.protocol = oldServer.protocol;
       this.serverPing.nrOfPlayers = oldServer.serverPing.nrOfPlayers;
       this.serverPing.lastPingSnapshot = oldServer.serverPing.lastPingSnapshot;
+      this.serverPing.playerList = oldServer.serverPing.playerList;
    }
 
    public static RealmsServer parse(JsonObject node) {
@@ -250,6 +251,7 @@ public class RealmsServer extends ValueObject {
       server.serverPing = new RealmsServerPing();
       server.serverPing.nrOfPlayers = this.serverPing.nrOfPlayers;
       server.serverPing.lastPingSnapshot = this.serverPing.lastPingSnapshot;
+      server.serverPing.playerList = this.serverPing.playerList;
       server.worldType = this.worldType;
       server.ownerUUID = this.ownerUUID;
       server.minigameName = this.minigameName;

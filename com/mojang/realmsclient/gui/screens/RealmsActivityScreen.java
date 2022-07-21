@@ -20,6 +20,7 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
+import net.minecraft.realms.RealmsDefaultVertexFormat;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.realms.RealmsScrolledSelectionList;
 import net.minecraft.realms.Tezzelator;
@@ -348,25 +349,20 @@ public class RealmsActivityScreen extends RealmsScreen {
             double hourWidth = (double)dayWidth / 24.0;
             double minuteWidth = hourWidth / 60.0;
             GL11.glDisable(3553);
-            t.begin();
-            t.color(
-               ((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).color.r,
-               ((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).color.g,
-               ((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).color.b
-            );
-            t.vertex((double)(activityPoint - 8), (double)(y + 7), 0.0);
-            t.vertex((double)(activityPoint - 3), (double)(y + 7), 0.0);
-            t.vertex((double)(activityPoint - 3), (double)(y + 2), 0.0);
-            t.vertex((double)(activityPoint - 8), (double)(y + 2), 0.0);
+            int r = ((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).color.r;
+            int g = ((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).color.g;
+            int b = ((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).color.b;
+            t.begin(7, RealmsDefaultVertexFormat.POSITION_COLOR);
+            t.vertex((double)(activityPoint - 8), (double)(y + 7), 0.0).color(r, g, b, 255).endVertex();
+            t.vertex((double)(activityPoint - 3), (double)(y + 7), 0.0).color(r, g, b, 255).endVertex();
+            t.vertex((double)(activityPoint - 3), (double)(y + 2), 0.0).color(r, g, b, 255).endVertex();
+            t.vertex((double)(activityPoint - 8), (double)(y + 2), 0.0).color(r, g, b, 255).endVertex();
             t.end();
-            GL11.glEnable(3553);
-            GL11.glDisable(3553);
-            t.begin();
-            t.color(8421504);
-            t.vertex((double)activityPoint, (double)(RealmsActivityScreen.this.height() - 40), 0.0);
-            t.vertex((double)(activityPoint + 1), (double)(RealmsActivityScreen.this.height() - 40), 0.0);
-            t.vertex((double)(activityPoint + 1), (double)(-RealmsActivityScreen.this.height()), 0.0);
-            t.vertex((double)activityPoint, (double)(-RealmsActivityScreen.this.height()), 0.0);
+            t.begin(7, RealmsDefaultVertexFormat.POSITION_COLOR);
+            t.vertex((double)activityPoint, (double)(RealmsActivityScreen.this.height() - 40), 0.0).color(128, 128, 128, 255).endVertex();
+            t.vertex((double)(activityPoint + 1), (double)(RealmsActivityScreen.this.height() - 40), 0.0).color(128, 128, 128, 255).endVertex();
+            t.vertex((double)(activityPoint + 1), (double)(-RealmsActivityScreen.this.height()), 0.0).color(128, 128, 128, 255).endVertex();
+            t.vertex((double)activityPoint, (double)(-RealmsActivityScreen.this.height()), 0.0).color(128, 128, 128, 255).endVertex();
             t.end();
             GL11.glEnable(3553);
             int daysIndex = 1;
@@ -379,12 +375,19 @@ public class RealmsActivityScreen extends RealmsScreen {
                   16777215
                );
                GL11.glDisable(3553);
-               t.begin();
-               t.color(8421504);
-               t.vertex((double)(activityPoint + daysIndex * dayWidth), (double)(RealmsActivityScreen.this.height() - 40), 0.0);
-               t.vertex((double)(activityPoint + daysIndex * dayWidth + 1), (double)(RealmsActivityScreen.this.height() - 40), 0.0);
-               t.vertex((double)(activityPoint + daysIndex * dayWidth + 1), (double)(-RealmsActivityScreen.this.height()), 0.0);
-               t.vertex((double)(activityPoint + daysIndex * dayWidth), (double)(-RealmsActivityScreen.this.height()), 0.0);
+               t.begin(7, RealmsDefaultVertexFormat.POSITION_COLOR);
+               t.vertex((double)(activityPoint + daysIndex * dayWidth), (double)(RealmsActivityScreen.this.height() - 40), 0.0)
+                  .color(128, 128, 128, 255)
+                  .endVertex();
+               t.vertex((double)(activityPoint + daysIndex * dayWidth + 1), (double)(RealmsActivityScreen.this.height() - 40), 0.0)
+                  .color(128, 128, 128, 255)
+                  .endVertex();
+               t.vertex((double)(activityPoint + daysIndex * dayWidth + 1), (double)(-RealmsActivityScreen.this.height()), 0.0)
+                  .color(128, 128, 128, 255)
+                  .endVertex();
+               t.vertex((double)(activityPoint + daysIndex * dayWidth), (double)(-RealmsActivityScreen.this.height()), 0.0)
+                  .color(128, 128, 128, 255)
+                  .endVertex();
                t.end();
                GL11.glEnable(3553);
 
@@ -399,32 +402,35 @@ public class RealmsActivityScreen extends RealmsScreen {
                      }
 
                      GL11.glDisable(3553);
-                     t.begin();
-                     t.color(
-                        ((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).color.r,
-                        ((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).color.g,
-                        ((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).color.b
-                     );
+                     t.begin(7, RealmsDefaultVertexFormat.POSITION_COLOR);
                      t.vertex(
-                        (double)(activityPoint + (dayWidth * daysIndex - dayWidth)) + (double)hour * hourWidth + (double)minute * minuteWidth,
-                        (double)(y + 7),
-                        0.0
-                     );
+                           (double)(activityPoint + (dayWidth * daysIndex - dayWidth)) + (double)hour * hourWidth + (double)minute * minuteWidth,
+                           (double)(y + 7),
+                           0.0
+                        )
+                        .color(r, g, b, 255)
+                        .endVertex();
                      t.vertex(
-                        (double)(activityPoint + (dayWidth * daysIndex - dayWidth)) + (double)hour * hourWidth + (double)minute * minuteWidth + itemWidth,
-                        (double)(y + 7),
-                        0.0
-                     );
+                           (double)(activityPoint + (dayWidth * daysIndex - dayWidth)) + (double)hour * hourWidth + (double)minute * minuteWidth + itemWidth,
+                           (double)(y + 7),
+                           0.0
+                        )
+                        .color(r, g, b, 255)
+                        .endVertex();
                      t.vertex(
-                        (double)(activityPoint + (dayWidth * daysIndex - dayWidth)) + (double)hour * hourWidth + (double)minute * minuteWidth + itemWidth,
-                        (double)(y + 2),
-                        0.0
-                     );
+                           (double)(activityPoint + (dayWidth * daysIndex - dayWidth)) + (double)hour * hourWidth + (double)minute * minuteWidth + itemWidth,
+                           (double)(y + 2),
+                           0.0
+                        )
+                        .color(r, g, b, 255)
+                        .endVertex();
                      t.vertex(
-                        (double)(activityPoint + (dayWidth * daysIndex - dayWidth)) + (double)hour * hourWidth + (double)minute * minuteWidth,
-                        (double)(y + 2),
-                        0.0
-                     );
+                           (double)(activityPoint + (dayWidth * daysIndex - dayWidth)) + (double)hour * hourWidth + (double)minute * minuteWidth,
+                           (double)(y + 2),
+                           0.0
+                        )
+                        .color(r, g, b, 255)
+                        .endVertex();
                      t.end();
                      GL11.glEnable(3553);
                      if ((double)this.xm()

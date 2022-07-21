@@ -10,6 +10,7 @@ import com.mojang.realmsclient.gui.RealmsConstants;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsClickableScrolledSelectionList;
+import net.minecraft.realms.RealmsDefaultVertexFormat;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.realms.Tezzelator;
 import org.apache.logging.log4j.LogManager;
@@ -203,14 +204,14 @@ public class RealmsPlayerScreen extends RealmsScreen implements RealmsConfirmRes
       bind("textures/gui/options_background.png");
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       float s = 32.0F;
-      t.begin();
-      t.color(4210752);
-      t.vertexUV(0.0, (double)this.height(), 0.0, 0.0, (double)((float)(this.height() - bottom_border) / s + 0.0F));
-      t.vertexUV(
-         (double)this.width(), (double)this.height(), 0.0, (double)((float)this.width() / s), (double)((float)(this.height() - bottom_border) / s + 0.0F)
-      );
-      t.vertexUV((double)this.width(), (double)bottom_border, 0.0, (double)((float)this.width() / s), 0.0);
-      t.vertexUV(0.0, (double)bottom_border, 0.0, 0.0, 0.0);
+      t.begin(7, RealmsDefaultVertexFormat.POSITION_TEX_COLOR);
+      t.vertex(0.0, (double)this.height(), 0.0).tex(0.0, (double)((float)(this.height() - bottom_border) / 32.0F + 0.0F)).color(64, 64, 64, 0).endVertex();
+      t.vertex((double)this.width(), (double)this.height(), 0.0)
+         .tex((double)((float)this.width() / 32.0F), (double)((float)(this.height() - bottom_border) / 32.0F + 0.0F))
+         .color(64, 64, 64, 0)
+         .endVertex();
+      t.vertex((double)this.width(), (double)bottom_border, 0.0).tex((double)((float)this.width() / 32.0F), 0.0).color(64, 64, 64, 0).endVertex();
+      t.vertex(0.0, (double)bottom_border, 0.0).tex(0.0, 0.0).color(64, 64, 64, 0).endVertex();
       t.end();
       this.drawCenteredString(getLocalizedString("mco.configure.world.players.title"), this.width() / 2, 17, 16777215);
       if (this.serverData != null && this.serverData.players != null) {

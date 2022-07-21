@@ -258,6 +258,7 @@ public class RealmsMainScreen extends RealmsScreen {
                      return;
                   }
                } catch (RealmsServiceException var9) {
+                  RealmsMainScreen.checkedMcoAvailability = false;
                   RealmsMainScreen.LOGGER.error("Couldn't connect to realms: ", new Object[]{var9.toString()});
                   if (var9.httpResultCode == 401) {
                      RealmsMainScreen.realmsGenericErrorScreen = new RealmsGenericErrorScreen(var9, RealmsMainScreen.this.lastScreen);
@@ -266,6 +267,7 @@ public class RealmsMainScreen extends RealmsScreen {
                   Realms.setScreen(new RealmsGenericErrorScreen(var9, RealmsMainScreen.this.lastScreen));
                   return;
                } catch (IOException var10) {
+                  RealmsMainScreen.checkedMcoAvailability = false;
                   RealmsMainScreen.LOGGER.error("Couldn't connect to realms: ", new Object[]{var10.getMessage()});
                   Realms.setScreen(new RealmsGenericErrorScreen(var10.getMessage(), RealmsMainScreen.this.lastScreen));
                   return;
@@ -688,9 +690,22 @@ public class RealmsMainScreen extends RealmsScreen {
       if (msg != null) {
          int rx = x + 12;
          int ry = y - 12;
-         int width = this.fontWidth(msg);
-         this.fillGradient(rx - 3, ry - 3, rx + width + 3, ry + 8 + 3, -1073741824, -1073741824);
-         this.fontDrawShadow(msg, rx, ry, -1);
+         int index = 0;
+         int width = 0;
+
+         for(String s : msg.split("\n")) {
+            int the_width = this.fontWidth(s);
+            if (the_width > width) {
+               width = the_width;
+            }
+         }
+
+         for(String s : msg.split("\n")) {
+            this.fillGradient(rx - 3, ry - (index == 0 ? 3 : 0) + index, rx + width + 3, ry + 8 + 3 + index, -1073741824, -1073741824);
+            this.fontDrawShadow(s, rx, ry + index, 16777215);
+            index += 10;
+         }
+
       }
    }
 
@@ -831,6 +846,14 @@ public class RealmsMainScreen extends RealmsScreen {
             if (!serverData.serverPing.nrOfPlayers.equals(noPlayers)) {
                String coloredNumPlayers = ChatFormatting.GRAY + "" + serverData.serverPing.nrOfPlayers;
                RealmsMainScreen.this.drawString(coloredNumPlayers, x + 200 - RealmsMainScreen.this.fontWidth(coloredNumPlayers), y + 1, 8421504);
+               if (this.xm() >= x + 200 - RealmsMainScreen.this.fontWidth(coloredNumPlayers)
+                  && this.xm() <= x + 200
+                  && this.ym() >= y + 1
+                  && this.ym() <= y + 9
+                  && this.ym() < RealmsMainScreen.this.height() - 64
+                  && this.ym() > 32) {
+                  RealmsMainScreen.this.toolTip = serverData.serverPing.playerList;
+               }
             }
 
             if (serverData.worldType.equals(RealmsServer.WorldType.MINIGAME)) {

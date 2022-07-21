@@ -1,6 +1,7 @@
 package com.mojang.realmsclient.gui.screens;
 
 import com.mojang.realmsclient.client.FileDownload;
+import com.mojang.realmsclient.dto.WorldDownload;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import net.minecraft.realms.Realms;
@@ -17,7 +18,7 @@ import org.lwjgl.opengl.GL11;
 public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
    private final RealmsScreen lastScreen;
-   private final String downloadLink;
+   private final WorldDownload worldDownload;
    private RealmsButton cancelButton;
    private final String worldName;
    private final RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus;
@@ -38,10 +39,10 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
    private boolean checked = false;
    private static final ReentrantLock downloadLock = new ReentrantLock();
 
-   public RealmsDownloadLatestWorldScreen(RealmsScreen lastScreen, String downloadLink, String worldName) {
+   public RealmsDownloadLatestWorldScreen(RealmsScreen lastScreen, WorldDownload worldDownload, String worldName) {
       this.lastScreen = lastScreen;
       this.worldName = worldName;
-      this.downloadLink = downloadLink;
+      this.worldDownload = worldDownload;
       this.downloadStatus = new RealmsDownloadLatestWorldScreen.DownloadStatus();
    }
 
@@ -54,7 +55,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 
    private void checkDownloadSize() {
       if (!this.finished) {
-         if (!this.checked && this.getContentLength(this.downloadLink) >= 1073741824L) {
+         if (!this.checked && this.getContentLength(this.worldDownload.downloadLink) >= 1073741824L) {
             String line1 = getLocalizedString("mco.download.confirmation.line1", new Object[]{humanReadableSize(1073741824L)});
             String line2 = getLocalizedString("mco.download.confirmation.line2");
             Realms.setScreen(new RealmsLongConfirmationScreen(this, RealmsLongConfirmationScreen.Type.Warning, line1, line2, false, 100));
@@ -228,9 +229,9 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
                         "mco.download.downloading", new Object[]{RealmsDownloadLatestWorldScreen.this.worldName}
                      );
                      FileDownload fileDownload = new FileDownload();
-                     fileDownload.contentLength(RealmsDownloadLatestWorldScreen.this.downloadLink);
+                     fileDownload.contentLength(RealmsDownloadLatestWorldScreen.this.worldDownload.downloadLink);
                      fileDownload.download(
-                        RealmsDownloadLatestWorldScreen.this.downloadLink,
+                        RealmsDownloadLatestWorldScreen.this.worldDownload,
                         RealmsDownloadLatestWorldScreen.this.worldName,
                         RealmsDownloadLatestWorldScreen.this.downloadStatus,
                         RealmsDownloadLatestWorldScreen.this.getLevelStorageSource()

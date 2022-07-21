@@ -18,6 +18,7 @@ import com.mojang.realmsclient.dto.RealmsWorldResetDto;
 import com.mojang.realmsclient.dto.ServerActivityList;
 import com.mojang.realmsclient.dto.Subscription;
 import com.mojang.realmsclient.dto.UploadInfo;
+import com.mojang.realmsclient.dto.WorldDownload;
 import com.mojang.realmsclient.dto.WorldTemplateList;
 import com.mojang.realmsclient.exception.RealmsHttpException;
 import com.mojang.realmsclient.exception.RealmsServiceException;
@@ -71,7 +72,7 @@ public class RealmsClient {
    private static final String PATH_WORLD_RESET = "/$WORLD_ID/reset";
    private static final String PATH_DELETE_WORLD = "/$WORLD_ID";
    private static final String PATH_WORLD_BACKUPS = "/$WORLD_ID/backups";
-   private static final String PATH_WORLD_DOWNLOAD = "/$WORLD_ID/backups/download";
+   private static final String PATH_WORLD_DOWNLOAD = "/$WORLD_ID/backups/download/full";
    private static final String PATH_WORLD_UPLOAD = "/$WORLD_ID/backups/upload";
    private static final String PATH_CLIENT_COMPATIBLE = "/client/compatible";
    private static final String PATH_TOS_AGREED = "/tos/agreed";
@@ -291,9 +292,10 @@ public class RealmsClient {
       this.execute(Request.put(asciiUrl, ""));
    }
 
-   public String download(long worldId) throws RealmsServiceException {
-      String asciiUrl = this.url("worlds" + "/$WORLD_ID/backups/download".replace("$WORLD_ID", String.valueOf(worldId)));
-      return this.execute(Request.get(asciiUrl));
+   public WorldDownload download(long worldId) throws RealmsServiceException {
+      String asciiUrl = this.url("worlds" + "/$WORLD_ID/backups/download/full".replace("$WORLD_ID", String.valueOf(worldId)));
+      String json = this.execute(Request.get(asciiUrl));
+      return WorldDownload.parse(json);
    }
 
    public UploadInfo upload(long worldId, String uploadToken) throws RealmsServiceException {

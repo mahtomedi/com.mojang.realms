@@ -38,8 +38,11 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
    private String toolTip = null;
    private String currentLink = null;
    private boolean isMiniGame;
-   private boolean displayWarning = false;
    private int clicks = 0;
+   private String warning = null;
+   private String warningURL = null;
+   private boolean displayWarning = false;
+   private boolean hoverWarning = false;
 
    public RealmsSelectWorldTemplateScreen(RealmsScreenWithCallback<WorldTemplate> lastScreen, WorldTemplate selectedWorldTemplate, boolean isMiniGame) {
       this.lastScreen = lastScreen;
@@ -49,25 +52,30 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
    }
 
    public RealmsSelectWorldTemplateScreen(
-      RealmsScreenWithCallback<WorldTemplate> lastScreen, WorldTemplate selectedWorldTemplate, boolean isMiniGame, boolean displayWarning
+      RealmsScreenWithCallback<WorldTemplate> lastScreen, WorldTemplate selectedWorldTemplate, boolean isMiniGame, List<WorldTemplate> templates
    ) {
       this(lastScreen, selectedWorldTemplate, isMiniGame);
-      this.displayWarning = displayWarning;
-   }
-
-   public RealmsSelectWorldTemplateScreen(
-      RealmsScreenWithCallback<WorldTemplate> lastScreen,
-      WorldTemplate selectedWorldTemplate,
-      boolean isMiniGame,
-      boolean displayWarning,
-      List<WorldTemplate> templates
-   ) {
-      this(lastScreen, selectedWorldTemplate, isMiniGame, displayWarning);
       this.templates = templates;
    }
 
    public void setTitle(String title) {
       this.title = title;
+   }
+
+   public void setWarning(String string) {
+      this.warning = string;
+      this.displayWarning = true;
+   }
+
+   public void setWarningURL(String string) {
+      this.warningURL = string;
+   }
+
+   public void mouseClicked(int x, int y, int buttonNum) {
+      if (this.hoverWarning && this.warningURL != null) {
+         RealmsUtil.browseTo("https://beta.minecraft.net/realms/adventure-maps-in-1-9");
+      }
+
    }
 
    public void mouseEvent() {
@@ -232,12 +240,36 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
    public void render(int xm, int ym, float a) {
       this.toolTip = null;
       this.currentLink = null;
+      this.hoverWarning = false;
       this.renderBackground();
       this.worldTemplateSelectionList.render(xm, ym, a);
       this.drawCenteredString(this.title, this.width() / 2, 13, 16777215);
       if (this.displayWarning) {
-         this.drawCenteredString(getLocalizedString("mco.minigame.world.info1"), this.width() / 2, RealmsConstants.row(-1), 10526880);
-         this.drawCenteredString(getLocalizedString("mco.minigame.world.info2"), this.width() / 2, RealmsConstants.row(0), 10526880);
+         String[] lines = this.warning.split("\\\\n");
+
+         for(int index = 0; index < lines.length; ++index) {
+            int fontWidth = this.fontWidth(lines[index]);
+            int offsetX = this.width() / 2 - fontWidth / 2;
+            int offsetY = RealmsConstants.row(-1 + index);
+            if (xm >= offsetX && xm <= offsetX + fontWidth && ym >= offsetY && ym <= offsetY + this.fontLineHeight()) {
+               this.hoverWarning = true;
+            }
+         }
+
+         for(int index = 0; index < lines.length; ++index) {
+            String line = lines[index];
+            int warningColor = 10526880;
+            if (this.warningURL != null) {
+               if (this.hoverWarning) {
+                  warningColor = 7107012;
+                  line = "§n" + line;
+               } else {
+                  warningColor = 3368635;
+               }
+            }
+
+            this.drawCenteredString(line, this.width() / 2, RealmsConstants.row(-1 + index), warningColor);
+         }
       }
 
       super.render(xm, ym, a);
@@ -287,7 +319,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
                RealmsSelectWorldTemplateScreen.this.selectButton.active(true);
                RealmsSelectWorldTemplateScreen.this.selectedTemplate = slot;
                RealmsSelectWorldTemplateScreen.this.selectedWorldTemplate = null;
-               RealmsSelectWorldTemplateScreen.this.clicks += RealmsSharedConstants.TICKS_PER_SECOND / 3 + 1;
+               RealmsSelectWorldTemplateScreen.this.clicks = RealmsSelectWorldTemplateScreen.this.clicks + RealmsSharedConstants.TICKS_PER_SECOND / 3 + 1;
                if (RealmsSelectWorldTemplateScreen.this.clicks >= RealmsSharedConstants.TICKS_PER_SECOND / 2) {
                   RealmsSelectWorldTemplateScreen.this.selectTemplate();
                }

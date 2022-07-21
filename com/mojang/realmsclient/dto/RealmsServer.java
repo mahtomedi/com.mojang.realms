@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsServerPing;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -69,21 +70,23 @@ public class RealmsServer extends ValueObject {
       int players = 0;
 
       for(String uuid : serverPlayerList.players) {
-         String name = "";
+         if (!uuid.equals(Realms.getUUID())) {
+            String name = "";
 
-         try {
-            name = (String)RealmsUtil.nameCache.get(uuid);
-         } catch (Exception var8) {
-            LOGGER.error("Could not get name for " + uuid, var8);
-            continue;
+            try {
+               name = (String)RealmsUtil.nameCache.get(uuid);
+            } catch (Exception var8) {
+               LOGGER.error("Could not get name for " + uuid, var8);
+               continue;
+            }
+
+            if (builder.length() > 0) {
+               builder.append("\n");
+            }
+
+            builder.append(name);
+            ++players;
          }
-
-         if (builder.length() > 0) {
-            builder.append("\n");
-         }
-
-         builder.append(name);
-         ++players;
       }
 
       this.serverPing.nrOfPlayers = String.valueOf(players);

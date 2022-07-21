@@ -42,6 +42,9 @@ mco.selectServer.expires.days=Expires in %s days
 mco.selectServer.expires.day=Expires in a day
 mco.selectServer.expires.soon=Expires soon
 
+mco.selectServer.note=Note:
+mco.selectServer.updateBreaksAdventure=Next update will break this map!
+
 mco.selectServer.popup=Realms is a safe, simple way to enjoy an online Minecraft world with up to ten friends at a time.   It supports loads of minigames and plenty of custom worlds! Only the owner of the Realm needs to pay.
 
 mco.configure.world.settings.title=Settings
@@ -129,11 +132,10 @@ mco.reset.world.generate=New world
 mco.reset.world.upload=Upload world
 mco.reset.world.adventure=Adventure maps
 mco.reset.world.template=Survival spawns
-
+mco.reset.world.updateBreaksAdventure=Before going on your adventure please note:\nThe next Minecraft update might break some of these maps!
 
 mco.minigame.world.title=Switch Realm to Mini Game
-mco.minigame.world.info1=This will temporarily replace your world with a mini game!
-mco.minigame.world.info2=You can later return to your original world without losing anything.
+mco.minigame.world.info=This will temporarily replace your world with a mini game!\nYou can later return to your original world without losing anything.
 mco.minigame.world.selected=Selected mini game:
 mco.minigame.world.noSelection=Please make a selection
 mco.minigame.world.startButton=Switch

@@ -115,6 +115,7 @@ public class RealmsMainScreen extends RealmsScreen {
    private char[] lchars = new char[]{'9', '8', '7', '4', '5', '6'};
    private static ReentrantLock connectLock = new ReentrantLock();
    private boolean expiredHover = false;
+   private boolean updateBreaksAdventureNoteHover = false;
 
    public RealmsMainScreen(RealmsScreen lastScreen) {
       this.lastScreen = lastScreen;
@@ -725,6 +726,7 @@ public class RealmsMainScreen extends RealmsScreen {
 
    public void render(int xm, int ym, float a) {
       this.expiredHover = false;
+      this.updateBreaksAdventureNoteHover = false;
       this.toolTip = null;
       this.renderBackground();
       this.serverSelectionList.render(xm, ym, a);
@@ -1315,9 +1317,9 @@ public class RealmsMainScreen extends RealmsScreen {
                      + Realms.getUUID()
                      + "&ref="
                      + (server.expiredTrial ? "expiredTrial" : "expiredRealm");
-                  Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-                  clipboard.setContents(new StringSelection(extensionUrl), null);
-                  RealmsUtil.browseTo(extensionUrl);
+                  this.browseURL(extensionUrl);
+               } else if (RealmsMainScreen.this.isSelfOwnedServer(server) && RealmsMainScreen.this.updateBreaksAdventureNoteHover) {
+                  this.browseURL("https://beta.minecraft.net/realms/adventure-maps-in-1-9");
                }
 
             }
@@ -1332,7 +1334,7 @@ public class RealmsMainScreen extends RealmsScreen {
             int slot = clickSlotPos / itemHeight;
             if (this.xm() >= x0 && this.xm() <= x1 && slot >= 0 && clickSlotPos >= 0 && slot < this.getItemCount()) {
                this.itemClicked(clickSlotPos, slot, this.xm(), this.ym(), this.width());
-               RealmsMainScreen.this.clicks += RealmsSharedConstants.TICKS_PER_SECOND / 3 + 1;
+               RealmsMainScreen.this.clicks = RealmsMainScreen.this.clicks + RealmsSharedConstants.TICKS_PER_SECOND / 3 + 1;
                this.selectItem(slot, RealmsMainScreen.this.clicks >= RealmsSharedConstants.TICKS_PER_SECOND / 2, this.xm(), this.ym());
             }
          }
@@ -1441,18 +1443,23 @@ public class RealmsMainScreen extends RealmsScreen {
                int buttonTextColor = hovered ? 16777120 : 16777215;
                RealmsMainScreen.this.drawString(expirationText, x + 2, textHeight + 1, 15553363);
                RealmsMainScreen.this.drawCenteredString(expirationButtonText, buttonX + buttonWidth / 2, textHeight + 1, buttonTextColor);
-            } else if (serverData.worldType.equals(RealmsServer.WorldType.MINIGAME)) {
-               int motdColor = 13413468;
-               String miniGameStr = RealmsScreen.getLocalizedString("mco.selectServer.minigame") + " ";
-               int mgWidth = RealmsMainScreen.this.fontWidth(miniGameStr);
-               RealmsMainScreen.this.drawString(miniGameStr, x + 2, y + 12, motdColor);
-               RealmsMainScreen.this.drawString(serverData.getMinigameName(), x + 2 + mgWidth, y + 12, 7105644);
             } else {
-               RealmsMainScreen.this.drawString(serverData.getDescription(), x + 2, y + 12, 7105644);
-            }
+               if (serverData.worldType.equals(RealmsServer.WorldType.MINIGAME)) {
+                  int motdColor = 13413468;
+                  String miniGameStr = RealmsScreen.getLocalizedString("mco.selectServer.minigame") + " ";
+                  int mgWidth = RealmsMainScreen.this.fontWidth(miniGameStr);
+                  RealmsMainScreen.this.drawString(miniGameStr, x + 2, y + 12, motdColor);
+                  RealmsMainScreen.this.drawString(serverData.getMinigameName(), x + 2 + mgWidth, y + 19872, 7105644);
+               } else {
+                  RealmsMainScreen.this.drawString(serverData.getDescription(), x + 2, y + 12, 7105644);
+               }
 
-            if (!RealmsMainScreen.this.isSelfOwnedServer(serverData)) {
-               RealmsMainScreen.this.drawString(serverData.owner, x + 2, y + 12 + 11, 5000268);
+               if (!RealmsMainScreen.this.isSelfOwnedServer(serverData)) {
+                  RealmsMainScreen.this.drawString(serverData.owner, x + 2, y + 12 + 11, 5000268);
+               } else if (serverData.worldType.equals(RealmsServer.WorldType.ADVENTUREMAP) && RealmsSharedConstants.VERSION_STRING.equals("1.8.9")) {
+                  String noteText = RealmsScreen.getLocalizedString("mco.selectServer.updateBreaksAdventure", new Object[]{"1.9"}) + " ";
+                  RealmsMainScreen.this.updateBreaksAdventureNoteHover = this.renderRealmNote(i, x, y, noteText);
+               }
             }
 
             RealmsMainScreen.this.drawString(serverData.getName(), x + 2, y + 1, 16777215);
@@ -1461,6 +1468,37 @@ public class RealmsMainScreen extends RealmsScreen {
             RealmsScreen.blit(x - 36, y, 8.0F, 8.0F, 8, 8, 32, 32, 64.0F, 64.0F);
             RealmsScreen.blit(x - 36, y, 40.0F, 8.0F, 8, 8, 32, 32, 64.0F, 64.0F);
          }
+      }
+
+      private boolean renderRealmNote(int i, int x, int y, String text) {
+         String label = RealmsScreen.getLocalizedString("mco.selectServer.note") + " ";
+         int labelWidth = RealmsMainScreen.this.fontWidth(label);
+         int textWidth = RealmsMainScreen.this.fontWidth(text);
+         int noteWidth = labelWidth + textWidth;
+         int offsetX = x + 2;
+         int offsetY = y + 12 + 11;
+         boolean noteIsHovered = this.xm() >= offsetX
+            && this.xm() < offsetX + noteWidth
+            && this.ym() > offsetY
+            && this.ym() <= offsetY + RealmsMainScreen.this.fontLineHeight();
+         int labelColor = 15553363;
+         int textColor = 16777215;
+         if (noteIsHovered) {
+            labelColor = 12535109;
+            textColor = 10526880;
+            label = "§n" + label;
+            text = "§n" + text;
+         }
+
+         RealmsMainScreen.this.drawString(label, offsetX, offsetY, labelColor, true);
+         RealmsMainScreen.this.drawString(text, offsetX + labelWidth, offsetY, textColor, true);
+         return noteIsHovered;
+      }
+
+      private void browseURL(String url) {
+         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+         clipboard.setContents(new StringSelection(url), null);
+         RealmsUtil.browseTo(url);
       }
    }
 }

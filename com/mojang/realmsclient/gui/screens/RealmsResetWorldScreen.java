@@ -13,6 +13,7 @@ import java.util.Random;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsScreen;
+import net.minecraft.realms.RealmsSharedConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
@@ -128,12 +129,17 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTempla
             Realms.setScreen(new RealmsSelectFileToUploadScreen(this.serverData.id, this.slot != -1 ? this.slot : this.serverData.activeSlot, this));
             break;
          case ADVENTURE:
-            RealmsSelectWorldTemplateScreen screen = new RealmsSelectWorldTemplateScreen(this, null, false, false, this.adventuremaps);
+            RealmsSelectWorldTemplateScreen screen = new RealmsSelectWorldTemplateScreen(this, null, false, this.adventuremaps);
             screen.setTitle(getLocalizedString("mco.reset.world.adventure"));
+            if (RealmsSharedConstants.VERSION_STRING.equals("1.8.9")) {
+               screen.setWarning(getLocalizedString("mco.reset.world.updateBreaksAdventure"));
+               screen.setWarningURL("https://beta.minecraft.net/realms/adventure-maps-in-1-9");
+            }
+
             Realms.setScreen(screen);
             break;
          case SURVIVAL_SPAWN:
-            RealmsSelectWorldTemplateScreen templateScreen = new RealmsSelectWorldTemplateScreen(this, null, false, false, this.templates);
+            RealmsSelectWorldTemplateScreen templateScreen = new RealmsSelectWorldTemplateScreen(this, null, false, this.templates);
             templateScreen.setTitle(getLocalizedString("mco.reset.world.template"));
             Realms.setScreen(templateScreen);
             break;

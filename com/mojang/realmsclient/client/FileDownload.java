@@ -1,5 +1,8 @@
 package com.mojang.realmsclient.client;
 
+import com.google.common.hash.Hashing;
+import com.google.common.io.Files;
+import com.mojang.realmsclient.dto.WorldDownload;
 import com.mojang.realmsclient.gui.screens.RealmsDownloadLatestWorldScreen;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,6 +22,7 @@ import net.minecraft.realms.RealmsSharedConstants;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.CountingOutputStream;
 import org.apache.commons.lang3.StringUtils;
@@ -38,6 +42,7 @@ public class FileDownload {
    private volatile boolean error = false;
    private volatile boolean extracting = false;
    private volatile File tempFile;
+   private volatile File resourcePackPath;
    private volatile HttpGet request;
    private Thread currentThread;
    private RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(120000).setConnectTimeout(120000).build();
@@ -100,7 +105,7 @@ public class FileDownload {
    }
 
    public void download(
-      final String downloadLink,
+      final WorldDownload worldDownload,
       final String worldName,
       final RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus,
       final RealmsAnvilLevelStorageSource levelStorageSource
@@ -112,14 +117,14 @@ public class FileDownload {
 
                try {
                   FileDownload.this.tempFile = File.createTempFile("backup", ".tar.gz");
-                  FileDownload.this.request = new HttpGet(downloadLink);
+                  FileDownload.this.request = new HttpGet(worldDownload.downloadLink);
                   client = HttpClientBuilder.create().setDefaultRequestConfig(FileDownload.this.requestConfig).build();
                   HttpResponse response = client.execute(FileDownload.this.request);
                   downloadStatus.totalBytes = Long.parseLong(response.getFirstHeader("Content-Length").getValue());
                   if (response.getStatusLine().getStatusCode() == 200) {
                      OutputStream os = new FileOutputStream(FileDownload.this.tempFile);
                      FileDownload.ProgressListener progressListener = FileDownload.this.new ProgressListener(
-                        worldName.trim(), FileDownload.this.tempFile, levelStorageSource, downloadStatus
+                        worldName.trim(), FileDownload.this.tempFile, levelStorageSource, downloadStatus, worldDownload
                      );
                      FileDownload.DownloadCountingOutputStream dcount = FileDownload.this.new DownloadCountingOutputStream(os);
                      dcount.setListener(progressListener);
@@ -129,8 +134,8 @@ public class FileDownload {
 
                   FileDownload.this.error = true;
                   FileDownload.this.request.abort();
-               } catch (Exception var15) {
-                  FileDownload.LOGGER.error("Caught exception while downloading: " + var15.getMessage());
+               } catch (Exception var89) {
+                  FileDownload.LOGGER.error("Caught exception while downloading: " + var89.getMessage());
                   FileDownload.this.error = true;
                   return;
                } finally {
@@ -139,10 +144,45 @@ public class FileDownload {
                      FileDownload.this.tempFile.delete();
                   }
 
+                  if (!FileDownload.this.error) {
+                     if (!worldDownload.resourcePackUrl.isEmpty() && !worldDownload.resourcePackHash.isEmpty()) {
+                        try {
+                           FileDownload.this.tempFile = File.createTempFile("resources", ".tar.gz");
+                           FileDownload.this.request = new HttpGet(worldDownload.resourcePackUrl);
+                           HttpResponse response = client.execute(FileDownload.this.request);
+                           downloadStatus.totalBytes = Long.parseLong(response.getFirstHeader("Content-Length").getValue());
+                           if (response.getStatusLine().getStatusCode() != 200) {
+                              FileDownload.this.error = true;
+                              FileDownload.this.request.abort();
+                              return;
+                           }
+
+                           OutputStream os = new FileOutputStream(FileDownload.this.tempFile);
+                           FileDownload.ResourcePackProgressListener progressListener = FileDownload.this.new ResourcePackProgressListener(
+                              FileDownload.this.tempFile, downloadStatus, worldDownload
+                           );
+                           FileDownload.DownloadCountingOutputStream dcount = FileDownload.this.new DownloadCountingOutputStream(os);
+                           dcount.setListener(progressListener);
+                           IOUtils.copy(response.getEntity().getContent(), dcount);
+                        } catch (Exception var87) {
+                           FileDownload.LOGGER.error("Caught exception while downloading: " + var87.getMessage());
+                           FileDownload.this.error = true;
+                        } finally {
+                           FileDownload.this.request.releaseConnection();
+                           if (FileDownload.this.tempFile != null) {
+                              FileDownload.this.tempFile.delete();
+                           }
+
+                        }
+                     } else {
+                        FileDownload.this.finished = true;
+                     }
+                  }
+
                   if (client != null) {
                      try {
                         client.close();
-                     } catch (IOException var14) {
+                     } catch (IOException var86) {
                         FileDownload.LOGGER.error("Failed to close Realms download client");
                      }
                   }
@@ -278,7 +318,7 @@ public class FileDownload {
          }
 
          levelStorageSource.renameLevel(finalName, finalName.trim());
-         this.finished = true;
+         this.resourcePackPath = new File(saves, finalName + File.separator + "resources.zip");
       }
 
    }
@@ -308,23 +348,63 @@ public class FileDownload {
       private volatile File tempFile;
       private volatile RealmsAnvilLevelStorageSource levelStorageSource;
       private volatile RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus;
+      private volatile WorldDownload worldDownload;
 
       private ProgressListener(
-         String worldName, File tempFile, RealmsAnvilLevelStorageSource levelStorageSource, RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus
+         String worldName,
+         File tempFile,
+         RealmsAnvilLevelStorageSource levelStorageSource,
+         RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus,
+         WorldDownload worldDownload
       ) {
          this.worldName = worldName;
          this.tempFile = tempFile;
          this.levelStorageSource = levelStorageSource;
          this.downloadStatus = downloadStatus;
+         this.worldDownload = worldDownload;
+      }
+
+      public void actionPerformed(ActionEvent e) {
+         this.downloadStatus.bytesWritten = ((FileDownload.DownloadCountingOutputStream)e.getSource()).getByteCount();
+         if (this.downloadStatus.bytesWritten >= this.downloadStatus.totalBytes && !FileDownload.this.cancelled && !FileDownload.this.error) {
+            try {
+               FileDownload.this.extracting = true;
+               FileDownload.this.untarGzipArchive(this.worldName, this.tempFile, this.levelStorageSource);
+            } catch (IOException var3) {
+               FileDownload.this.error = true;
+            }
+         }
+
+      }
+   }
+
+   private class ResourcePackProgressListener implements ActionListener {
+      private volatile File tempFile;
+      private volatile RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus;
+      private volatile WorldDownload worldDownload;
+
+      private ResourcePackProgressListener(File tempFile, RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus, WorldDownload worldDownload) {
+         this.tempFile = tempFile;
+         this.downloadStatus = downloadStatus;
+         this.worldDownload = worldDownload;
       }
 
       public void actionPerformed(ActionEvent e) {
          this.downloadStatus.bytesWritten = ((FileDownload.DownloadCountingOutputStream)e.getSource()).getByteCount();
          if (this.downloadStatus.bytesWritten >= this.downloadStatus.totalBytes && !FileDownload.this.cancelled) {
             try {
-               FileDownload.this.extracting = true;
-               FileDownload.this.untarGzipArchive(this.worldName, this.tempFile, this.levelStorageSource);
+               String actualHash = Hashing.sha1().hashBytes(Files.toByteArray(this.tempFile)).toString();
+               if (actualHash.equals(this.worldDownload.resourcePackHash)) {
+                  FileUtils.copyFile(this.tempFile, FileDownload.this.resourcePackPath);
+                  FileDownload.this.finished = true;
+               } else {
+                  FileDownload.LOGGER
+                     .error("Resourcepack had wrong hash (expected " + this.worldDownload.resourcePackHash + ", found " + actualHash + "). Deleting it.");
+                  FileUtils.deleteQuietly(this.tempFile);
+                  FileDownload.this.error = true;
+               }
             } catch (IOException var3) {
+               FileDownload.LOGGER.error("Error copying resourcepack file", new Object[]{var3.getMessage()});
                FileDownload.this.error = true;
             }
          }

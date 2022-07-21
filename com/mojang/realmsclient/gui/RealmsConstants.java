@@ -21,6 +21,7 @@ public class RealmsConstants {
    public static final int COLOR_LINK_HOVER = 7107012;
    public static final int COLOR_INFO = 8226750;
    public static final int COLOR_BUTTON_YELLOW = 16777120;
+   public static final String UPDATE_BREAKS_ADVENTURE_URL = "https://beta.minecraft.net/realms/adventure-maps-in-1-9";
 
    public static int row(int i) {
       return 40 + i * 13;

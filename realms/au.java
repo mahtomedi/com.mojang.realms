@@ -37,35 +37,25 @@ public class au extends RealmsScreen {
    private String p;
    private boolean q;
    private boolean r;
-   private boolean s;
-   private WorldTemplatePaginatedList t;
-   private List<bl.a> u;
+   private WorldTemplatePaginatedList s;
+   private List<bl.a> t;
+   private boolean u;
    private boolean v;
-   private boolean w;
 
    public au(as<WorldTemplate> lastScreen, WorldTemplate selectedWorldTemplate, RealmsServer.c worldType) {
       this.b = lastScreen;
       this.c = selectedWorldTemplate;
       this.m = worldType;
       this.g = getLocalizedString("mco.template.title");
-      if (this.t == null) {
-         this.t = new WorldTemplatePaginatedList();
-         this.t.size = 10;
-      }
-
-      if (this.t.size == 0) {
-         this.t.size = 10;
-      }
-
+      this.s = new WorldTemplatePaginatedList(10);
    }
 
    public au(as<WorldTemplate> lastScreen, WorldTemplate selectedWorldTemplate, RealmsServer.c worldType, WorldTemplatePaginatedList list) {
       this(lastScreen, selectedWorldTemplate, worldType);
-      this.s = true;
       this.d.addAll((Collection)(list == null ? new ArrayList() : list.templates));
-      this.t = list;
-      if (this.t.size == 0) {
-         this.t.size = 10;
+      this.s = list;
+      if (this.s.size == 0) {
+         this.s.size = 10;
       }
 
    }
@@ -91,10 +81,14 @@ public class au extends RealmsScreen {
    public void init() {
       this.setKeyboardHandlerSendRepeatsToGui(true);
       this.e = new au.a();
-      if (!this.s && this.d.isEmpty()) {
-         this.t.page = 0;
-         this.t.size = 10;
+      if (this.d.isEmpty()) {
+         this.s.page = 0;
+         this.s.size = 10;
          this.j();
+      } else {
+         for(WorldTemplate template : this.d) {
+            this.e.a(template);
+         }
       }
 
       this.buttonsAdd(this.i = new RealmsButton(2, this.width() / 2 - 206, this.height() - 32, 100, 20, getLocalizedString("mco.template.button.trailer")) {
@@ -198,33 +192,33 @@ public class au extends RealmsScreen {
    }
 
    private void j() {
-      if (!this.v && !this.w) {
-         this.v = true;
+      if (!this.u && !this.v) {
+         this.u = true;
          (new Thread("realms-template-fetcher") {
             public void run() {
                try {
                   g client = realms.g.a();
-                  au.this.t = client.a(au.this.t.page + 1, au.this.t.size, au.this.m);
-                  au.this.d.addAll(au.this.t.templates);
+                  au.this.s = client.a(au.this.s.page + 1, au.this.s.size, au.this.m);
+                  au.this.d.addAll(au.this.s.templates);
 
                   for(WorldTemplate template : au.this.d) {
                      au.this.e.a(template);
                   }
 
-                  if (au.this.t.templates.isEmpty()) {
-                     au.this.w = true;
+                  if (au.this.s.templates.isEmpty()) {
+                     au.this.v = true;
                      String withoutLink = RealmsScreen.getLocalizedString("mco.template.select.none", new Object[]{"%link"});
                      bl.b link = bl.b.a(RealmsScreen.getLocalizedString("mco.template.select.none.linkTitle"), "https://minecraft.net/realms/content-creator/");
-                     au.this.u = bl.a(withoutLink, link);
+                     au.this.t = bl.a(withoutLink, link);
                   }
                } catch (o var7) {
                   au.a.error("Couldn't fetch templates");
-                  au.this.w = true;
-                  if (au.this.t.templates.isEmpty()) {
-                     au.this.u = bl.a(RealmsScreen.getLocalizedString("mco.template.select.failure"));
+                  au.this.v = true;
+                  if (au.this.s.templates.isEmpty()) {
+                     au.this.t = bl.a(RealmsScreen.getLocalizedString("mco.template.select.failure"));
                   }
                } finally {
-                  au.this.v = false;
+                  au.this.u = false;
                }
 
             }
@@ -237,15 +231,16 @@ public class au extends RealmsScreen {
       this.k = null;
       this.l = null;
       this.r = false;
-      if (!this.t.isLastPage()) {
+      if (!this.s.isLastPage()) {
+         this.e.clear();
          this.j();
       }
 
       this.renderBackground();
       this.e.render(xm, ym, a);
-      if (this.w && this.t.templates.isEmpty() && this.u != null) {
-         for(int i = 0; i < this.u.size(); ++i) {
-            bl.a line = (bl.a)this.u.get(i);
+      if (this.v && this.s.templates.isEmpty() && this.t != null) {
+         for(int i = 0; i < this.t.size(); ++i) {
+            bl.a line = (bl.a)this.t.get(i);
             int lineY = realms.u.a(4 + i);
             int lineWidth = line.a.stream().mapToInt(s -> this.fontWidth(s.a())).sum();
             int startX = this.width() / 2 - lineWidth / 2;
@@ -316,10 +311,6 @@ public class au extends RealmsScreen {
 
       public void a(WorldTemplate template) {
          this.addEntry(au.this.new b(template));
-      }
-
-      public int getItemCount() {
-         return au.this.d.size();
       }
 
       public boolean mouseClicked(double xm, double ym, int buttonNum) {

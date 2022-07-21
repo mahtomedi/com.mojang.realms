@@ -53,7 +53,7 @@ public class ap extends RealmsScreen {
             ap.this.a();
          }
       });
-      this.d = this.newEditBox(4, this.width() / 2 - 100, u.a(2), 200, 20);
+      this.d = this.newEditBox(4, this.width() / 2 - 100, u.a(2), 200, 20, getLocalizedString("mco.reset.world.seed"));
       this.d.setMaxLength(32);
       this.d.setValue("");
       this.addWidget(this.d);

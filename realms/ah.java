@@ -48,6 +48,7 @@ public class ah extends RealmsScreen {
    }
 
    public void init() {
+      Realms.narrateNow(this.b + ": " + this.c);
       this.buttonsAdd(new RealmsButton(10, this.width() / 2 - 100, this.height() - 52, 200, 20, "Ok") {
          public void onPress() {
             Realms.setScreen(ah.this.a);

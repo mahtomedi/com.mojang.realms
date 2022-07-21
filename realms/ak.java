@@ -104,6 +104,7 @@ public class ak extends RealmsScreen implements r {
    public void a(String errorMessage) {
       this.h = true;
       this.i = errorMessage;
+      Realms.narrateNow(errorMessage);
       this.buttonsClear();
       this.buttonsAdd(new RealmsButton(667, this.width() / 2 - 106, this.height() / 4 + 120 + 12, getLocalizedString("gui.back")) {
          public void onPress() {

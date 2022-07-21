@@ -91,7 +91,7 @@ public class aw extends RealmsScreen {
          this.s = true;
       }
 
-      this.e = this.newEditBox(11, this.f + 2, realms.u.a(1), this.g - 4, 20);
+      this.e = this.newEditBox(11, this.f + 2, realms.u.a(1), this.g - 4, 20, getLocalizedString("mco.configure.world.edit.slot.name"));
       this.e.setMaxLength(10);
       this.e.setValue(this.i.getSlotName(this.k));
       this.focusOn(this.e);

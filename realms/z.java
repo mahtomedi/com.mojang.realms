@@ -53,6 +53,7 @@ public class z extends RealmsScreen {
             try {
                z.this.d = client.e(z.this.m.id).backups;
                z.this.l = z.this.d.size() == 0;
+               z.this.f.clear();
 
                for(Backup backup : z.this.d) {
                   z.this.f.a(backup);

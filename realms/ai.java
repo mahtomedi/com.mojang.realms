@@ -43,7 +43,7 @@ public class ai extends RealmsScreen {
             Realms.setScreen(ai.this.e);
          }
       });
-      this.b = this.newEditBox(2, this.width() / 2 - 100, u.a(2), 200, 20);
+      this.b = this.newEditBox(2, this.width() / 2 - 100, u.a(2), 200, 20, getLocalizedString("mco.configure.world.invite.profile.name"));
       this.focusOn(this.b);
       this.addWidget(this.b);
    }
@@ -74,6 +74,7 @@ public class ai extends RealmsScreen {
    private void a(String errorMsg) {
       this.k = true;
       this.j = errorMsg;
+      Realms.narrateNow(errorMsg);
    }
 
    public boolean keyPressed(int eventKey, int scancode, int mods) {

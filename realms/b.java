@@ -278,6 +278,7 @@ public class b extends RealmsScreen {
          e.b();
          if (e.a(v.d.a)) {
             List<RealmsServer> newServers = e.e();
+            this.h.clear();
             if (newServers != null) {
                boolean ownsNonExpiredRealmServer = false;
 
@@ -561,7 +562,7 @@ public class b extends RealmsScreen {
    private void f(RealmsServer selectedServer) {
       if (Realms.getUUID().equals(selectedServer.ownerUUID) || b) {
          this.z();
-         cva minecraft = cva.v();
+         cve minecraft = cve.v();
          minecraft.execute(() -> minecraft.a(new ac(this, selectedServer.id).getProxy()));
       }
 
@@ -1283,7 +1284,7 @@ public class b extends RealmsScreen {
             }
 
             if (server.state == RealmsServer.b.c) {
-               Realms.narrateNow(RealmsScreen.getLocalizedString("mco.selectServer.uninitialized"));
+               Realms.narrateNow(RealmsScreen.getLocalizedString("mco.selectServer.uninitialized") + RealmsScreen.getLocalizedString("mco.gui.button"));
             } else {
                Realms.narrateNow(RealmsScreen.getLocalizedString("narrator.select", new Object[]{((RealmsServer)b.this.p.get(item)).name}));
             }

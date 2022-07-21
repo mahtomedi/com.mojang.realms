@@ -179,6 +179,8 @@ public class ao extends RealmsScreen {
             }
 
             this.e(this.k);
+            this.m = -1;
+            this.a();
          }
 
          this.n = true;

@@ -28,6 +28,10 @@ public class WorldTemplatePaginatedList extends l {
       this.set(src);
    }
 
+   public WorldTemplatePaginatedList(int size) {
+      this.size = size;
+   }
+
    public void set(WorldTemplatePaginatedList src) {
       this.templates = new ArrayList((Collection)(src.templates == null ? new ArrayList() : src.templates));
       this.page = src.page;

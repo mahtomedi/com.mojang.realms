@@ -32,9 +32,9 @@ public class af extends RealmsScreen {
       this.setKeyboardHandlerSendRepeatsToGui(true);
       if (!this.d) {
          this.d = true;
-         this.b = this.newEditBox(3, this.width() / 2 - 100, 65, 200, 20);
+         this.b = this.newEditBox(3, this.width() / 2 - 100, 65, 200, 20, getLocalizedString("mco.configure.world.name"));
          this.focusOn(this.b);
-         this.c = this.newEditBox(4, this.width() / 2 - 100, 115, 200, 20);
+         this.c = this.newEditBox(4, this.width() / 2 - 100, 115, 200, 20, getLocalizedString("mco.configure.world.description"));
       }
 
       this.buttonsAdd(this.e = new RealmsButton(0, this.width() / 2 - 100, this.height() / 4 + 120 + 17, 97, 20, getLocalizedString("mco.create.world")) {

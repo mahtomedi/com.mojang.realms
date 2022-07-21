@@ -61,7 +61,7 @@ public class av extends RealmsScreen {
             }
          }
       );
-      this.f = this.newEditBox(2, center, u.a(4), 212, 20);
+      this.f = this.newEditBox(2, center, u.a(4), 212, 20, getLocalizedString("mco.configure.world.name"));
       this.f.setMaxLength(32);
       if (this.b.getName() != null) {
          this.f.setValue(this.b.getName());
@@ -69,7 +69,7 @@ public class av extends RealmsScreen {
 
       this.addWidget(this.f);
       this.focusOn(this.f);
-      this.e = this.newEditBox(3, center, u.a(8), 212, 20);
+      this.e = this.newEditBox(3, center, u.a(8), 212, 20, getLocalizedString("mco.configure.world.description"));
       this.e.setMaxLength(32);
       if (this.b.getDescription() != null) {
          this.e.setValue(this.b.getDescription());

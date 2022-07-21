@@ -44,10 +44,10 @@ public class ae extends RealmsScreen {
          }
       });
       this.e.active(false);
-      this.c = this.newEditBox(3, this.width() / 2 - 100, 65, 200, 20);
+      this.c = this.newEditBox(3, this.width() / 2 - 100, 65, 200, 20, getLocalizedString("mco.configure.world.name"));
       this.addWidget(this.c);
       this.focusOn(this.c);
-      this.d = this.newEditBox(4, this.width() / 2 - 100, 115, 200, 20);
+      this.d = this.newEditBox(4, this.width() / 2 - 100, 115, 200, 20, getLocalizedString("mco.configure.world.description"));
       this.addWidget(this.d);
       this.f = new RealmsLabel(getLocalizedString("mco.selectServer.create"), this.width() / 2, 11, 16777215);
       this.addWidget(this.f);

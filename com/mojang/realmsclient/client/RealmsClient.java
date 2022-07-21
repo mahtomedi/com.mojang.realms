@@ -34,11 +34,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class RealmsClient {
+   public static RealmsClient.Environment currentEnvironment = RealmsClient.Environment.PRODUCTION;
+   private static boolean initialized = false;
    private static final Logger LOGGER = LogManager.getLogger();
    private final String sessionId;
    private final String username;
-   private static String baseUrl = "mcoapi.minecraft.net";
-   private static String protocol = "https";
    private static final String WORLDS_RESOURCE_PATH = "worlds";
    private static final String INVITES_RESOURCE_PATH = "invites";
    private static final String MCO_RESOURCE_PATH = "mco";
@@ -72,7 +72,7 @@ public class RealmsClient {
    private static final String PATH_WORLD_RESET = "/$WORLD_ID/reset";
    private static final String PATH_DELETE_WORLD = "/$WORLD_ID";
    private static final String PATH_WORLD_BACKUPS = "/$WORLD_ID/backups";
-   private static final String PATH_WORLD_DOWNLOAD = "/$WORLD_ID/backups/download/full";
+   private static final String PATH_WORLD_DOWNLOAD = "/$WORLD_ID/slot/$SLOT_ID/download";
    private static final String PATH_WORLD_UPLOAD = "/$WORLD_ID/backups/upload";
    private static final String PATH_CLIENT_COMPATIBLE = "/client/compatible";
    private static final String PATH_TOS_AGREED = "/tos/agreed";
@@ -82,22 +82,39 @@ public class RealmsClient {
    public static RealmsClient createRealmsClient() {
       String username = Realms.userName();
       String sessionId = Realms.sessionId();
-      return username != null && sessionId != null ? new RealmsClient(sessionId, username, Realms.getProxy()) : null;
+      if (username != null && sessionId != null) {
+         if (!initialized) {
+            initialized = true;
+            String realmsEnvironment = System.getenv("realms.environment");
+            if (realmsEnvironment == null) {
+               realmsEnvironment = System.getProperty("realms.environment");
+            }
+
+            if (realmsEnvironment != null) {
+               if (realmsEnvironment.equals("LOCAL")) {
+                  switchToLocal();
+               } else if (realmsEnvironment.equals("STAGE")) {
+                  switchToStage();
+               }
+            }
+         }
+
+         return new RealmsClient(sessionId, username, Realms.getProxy());
+      } else {
+         return null;
+      }
    }
 
    public static void switchToStage() {
-      baseUrl = "mcoapi-stage.minecraft.net";
-      protocol = "https";
+      currentEnvironment = RealmsClient.Environment.STAGE;
    }
 
    public static void switchToProd() {
-      baseUrl = "mcoapi.minecraft.net";
-      protocol = "https";
+      currentEnvironment = RealmsClient.Environment.PRODUCTION;
    }
 
    public static void switchToLocal() {
-      baseUrl = "localhost:8080";
-      protocol = "http";
+      currentEnvironment = RealmsClient.Environment.LOCAL;
    }
 
    public RealmsClient(String sessionId, String username, Proxy proxy) {
@@ -292,8 +309,10 @@ public class RealmsClient {
       this.execute(Request.put(asciiUrl, ""));
    }
 
-   public WorldDownload download(long worldId) throws RealmsServiceException {
-      String asciiUrl = this.url("worlds" + "/$WORLD_ID/backups/download/full".replace("$WORLD_ID", String.valueOf(worldId)));
+   public WorldDownload download(long worldId, int slotId) throws RealmsServiceException {
+      String asciiUrl = this.url(
+         "worlds" + "/$WORLD_ID/slot/$SLOT_ID/download".replace("$WORLD_ID", String.valueOf(worldId)).replace("$SLOT_ID", String.valueOf(slotId))
+      );
       String json = this.execute(Request.get(asciiUrl));
       return WorldDownload.parse(json);
    }
@@ -352,7 +371,7 @@ public class RealmsClient {
 
    private String url(String path, String queryString) {
       try {
-         URI uri = new URI(protocol, baseUrl, "/" + path, queryString, null);
+         URI uri = new URI(currentEnvironment.protocol, currentEnvironment.baseUrl, "/" + path, queryString, null);
          return uri.toASCIIString();
       } catch (URISyntaxException var4) {
          var4.printStackTrace();
@@ -400,5 +419,19 @@ public class RealmsClient {
       COMPATIBLE,
       OUTDATED,
       OTHER;
+   }
+
+   public static enum Environment {
+      PRODUCTION("mcoapi.minecraft.net", "https"),
+      STAGE("mcoapi-stage.minecraft.net", "https"),
+      LOCAL("localhost:8080", "http");
+
+      public String baseUrl;
+      public String protocol;
+
+      private Environment(String baseUrl, String protocol) {
+         this.baseUrl = baseUrl;
+         this.protocol = protocol;
+      }
    }
 }

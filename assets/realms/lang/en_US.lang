@@ -44,6 +44,8 @@ mco.selectServer.expires.soon=Expires soon
 
 mco.selectServer.note=Note:
 mco.selectServer.updateBreaksAdventure=Next update will break this map!
+mco.selectServer.mapOnlySupportedForVersion=This map is unsupported in %s
+mco.selectServer.minigameNotSupportedInVersion=Can't play this mini-game in %s
 
 mco.selectServer.popup=Realms is a safe, simple way to enjoy an online Minecraft world with up to ten friends at a time.   It supports loads of minigames and plenty of custom worlds! Only the owner of the Realm needs to pay.
 
@@ -265,3 +267,12 @@ mco.errorMessage.connectionFailure=An error occurred, please try again later.
 
 mco.trial.unavailable=Sorry, trials are unavailable at this time!
 mco.trial.message=Want to get your own Realm? \n Click here for more info!
+
+mco.brokenworld.play=Play
+mco.brokenworld.download=Download
+mco.brokenworld.downloaded=Downloaded
+mco.brokenworld.reset=Reset
+
+mco.brokenworld.title=Your current world is no longer supported
+mco.brokenworld.message=Please reset or select another world.\nYou can also choose to download the world to singleplayer.
+mco.brokenworld.minigame.title=This mini-game is no longer supported

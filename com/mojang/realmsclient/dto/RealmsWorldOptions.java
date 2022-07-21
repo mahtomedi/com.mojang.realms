@@ -17,6 +17,8 @@ public class RealmsWorldOptions {
    public String slotName;
    public long templateId;
    public String templateImage;
+   public String minecraftVersion;
+   public boolean adventureMap;
    public boolean empty = false;
    private static boolean forceGameModeDefault = false;
    private static boolean pvpDefault = true;
@@ -30,6 +32,8 @@ public class RealmsWorldOptions {
    private static String slotNameDefault = null;
    private static long templateIdDefault = -1L;
    private static String templateImageDefault = null;
+   private static String minecraftVersionDefault = null;
+   private static boolean adventureMapDefault = false;
 
    public RealmsWorldOptions(
       Boolean pvp,
@@ -106,6 +110,8 @@ public class RealmsWorldOptions {
       );
       newOptions.templateId = JsonUtils.getLongOr("worldTemplateId", jsonObject, templateIdDefault);
       newOptions.templateImage = JsonUtils.getStringOr("worldTemplateImage", jsonObject, templateImageDefault);
+      newOptions.minecraftVersion = JsonUtils.getStringOr("minecraftVersion", jsonObject, minecraftVersionDefault);
+      newOptions.adventureMap = JsonUtils.getBooleanOr("adventureMap", jsonObject, adventureMapDefault);
       return newOptions;
    }
 

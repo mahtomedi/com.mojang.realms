@@ -36,14 +36,16 @@ public class RealmsBackupScreen extends RealmsScreen {
    private static final int BACK_BUTTON_ID = 0;
    private static final int RESTORE_BUTTON_ID = 1;
    private static final int DOWNLOAD_BUTTON_ID = 2;
+   private int slotId;
    private RealmsButton downloadButton;
    private Boolean noBackups = false;
    private RealmsServer serverData;
    private static final String UPLOADED_KEY = "Uploaded";
 
-   public RealmsBackupScreen(RealmsConfigureWorldScreen lastscreen, RealmsServer serverData) {
+   public RealmsBackupScreen(RealmsConfigureWorldScreen lastscreen, RealmsServer serverData, int slotId) {
       this.lastScreen = lastscreen;
       this.serverData = serverData;
+      this.slotId = slotId;
    }
 
    public void mouseEvent() {
@@ -156,7 +158,7 @@ public class RealmsBackupScreen extends RealmsScreen {
       RealmsClient client = RealmsClient.createRealmsClient();
 
       try {
-         WorldDownload worldDownload = client.download(this.serverData.id);
+         WorldDownload worldDownload = client.download(this.serverData.id, this.slotId);
          Realms.setScreen(
             new RealmsDownloadLatestWorldScreen(
                this,

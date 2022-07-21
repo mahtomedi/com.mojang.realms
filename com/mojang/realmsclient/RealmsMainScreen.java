@@ -12,6 +12,7 @@ import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.exception.RetryCallException;
 import com.mojang.realmsclient.gui.ChatFormatting;
 import com.mojang.realmsclient.gui.RealmsDataFetcher;
+import com.mojang.realmsclient.gui.screens.RealmsBrokenWorldScreen;
 import com.mojang.realmsclient.gui.screens.RealmsClientOutdatedScreen;
 import com.mojang.realmsclient.gui.screens.RealmsConfigureWorldScreen;
 import com.mojang.realmsclient.gui.screens.RealmsCreateRealmScreen;
@@ -48,8 +49,6 @@ import org.lwjgl.opengl.GL11;
 public class RealmsMainScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
    private static boolean overrideConfigure = false;
-   private static boolean stageEnabled = false;
-   private static boolean localEnabled = false;
    private boolean dontSetConnectedToRealms = false;
    protected static final int BUTTON_BACK_ID = 0;
    protected static final int BUTTON_PLAY_ID = 1;
@@ -115,7 +114,7 @@ public class RealmsMainScreen extends RealmsScreen {
    private char[] lchars = new char[]{'9', '8', '7', '4', '5', '6'};
    private static ReentrantLock connectLock = new ReentrantLock();
    private boolean expiredHover = false;
-   private boolean updateBreaksAdventureNoteHover = false;
+   private boolean mapOnlySupportsVersionHover = false;
 
    public RealmsMainScreen(RealmsScreen lastScreen) {
       this.lastScreen = lastScreen;
@@ -184,7 +183,13 @@ public class RealmsMainScreen extends RealmsScreen {
       this.buttonsAdd(this.playButton = newButton(1, this.width() / 2 - 98, this.height() - 32, 98, 20, getLocalizedString("mco.selectServer.play")));
       this.buttonsAdd(this.backButton = newButton(0, this.width() / 2 + 6, this.height() - 32, 98, 20, getLocalizedString("gui.back")));
       RealmsServer server = this.findServer(this.selectedServerId);
-      this.playButton.active(server != null && server.state == RealmsServer.State.OPEN && !server.expired);
+      this.playButton
+         .active(
+            server != null
+               && server.state == RealmsServer.State.OPEN
+               && !server.expired
+               && (!RealmsUtil.mapIsBrokenByUpdate(server) || this.isSelfOwnedServer(server))
+         );
    }
 
    public void postInit() {
@@ -320,7 +325,16 @@ public class RealmsMainScreen extends RealmsScreen {
                }
                break;
             case 1:
-               this.play(this.findServer(this.selectedServerId));
+               RealmsServer server = this.findServer(this.selectedServerId);
+               if (server == null) {
+                  return;
+               }
+
+               if (this.isSelfOwnedServer(server) && RealmsUtil.mapIsBrokenByUpdate(server)) {
+                  Realms.setScreen(new RealmsBrokenWorldScreen(this, server.id));
+               } else {
+                  this.play(server);
+               }
                break;
             case 2:
             default:
@@ -416,7 +430,7 @@ public class RealmsMainScreen extends RealmsScreen {
    }
 
    private void switchToStage() {
-      if (!stageEnabled) {
+      if (!RealmsClient.currentEnvironment.equals(RealmsClient.Environment.STAGE)) {
          (new Thread("MCO Stage Availability Checker #1") {
             public void run() {
                RealmsClient client = RealmsClient.createRealmsClient();
@@ -427,10 +441,6 @@ public class RealmsMainScreen extends RealmsScreen {
                      RealmsClient.switchToStage();
                      RealmsMainScreen.LOGGER.info("Switched to stage");
                      RealmsMainScreen.realmsDataFetcher.forceUpdate();
-                     RealmsMainScreen.localEnabled = false;
-                     RealmsMainScreen.stageEnabled = true;
-                  } else {
-                     RealmsMainScreen.stageEnabled = false;
                   }
                } catch (RealmsServiceException var3) {
                   RealmsMainScreen.LOGGER.error("Couldn't connect to Realms: " + var3.toString());
@@ -445,7 +455,7 @@ public class RealmsMainScreen extends RealmsScreen {
    }
 
    private void switchToLocal() {
-      if (!localEnabled) {
+      if (!RealmsClient.currentEnvironment.equals(RealmsClient.Environment.LOCAL)) {
          (new Thread("MCO Local Availability Checker #1") {
             public void run() {
                RealmsClient client = RealmsClient.createRealmsClient();
@@ -456,10 +466,6 @@ public class RealmsMainScreen extends RealmsScreen {
                      RealmsClient.switchToLocal();
                      RealmsMainScreen.LOGGER.info("Switched to local");
                      RealmsMainScreen.realmsDataFetcher.forceUpdate();
-                     RealmsMainScreen.stageEnabled = false;
-                     RealmsMainScreen.localEnabled = true;
-                  } else {
-                     RealmsMainScreen.localEnabled = false;
                   }
                } catch (RealmsServiceException var3) {
                   RealmsMainScreen.LOGGER.error("Couldn't connect to Realms: " + var3.toString());
@@ -474,13 +480,8 @@ public class RealmsMainScreen extends RealmsScreen {
    }
 
    private void switchToProd() {
-      if (stageEnabled || localEnabled) {
-         stageEnabled = false;
-         localEnabled = false;
-         RealmsClient.switchToProd();
-         realmsDataFetcher.forceUpdate();
-      }
-
+      RealmsClient.switchToProd();
+      realmsDataFetcher.forceUpdate();
    }
 
    private void stopRealmsFetcher() {
@@ -490,7 +491,16 @@ public class RealmsMainScreen extends RealmsScreen {
    private void configureClicked(RealmsServer selectedServer) {
       if (Realms.getUUID().equals(selectedServer.ownerUUID) || overrideConfigure) {
          this.saveListScrollPosition();
-         Realms.setScreen(new RealmsConfigureWorldScreen(this, selectedServer.id));
+         if (RealmsUtil.mapIsBrokenByUpdate(selectedServer)) {
+            RealmsBrokenWorldScreen brokenWorldScreen = new RealmsBrokenWorldScreen(this, selectedServer.id);
+            if (selectedServer.worldType.equals(RealmsServer.WorldType.MINIGAME)) {
+               brokenWorldScreen.setTitle(getLocalizedString("mco.brokenworld.minigame.title"));
+            }
+
+            Realms.setScreen(brokenWorldScreen);
+         } else {
+            Realms.setScreen(new RealmsConfigureWorldScreen(this, selectedServer.id));
+         }
       }
 
    }
@@ -697,7 +707,7 @@ public class RealmsMainScreen extends RealmsScreen {
                ++this.sindex;
                if (this.sindex == this.schars.length) {
                   this.sindex = 0;
-                  if (!stageEnabled) {
+                  if (!RealmsClient.currentEnvironment.equals(RealmsClient.Environment.STAGE)) {
                      this.switchToStage();
                   } else {
                      this.switchToProd();
@@ -711,7 +721,7 @@ public class RealmsMainScreen extends RealmsScreen {
                ++this.lindex;
                if (this.lindex == this.lchars.length) {
                   this.lindex = 0;
-                  if (!localEnabled) {
+                  if (!RealmsClient.currentEnvironment.equals(RealmsClient.Environment.LOCAL)) {
                      this.switchToLocal();
                   } else {
                      this.switchToProd();
@@ -726,7 +736,7 @@ public class RealmsMainScreen extends RealmsScreen {
 
    public void render(int xm, int ym, float a) {
       this.expiredHover = false;
-      this.updateBreaksAdventureNoteHover = false;
+      this.mapOnlySupportsVersionHover = false;
       this.toolTip = null;
       this.renderBackground();
       this.serverSelectionList.render(xm, ym, a);
@@ -736,11 +746,11 @@ public class RealmsMainScreen extends RealmsScreen {
       }
 
       this.drawInvitationPendingIcon(xm, ym);
-      if (stageEnabled) {
+      if (RealmsClient.currentEnvironment.equals(RealmsClient.Environment.STAGE)) {
          this.renderStage();
       }
 
-      if (localEnabled) {
+      if (RealmsClient.currentEnvironment.equals(RealmsClient.Environment.LOCAL)) {
          this.renderLocal();
       }
 
@@ -752,7 +762,13 @@ public class RealmsMainScreen extends RealmsScreen {
             this.buttonsAdd(this.playButton);
             this.buttonsAdd(this.backButton);
             RealmsServer server = this.findServer(this.selectedServerId);
-            this.playButton.active(server != null && server.state == RealmsServer.State.OPEN && !server.expired);
+            this.playButton
+               .active(
+                  server != null
+                     && server.state == RealmsServer.State.OPEN
+                     && !server.expired
+                     && (!RealmsUtil.mapIsBrokenByUpdate(server) || this.isSelfOwnedServer(server))
+               );
          }
 
          this.showingPopup = false;
@@ -1206,9 +1222,18 @@ public class RealmsMainScreen extends RealmsScreen {
                RealmsMainScreen.this.selectedServerId = server.id;
             }
 
-            RealmsMainScreen.this.playButton.active(server.state == RealmsServer.State.OPEN && !server.expired);
+            RealmsMainScreen.this.playButton
+               .active(
+                  server.state == RealmsServer.State.OPEN
+                     && !server.expired
+                     && (!RealmsUtil.mapIsBrokenByUpdate(server) || RealmsMainScreen.this.isSelfOwnedServer(server))
+               );
             if (doubleClick && RealmsMainScreen.this.playButton.active()) {
-               RealmsMainScreen.this.play(RealmsMainScreen.this.findServer(RealmsMainScreen.this.selectedServerId));
+               if (RealmsMainScreen.this.isSelfOwnedServer(server) && RealmsUtil.mapIsBrokenByUpdate(server)) {
+                  Realms.setScreen(new RealmsBrokenWorldScreen(RealmsMainScreen.this, server.id));
+               } else {
+                  RealmsMainScreen.this.play(RealmsMainScreen.this.findServer(RealmsMainScreen.this.selectedServerId));
+               }
             }
 
          }
@@ -1301,9 +1326,10 @@ public class RealmsMainScreen extends RealmsScreen {
          if (slot < RealmsMainScreen.this.realmsServers.size()) {
             RealmsServer server = (RealmsServer)RealmsMainScreen.this.realmsServers.get(slot);
             if (server != null) {
-               if (RealmsMainScreen.this.toolTip != null && RealmsMainScreen.this.toolTip.equals(RealmsScreen.getLocalizedString("mco.selectServer.configure"))
-                  )
-                {
+               if (RealmsMainScreen.this.mapOnlySupportsVersionHover) {
+                  Realms.setScreen(new RealmsBrokenWorldScreen(RealmsMainScreen.this, server.id));
+               } else if (RealmsMainScreen.this.toolTip != null
+                  && RealmsMainScreen.this.toolTip.equals(RealmsScreen.getLocalizedString("mco.selectServer.configure"))) {
                   RealmsMainScreen.this.selectedServerId = server.id;
                   RealmsMainScreen.this.configureClicked(server);
                } else if (RealmsMainScreen.this.toolTip != null
@@ -1318,8 +1344,6 @@ public class RealmsMainScreen extends RealmsScreen {
                      + "&ref="
                      + (server.expiredTrial ? "expiredTrial" : "expiredRealm");
                   this.browseURL(extensionUrl);
-               } else if (RealmsMainScreen.this.isSelfOwnedServer(server) && RealmsMainScreen.this.updateBreaksAdventureNoteHover) {
-                  this.browseURL("https://beta.minecraft.net/realms/adventure-maps-in-1-9");
                }
 
             }
@@ -1358,12 +1382,15 @@ public class RealmsMainScreen extends RealmsScreen {
             int dy = 2;
             if (serverData.expired) {
                RealmsMainScreen.this.drawExpired(x + dx - 14, y + dy, this.xm(), this.ym());
-            } else if (serverData.state == RealmsServer.State.CLOSED) {
+            } else if (serverData.state != RealmsServer.State.CLOSED
+               && (!RealmsUtil.mapIsBrokenByUpdate(serverData) || RealmsMainScreen.this.isSelfOwnedServer(serverData))) {
+               if (RealmsMainScreen.this.isSelfOwnedServer(serverData) && serverData.daysLeft < 7) {
+                  RealmsMainScreen.this.drawExpiring(x + dx - 14, y + dy, this.xm(), this.ym(), serverData.daysLeft);
+               } else if (serverData.state == RealmsServer.State.OPEN) {
+                  RealmsMainScreen.this.drawOpen(x + dx - 14, y + dy, this.xm(), this.ym());
+               }
+            } else {
                RealmsMainScreen.this.drawClose(x + dx - 14, y + dy, this.xm(), this.ym());
-            } else if (RealmsMainScreen.this.isSelfOwnedServer(serverData) && serverData.daysLeft < 7) {
-               RealmsMainScreen.this.drawExpiring(x + dx - 14, y + dy, this.xm(), this.ym(), serverData.daysLeft);
-            } else if (serverData.state == RealmsServer.State.OPEN) {
-               RealmsMainScreen.this.drawOpen(x + dx - 14, y + dy, this.xm(), this.ym());
             }
 
             if (!RealmsMainScreen.this.isSelfOwnedServer(serverData) && !RealmsMainScreen.overrideConfigure) {
@@ -1449,16 +1476,28 @@ public class RealmsMainScreen extends RealmsScreen {
                   String miniGameStr = RealmsScreen.getLocalizedString("mco.selectServer.minigame") + " ";
                   int mgWidth = RealmsMainScreen.this.fontWidth(miniGameStr);
                   RealmsMainScreen.this.drawString(miniGameStr, x + 2, y + 12, motdColor);
-                  RealmsMainScreen.this.drawString(serverData.getMinigameName(), x + 2 + mgWidth, y + 19872, 7105644);
+                  RealmsMainScreen.this.drawString(serverData.getMinigameName(), x + 2 + mgWidth, y + 12, 7105644);
                } else {
                   RealmsMainScreen.this.drawString(serverData.getDescription(), x + 2, y + 12, 7105644);
                }
 
-               if (!RealmsMainScreen.this.isSelfOwnedServer(serverData)) {
+               if (RealmsUtil.mapIsBrokenByUpdate(serverData)) {
+                  String noteText;
+                  if (serverData.worldType.equals(RealmsServer.WorldType.ADVENTUREMAP)) {
+                     noteText = RealmsScreen.getLocalizedString(
+                        "mco.selectServer.mapOnlySupportedForVersion", new Object[]{RealmsSharedConstants.VERSION_STRING}
+                     );
+                  } else {
+                     noteText = RealmsScreen.getLocalizedString(
+                        "mco.selectServer.minigameNotSupportedInVersion", new Object[]{RealmsSharedConstants.VERSION_STRING}
+                     );
+                  }
+
+                  if (this.renderRealmNote(i, x, y, noteText, RealmsMainScreen.this.isSelfOwnedServer(serverData))) {
+                     RealmsMainScreen.this.mapOnlySupportsVersionHover = true;
+                  }
+               } else if (!RealmsMainScreen.this.isSelfOwnedServer(serverData)) {
                   RealmsMainScreen.this.drawString(serverData.owner, x + 2, y + 12 + 11, 5000268);
-               } else if (serverData.worldType.equals(RealmsServer.WorldType.ADVENTUREMAP) && RealmsSharedConstants.VERSION_STRING.equals("1.8.9")) {
-                  String noteText = RealmsScreen.getLocalizedString("mco.selectServer.updateBreaksAdventure", new Object[]{"1.9"}) + " ";
-                  RealmsMainScreen.this.updateBreaksAdventureNoteHover = this.renderRealmNote(i, x, y, noteText);
                }
             }
 
@@ -1470,7 +1509,7 @@ public class RealmsMainScreen extends RealmsScreen {
          }
       }
 
-      private boolean renderRealmNote(int i, int x, int y, String text) {
+      private boolean renderRealmNote(int i, int x, int y, String text, boolean hover) {
          String label = RealmsScreen.getLocalizedString("mco.selectServer.note") + " ";
          int labelWidth = RealmsMainScreen.this.fontWidth(label);
          int textWidth = RealmsMainScreen.this.fontWidth(text);
@@ -1480,7 +1519,8 @@ public class RealmsMainScreen extends RealmsScreen {
          boolean noteIsHovered = this.xm() >= offsetX
             && this.xm() < offsetX + noteWidth
             && this.ym() > offsetY
-            && this.ym() <= offsetY + RealmsMainScreen.this.fontLineHeight();
+            && this.ym() <= offsetY + RealmsMainScreen.this.fontLineHeight()
+            && hover;
          int labelColor = 15553363;
          int textColor = 16777215;
          if (noteIsHovered) {

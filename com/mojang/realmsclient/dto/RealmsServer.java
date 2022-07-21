@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import net.minecraft.realms.Realms;
-import net.minecraft.realms.RealmsServerPing;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.logging.log4j.LogManager;
@@ -43,6 +42,7 @@ public class RealmsServer extends ValueObject {
    public String minigameImage;
    public String resourcePackUrl;
    public String resourcePackHash;
+   public String minecraftVersion;
    public RealmsServerPing serverPing = new RealmsServerPing();
 
    public String getDescription() {
@@ -128,6 +128,7 @@ public class RealmsServer extends ValueObject {
          server.minigameImage = JsonUtils.getStringOr("minigameImage", node, null);
          server.resourcePackUrl = JsonUtils.getStringOr("resourcePackUrl", node, null);
          server.resourcePackHash = JsonUtils.getStringOr("resourcePackHash", node, null);
+         server.minecraftVersion = JsonUtils.getStringOr("minecraftVersion", node, null);
       } catch (Exception var3) {
          LOGGER.error("Could not parse McoServer: " + var3.getMessage());
       }

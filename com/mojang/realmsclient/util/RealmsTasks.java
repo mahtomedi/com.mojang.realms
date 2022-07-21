@@ -243,6 +243,7 @@ public class RealmsTasks {
       private final boolean generateStructures;
       private final long serverId;
       private final RealmsScreen lastScreen;
+      private int confirmationId = -1;
       private String title = RealmsScreen.getLocalizedString("mco.reset.world.resetting.screen.title");
 
       public ResettingWorldTask(long serverId, RealmsScreen lastScreen, WorldTemplate worldTemplate) {
@@ -261,6 +262,10 @@ public class RealmsTasks {
          this.generateStructures = generateStructures;
          this.serverId = serverId;
          this.lastScreen = lastScreen;
+      }
+
+      public void setConfirmationId(int confirmationId) {
+         this.confirmationId = confirmationId;
       }
 
       public void setResetTitle(String title) {
@@ -288,7 +293,12 @@ public class RealmsTasks {
                   return;
                }
 
-               Realms.setScreen(this.lastScreen);
+               if (this.confirmationId != -1) {
+                  this.lastScreen.confirmResult(true, this.confirmationId);
+               } else {
+                  Realms.setScreen(this.lastScreen);
+               }
+
                return;
             } catch (RetryCallException var4) {
                if (this.aborted()) {

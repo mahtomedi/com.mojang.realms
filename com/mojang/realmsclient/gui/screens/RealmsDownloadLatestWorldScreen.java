@@ -36,6 +36,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
    private static final String[] DOTS = new String[]{"", ".", ". .", ". . ."};
    private int dotIndex = 0;
    private final int WARNING_ID = 100;
+   private int confirmationId = -1;
    private boolean checked = false;
    private static final ReentrantLock downloadLock = new ReentrantLock();
 
@@ -44,6 +45,10 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
       this.worldName = worldName;
       this.worldDownload = worldDownload;
       this.downloadStatus = new RealmsDownloadLatestWorldScreen.DownloadStatus();
+   }
+
+   public void setConfirmationId(int confirmationId) {
+      this.confirmationId = confirmationId;
    }
 
    public void init() {
@@ -101,6 +106,10 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
    }
 
    private void backButtonClicked() {
+      if (this.finished && this.confirmationId != -1 && this.errorMessage == null) {
+         this.lastScreen.confirmResult(true, this.confirmationId);
+      }
+
       Realms.setScreen(this.lastScreen);
    }
 

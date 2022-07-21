@@ -10,6 +10,7 @@ import com.mojang.realmsclient.gui.RealmsConstants;
 import com.mojang.realmsclient.gui.RealmsHideableButton;
 import com.mojang.realmsclient.util.RealmsTasks;
 import com.mojang.realmsclient.util.RealmsTextureManager;
+import com.mojang.realmsclient.util.RealmsUtil;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Map.Entry;
@@ -272,7 +273,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
                   );
                   break;
                case 6:
-                  Realms.setScreen(new RealmsBackupScreen(this, this.serverData.clone()));
+                  Realms.setScreen(new RealmsBackupScreen(this, this.serverData.clone(), this.serverData.activeSlot));
                   break;
                case 7:
                   Realms.setScreen(new RealmsResetWorldScreen(this, this.serverData.clone(), this.getNewScreen()));
@@ -307,6 +308,11 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
 
             try {
                RealmsConfigureWorldScreen.this.serverData = client.getOwnWorld(worldId);
+               if (RealmsUtil.mapIsBrokenByUpdate(RealmsConfigureWorldScreen.this.serverData)) {
+                  Realms.setScreen(new RealmsBrokenWorldScreen(RealmsConfigureWorldScreen.this.lastScreen, RealmsConfigureWorldScreen.this.serverData.id));
+                  return;
+               }
+
                RealmsConfigureWorldScreen.this.disableButtons();
                if (RealmsConfigureWorldScreen.this.isMinigame()) {
                   RealmsConfigureWorldScreen.this.showMinigameButtons();

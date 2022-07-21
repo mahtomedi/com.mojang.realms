@@ -194,7 +194,7 @@ public class RealmsServer extends ValueObject {
    }
 
    private static Map<Integer, RealmsWorldOptions> getEmptySlots() {
-      HashMap slots = new HashMap();
+      HashMap<Integer, RealmsWorldOptions> slots = new HashMap();
       slots.put(1, RealmsWorldOptions.getEmptyDefaults());
       slots.put(2, RealmsWorldOptions.getEmptyDefaults());
       slots.put(3, RealmsWorldOptions.getEmptyDefaults());

@@ -11,7 +11,7 @@ import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 
-public abstract class Request<T extends Request> {
+public abstract class Request<T extends Request<T>> {
    protected HttpURLConnection connection;
    private boolean connected;
    protected String url;

@@ -16,8 +16,11 @@ public class RealmsClientOutdatedScreen extends RealmsScreen {
    }
 
    public void init() {
-      this.buttonsClear();
-      this.buttonsAdd(newButton(0, this.width() / 2 - 100, RealmsConstants.row(12), "Back"));
+      this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 100, RealmsConstants.row(12), "Back") {
+         public void onClick(double mouseX, double mouseY) {
+            Realms.setScreen(RealmsClientOutdatedScreen.this.lastScreen);
+         }
+      });
    }
 
    public void render(int xm, int ym, float a) {
@@ -34,17 +37,12 @@ public class RealmsClientOutdatedScreen extends RealmsScreen {
       super.render(xm, ym, a);
    }
 
-   public void buttonClicked(RealmsButton button) {
-      if (button.id() == 0) {
+   public boolean keyPressed(int eventKey, int scancode, int mods) {
+      if (eventKey != 257 && eventKey != 335 && eventKey != 256) {
+         return super.keyPressed(eventKey, scancode, mods);
+      } else {
          Realms.setScreen(this.lastScreen);
+         return true;
       }
-
-   }
-
-   public void keyPressed(char eventCharacter, int eventKey) {
-      if (eventKey == 28 || eventKey == 156 || eventKey == 1) {
-         Realms.setScreen(this.lastScreen);
-      }
-
    }
 }

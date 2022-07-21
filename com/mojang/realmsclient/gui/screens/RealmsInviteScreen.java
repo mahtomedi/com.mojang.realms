@@ -9,7 +9,6 @@ import net.minecraft.realms.RealmsEditBox;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.input.Keyboard;
 
 public class RealmsInviteScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
@@ -35,47 +34,42 @@ public class RealmsInviteScreen extends RealmsScreen {
    }
 
    public void init() {
-      Keyboard.enableRepeatEvents(true);
-      this.buttonsClear();
+      this.setKeyboardHandlerSendRepeatsToGui(true);
       this.buttonsAdd(
-         this.inviteButton = newButton(0, this.width() / 2 - 100, RealmsConstants.row(10), getLocalizedString("mco.configure.world.buttons.invite"))
+         this.inviteButton = new RealmsButton(0, this.width() / 2 - 100, RealmsConstants.row(10), getLocalizedString("mco.configure.world.buttons.invite")) {
+            public void onClick(double mouseX, double mouseY) {
+               RealmsInviteScreen.this.onInvite();
+            }
+         }
       );
-      this.buttonsAdd(newButton(1, this.width() / 2 - 100, RealmsConstants.row(12), getLocalizedString("gui.cancel")));
+      this.buttonsAdd(new RealmsButton(1, this.width() / 2 - 100, RealmsConstants.row(12), getLocalizedString("gui.cancel")) {
+         public void onClick(double mouseX, double mouseY) {
+            Realms.setScreen(RealmsInviteScreen.this.lastScreen);
+         }
+      });
       this.profileName = this.newEditBox(2, this.width() / 2 - 100, RealmsConstants.row(2), 200, 20);
-      this.profileName.setFocus(true);
+      this.focusOn(this.profileName);
+      this.addWidget(this.profileName);
    }
 
    public void removed() {
-      Keyboard.enableRepeatEvents(false);
+      this.setKeyboardHandlerSendRepeatsToGui(false);
    }
 
-   public void buttonClicked(RealmsButton button) {
-      if (button.active()) {
-         switch(button.id()) {
-            case 0:
-               RealmsClient client = RealmsClient.createRealmsClient();
-               if (this.profileName.getValue() == null || this.profileName.getValue().isEmpty()) {
-                  return;
-               }
-
-               try {
-                  RealmsServer realmsServer = client.invite(this.serverData.id, this.profileName.getValue().trim());
-                  if (realmsServer != null) {
-                     this.serverData.players = realmsServer.players;
-                     Realms.setScreen(new RealmsPlayerScreen(this.configureScreen, this.serverData));
-                  } else {
-                     this.showError(getLocalizedString("mco.configure.world.players.error"));
-                  }
-               } catch (Exception var4) {
-                  LOGGER.error("Couldn't invite user");
-                  this.showError(getLocalizedString("mco.configure.world.players.error"));
-               }
-               break;
-            case 1:
-               Realms.setScreen(this.lastScreen);
-               break;
-            default:
-               return;
+   private void onInvite() {
+      RealmsClient client = RealmsClient.createRealmsClient();
+      if (this.profileName.getValue() != null && !this.profileName.getValue().isEmpty()) {
+         try {
+            RealmsServer realmsServer = client.invite(this.serverData.id, this.profileName.getValue().trim());
+            if (realmsServer != null) {
+               this.serverData.players = realmsServer.players;
+               Realms.setScreen(new RealmsPlayerScreen(this.configureScreen, this.serverData));
+            } else {
+               this.showError(getLocalizedString("mco.configure.world.players.error"));
+            }
+         } catch (Exception var3) {
+            LOGGER.error("Couldn't invite user");
+            this.showError(getLocalizedString("mco.configure.world.players.error"));
          }
 
       }
@@ -86,29 +80,19 @@ public class RealmsInviteScreen extends RealmsScreen {
       this.errorMsg = errorMsg;
    }
 
-   public void keyPressed(char ch, int eventKey) {
-      this.profileName.keyPressed(ch, eventKey);
-      if (eventKey == 15) {
-         if (this.profileName.isFocused()) {
-            this.profileName.setFocus(false);
-         } else {
-            this.profileName.setFocus(true);
-         }
-      }
-
-      if (eventKey == 28 || eventKey == 156) {
-         this.buttonClicked(this.inviteButton);
-      }
-
-      if (eventKey == 1) {
+   public boolean keyPressed(int eventKey, int scancode, int mods) {
+      if (eventKey == 258) {
+         this.focusNext();
+         return true;
+      } else if (eventKey == 257 || eventKey == 335) {
+         this.onInvite();
+         return true;
+      } else if (eventKey == 256) {
          Realms.setScreen(this.lastScreen);
+         return true;
+      } else {
+         return super.keyPressed(eventKey, scancode, mods);
       }
-
-   }
-
-   public void mouseClicked(int x, int y, int buttonNum) {
-      super.mouseClicked(x, y, buttonNum);
-      this.profileName.mouseClicked(x, y, buttonNum);
    }
 
    public void render(int xm, int ym, float a) {
@@ -118,7 +102,7 @@ public class RealmsInviteScreen extends RealmsScreen {
          this.drawCenteredString(this.errorMsg, this.width() / 2, RealmsConstants.row(5), 16711680);
       }
 
-      this.profileName.render();
+      this.profileName.render(xm, ym, a);
       super.render(xm, ym, a);
    }
 }

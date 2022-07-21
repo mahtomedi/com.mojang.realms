@@ -16,8 +16,6 @@ import net.minecraft.realms.RealmsScreen;
 import net.minecraft.realms.Tezzelator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 public class RealmsPendingInvitesScreen extends RealmsScreen {
@@ -35,14 +33,8 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
       this.lastScreen = lastScreen;
    }
 
-   public void mouseEvent() {
-      super.mouseEvent();
-      this.pendingList.mouseEvent();
-   }
-
    public void init() {
-      Keyboard.enableRepeatEvents(true);
-      this.buttonsClear();
+      this.setKeyboardHandlerSendRepeatsToGui(true);
       this.pendingList = new RealmsPendingInvitesScreen.PendingInvitationList();
       (new Thread("Realms-pending-invitations-fetcher") {
          public void run() {
@@ -58,27 +50,26 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 
          }
       }).start();
-      this.buttonsAdd(newButton(0, this.width() / 2 - 75, this.height() - 32, 153, 20, getLocalizedString("gui.done")));
+      this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 75, this.height() - 32, 153, 20, getLocalizedString("gui.done")) {
+         public void onClick(double mouseX, double mouseY) {
+            Realms.setScreen(new RealmsMainScreen(RealmsPendingInvitesScreen.this.lastScreen));
+         }
+      });
+      this.addWidget(this.pendingList);
+      this.focusOn(this.pendingList);
    }
 
    public void tick() {
       super.tick();
    }
 
-   public void buttonClicked(RealmsButton button) {
-      if (button.active()) {
-         switch(button.id()) {
-            case 0:
-               Realms.setScreen(new RealmsMainScreen(this.lastScreen));
-         }
-      }
-   }
-
-   public void keyPressed(char eventCharacter, int eventKey) {
-      if (eventKey == 1) {
+   public boolean keyPressed(int eventKey, int scancode, int mods) {
+      if (eventKey == 256) {
          Realms.setScreen(new RealmsMainScreen(this.lastScreen));
+         return true;
+      } else {
+         return super.keyPressed(eventKey, scancode, mods);
       }
-
    }
 
    private void updateList(int slot) {
@@ -184,12 +175,12 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 
       public void renderItem(int i, int x, int y, int h, int mouseX, int mouseY) {
          if (i < RealmsPendingInvitesScreen.this.pendingInvites.size()) {
-            this.renderPendingInvitationItem(i, x, y, h);
+            this.renderPendingInvitationItem(i, x, y, h, mouseX, mouseY);
          }
 
       }
 
-      private void renderPendingInvitationItem(int i, int x, int y, int h) {
+      private void renderPendingInvitationItem(int i, int x, int y, int h, int mouseX, int mouseY) {
          PendingInvite invite = (PendingInvite)RealmsPendingInvitesScreen.this.pendingInvites.get(i);
          RealmsPendingInvitesScreen.this.drawString(invite.worldName, x + 2, y + 1, 16777215);
          RealmsPendingInvitesScreen.this.drawString(invite.worldOwnerName, x + 2, y + 12, 7105644);
@@ -197,8 +188,8 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
             RealmsUtil.convertToAgePresentation(System.currentTimeMillis() - invite.date.getTime()), x + 2, y + 24, 7105644
          );
          int dx = this.getScrollbarPosition() - 50;
-         this.drawAccept(dx, y, this.xm(), this.ym());
-         this.drawReject(dx + 20, y, this.xm(), this.ym());
+         this.drawAccept(dx, y, mouseX, mouseY);
+         this.drawReject(dx + 20, y, mouseX, mouseY);
          RealmsTextureManager.bindFace(invite.worldOwnerUuid);
          GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
          RealmsScreen.blit(x - 36, y, 8.0F, 8.0F, 8, 8, 32, 32, 64.0F, 64.0F);
@@ -239,28 +230,31 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 
       }
 
-      public void itemClicked(int clickSlotPos, int slot, int xm, int ym, int width) {
+      public void itemClicked(int clickSlotPos, int slot, double xm, double ym, int width) {
          int x = this.getScrollbarPosition() - 50;
          int y = clickSlotPos + 30 - this.getScroll();
-         if (xm >= x && xm <= x + 15 && ym >= y && ym <= y + 15) {
+         if (xm >= (double)x && xm <= (double)(x + 15) && ym >= (double)y && ym <= (double)(y + 15)) {
             RealmsPendingInvitesScreen.this.accept(slot);
-         } else if (xm >= x + 20 && xm <= x + 20 + 15 && ym >= y && ym <= y + 15) {
+         } else if (xm >= (double)(x + 20) && xm <= (double)(x + 20 + 15) && ym >= (double)y && ym <= (double)(y + 15)) {
             RealmsPendingInvitesScreen.this.reject(slot);
          }
 
       }
 
-      public void customMouseEvent(int y0, int y1, int headerHeight, float yo, int itemHeight) {
-         if (Mouse.isButtonDown(0) && this.ym() >= y0 && this.ym() <= y1) {
+      public boolean mouseClicked(double xm, double ym, int buttonNum) {
+         if (buttonNum == 0 && xm < (double)this.getScrollbarPosition() && ym >= (double)this.y0() && ym <= (double)this.y1()) {
             int x0 = this.width() / 2 - 92;
             int x1 = this.width();
-            int clickSlotPos = this.ym() - y0 - headerHeight + (int)yo - 4;
-            int slot = clickSlotPos / itemHeight;
-            if (this.xm() >= x0 && this.xm() <= x1 && slot >= 0 && clickSlotPos >= 0 && slot < this.getItemCount()) {
-               this.itemClicked(clickSlotPos, slot, this.xm(), this.ym(), this.width());
+            int clickSlotPos = (int)Math.floor(ym - (double)this.y0()) - this.headerHeight() + (int)this.yo() - 4;
+            int slot = clickSlotPos / this.itemHeight();
+            if (xm >= (double)x0 && xm <= (double)x1 && slot >= 0 && clickSlotPos >= 0 && slot < this.getItemCount()) {
+               this.itemClicked(clickSlotPos, slot, xm, ym, this.width());
             }
-         }
 
+            return true;
+         } else {
+            return super.mouseClicked(xm, ym, buttonNum);
+         }
       }
    }
 }

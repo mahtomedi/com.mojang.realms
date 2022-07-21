@@ -13,7 +13,6 @@ import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTemplate> {
@@ -74,8 +73,11 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTempla
    }
 
    public void init() {
-      this.buttonsClear();
-      this.buttonsAdd(newButton(0, this.width() / 2 - 40, RealmsConstants.row(14) - 10, 80, 20, this.buttonTitle));
+      this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 40, RealmsConstants.row(14) - 10, 80, 20, this.buttonTitle) {
+         public void onClick(double mouseX, double mouseY) {
+            Realms.setScreen(RealmsResetWorldScreen.this.lastScreen);
+         }
+      });
       (new Thread("Realms-reset-world-fetcher") {
          public void run() {
             RealmsClient client = RealmsClient.createRealmsClient();
@@ -94,67 +96,57 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTempla
    }
 
    public void removed() {
-      Keyboard.enableRepeatEvents(false);
+      this.setKeyboardHandlerSendRepeatsToGui(false);
    }
 
-   public void keyPressed(char ch, int eventKey) {
-      if (eventKey == 1) {
+   public boolean keyPressed(int eventKey, int scancode, int mods) {
+      if (eventKey == 256) {
          Realms.setScreen(this.lastScreen);
-      }
-
-   }
-
-   public void buttonClicked(RealmsButton button) {
-      if (button.active()) {
-         if (button.id() == 0) {
-            Realms.setScreen(this.lastScreen);
-         }
-
+         return true;
+      } else {
+         return super.keyPressed(eventKey, scancode, mods);
       }
    }
 
-   public void mouseClicked(int x, int y, int buttonNum) {
+   public boolean mouseClicked(double x, double y, int buttonNum) {
       switch(this.selectedType) {
-         case NONE:
-            break;
          case GENERATE:
             Realms.setScreen(new RealmsResetNormalWorldScreen(this, this.title));
-            break;
+            return true;
          case UPLOAD:
             Realms.setScreen(new RealmsSelectFileToUploadScreen(this.serverData.id, this.slot != -1 ? this.slot : this.serverData.activeSlot, this));
-            break;
+            return true;
          case ADVENTURE:
             RealmsSelectWorldTemplateScreen screen = new RealmsSelectWorldTemplateScreen(
                this, null, RealmsServer.WorldType.ADVENTUREMAP, new WorldTemplatePaginatedList(this.adventuremaps)
             );
             screen.setTitle(getLocalizedString("mco.reset.world.adventure"));
             Realms.setScreen(screen);
-            break;
+            return true;
          case SURVIVAL_SPAWN:
             RealmsSelectWorldTemplateScreen templateScreen = new RealmsSelectWorldTemplateScreen(
                this, null, RealmsServer.WorldType.NORMAL, new WorldTemplatePaginatedList(this.templates)
             );
             templateScreen.setTitle(getLocalizedString("mco.reset.world.template"));
             Realms.setScreen(templateScreen);
-            break;
+            return true;
          case EXPERIENCE:
             RealmsSelectWorldTemplateScreen experienceScreen = new RealmsSelectWorldTemplateScreen(
                this, null, RealmsServer.WorldType.EXPERIENCE, new WorldTemplatePaginatedList(this.experiences)
             );
             experienceScreen.setTitle(getLocalizedString("mco.reset.world.experience"));
             Realms.setScreen(experienceScreen);
-            break;
+            return true;
          case INSPIRATION:
             RealmsSelectWorldTemplateScreen inspirationScreen = new RealmsSelectWorldTemplateScreen(
                this, null, RealmsServer.WorldType.INSPIRATION, new WorldTemplatePaginatedList(this.inspirations)
             );
             inspirationScreen.setTitle(getLocalizedString("mco.reset.world.inspiration"));
             Realms.setScreen(inspirationScreen);
-            break;
+            return true;
          default:
-            return;
+            return super.mouseClicked(x, y, buttonNum);
       }
-
    }
 
    private int frame(int i) {

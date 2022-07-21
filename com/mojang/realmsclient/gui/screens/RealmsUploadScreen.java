@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.zip.GZIPOutputStream;
@@ -19,14 +20,12 @@ import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsDefaultVertexFormat;
 import net.minecraft.realms.RealmsLevelSummary;
 import net.minecraft.realms.RealmsScreen;
-import net.minecraft.realms.RealmsSharedConstants;
 import net.minecraft.realms.Tezzelator;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 public class RealmsUploadScreen extends RealmsScreen {
@@ -65,10 +64,17 @@ public class RealmsUploadScreen extends RealmsScreen {
    }
 
    public void init() {
-      Keyboard.enableRepeatEvents(true);
-      this.buttonsClear();
-      this.backButton = newButton(1, this.width() / 2 - 100, this.height() - 42, 200, 20, getLocalizedString("gui.back"));
-      this.buttonsAdd(this.cancelButton = newButton(0, this.width() / 2 - 100, this.height() - 42, 200, 20, getLocalizedString("gui.cancel")));
+      this.setKeyboardHandlerSendRepeatsToGui(true);
+      this.backButton = new RealmsButton(1, this.width() / 2 - 100, this.height() - 42, 200, 20, getLocalizedString("gui.back")) {
+         public void onClick(double mouseX, double mouseY) {
+            RealmsUploadScreen.this.onBack();
+         }
+      };
+      this.buttonsAdd(this.cancelButton = new RealmsButton(0, this.width() / 2 - 100, this.height() - 42, 200, 20, getLocalizedString("gui.cancel")) {
+         public void onClick(double mouseX, double mouseY) {
+            RealmsUploadScreen.this.onCancel();
+         }
+      });
       if (!this.uploadStarted) {
          if (this.lastScreen.slot == -1) {
             this.upload();
@@ -89,30 +95,30 @@ public class RealmsUploadScreen extends RealmsScreen {
    }
 
    public void removed() {
-      Keyboard.enableRepeatEvents(false);
+      this.setKeyboardHandlerSendRepeatsToGui(false);
    }
 
-   public void buttonClicked(RealmsButton button) {
-      if (button.active()) {
-         if (button.id() == 1) {
-            this.lastScreen.confirmResult(true, 0);
-         } else if (button.id() == 0) {
-            this.cancelled = true;
-            Realms.setScreen(this.lastScreen);
-         }
-
-      }
+   private void onBack() {
+      this.lastScreen.confirmResult(true, 0);
    }
 
-   public void keyPressed(char ch, int eventKey) {
-      if (eventKey == 1) {
+   private void onCancel() {
+      this.cancelled = true;
+      Realms.setScreen(this.lastScreen);
+   }
+
+   public boolean keyPressed(int eventKey, int scancode, int mods) {
+      if (eventKey == 256) {
          if (this.showDots) {
-            this.buttonClicked(this.cancelButton);
+            this.onCancel();
          } else {
-            this.buttonClicked(this.backButton);
+            this.onBack();
          }
-      }
 
+         return true;
+      } else {
+         return super.keyPressed(eventKey, scancode, mods);
+      }
    }
 
    public void render(int xm, int ym, float a) {
@@ -158,7 +164,7 @@ public class RealmsUploadScreen extends RealmsScreen {
          percentage = 100.0;
       }
 
-      this.progress = String.format("%.1f", percentage);
+      this.progress = String.format(Locale.ROOT, "%.1f", percentage);
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glDisable(3553);
       double base = (double)(this.width() / 2 - 100);
@@ -179,7 +185,7 @@ public class RealmsUploadScreen extends RealmsScreen {
    }
 
    private void drawUploadSpeed() {
-      if (this.animTick % RealmsSharedConstants.TICKS_PER_SECOND == 0) {
+      if (this.animTick % 20 == 0) {
          if (this.previousWrittenBytes != null) {
             long timeElapsed = System.currentTimeMillis() - this.previousTimeSnapshot;
             if (timeElapsed == 0L) {
@@ -214,12 +220,8 @@ public class RealmsUploadScreen extends RealmsScreen {
       } else {
          int exp = (int)(Math.log((double)bytes) / Math.log(1024.0));
          String pre = "KMGTPE".charAt(exp - 1) + "";
-         return String.format("%.1f %sB/s", (double)bytes / Math.pow(1024.0, (double)exp), pre);
+         return String.format(Locale.ROOT, "%.1f %sB/s", (double)bytes / Math.pow(1024.0, (double)exp), pre);
       }
-   }
-
-   public void mouseEvent() {
-      super.mouseEvent();
    }
 
    public void tick() {
@@ -311,7 +313,7 @@ public class RealmsUploadScreen extends RealmsScreen {
                            uploadInfo,
                            Realms.getSessionId(),
                            Realms.getName(),
-                           RealmsSharedConstants.VERSION_STRING,
+                           "1.13",
                            RealmsUploadScreen.this.uploadStatus
                         );
                         fileUpload.upload(
@@ -394,7 +396,7 @@ public class RealmsUploadScreen extends RealmsScreen {
                   if (RealmsUploadScreen.uploadLock.isHeldByCurrentThread()) {
                      RealmsUploadScreen.uploadLock.unlock();
                      RealmsUploadScreen.this.showDots = false;
-                     RealmsUploadScreen.this.buttonsClear();
+                     RealmsUploadScreen.this.childrenClear();
                      RealmsUploadScreen.this.buttonsAdd(RealmsUploadScreen.this.backButton);
                      if (archive != null) {
                         RealmsUploadScreen.LOGGER.debug("Deleting file " + archive.getAbsolutePath());

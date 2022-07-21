@@ -3,6 +3,7 @@ package com.mojang.realmsclient.client;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 import com.mojang.realmsclient.dto.WorldDownload;
+import com.mojang.realmsclient.exception.RealmsDefaultUncaughtExceptionHandler;
 import com.mojang.realmsclient.gui.screens.RealmsDownloadLatestWorldScreen;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -192,6 +193,7 @@ public class FileDownload {
 
             }
          };
+         this.currentThread.setUncaughtExceptionHandler(new RealmsDefaultUncaughtExceptionHandler(LOGGER));
          this.currentThread.start();
       }
    }

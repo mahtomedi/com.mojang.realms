@@ -8,7 +8,6 @@ import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsEditBox;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.realms.RealmsSliderButton;
-import org.lwjgl.input.Keyboard;
 
 public class RealmsSlotOptionsScreen extends RealmsScreen {
    private static final int BUTTON_CANCEL_ID = 0;
@@ -60,87 +59,28 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
    }
 
    public void removed() {
-      Keyboard.enableRepeatEvents(false);
+      this.setKeyboardHandlerSendRepeatsToGui(false);
    }
 
    public void tick() {
       this.nameEdit.tick();
    }
 
-   public void buttonClicked(RealmsButton button) {
-      if (button.active()) {
-         switch(button.id()) {
-            case 0:
-               Realms.setScreen(this.parent);
-               break;
-            case 1:
-               this.saveSettings();
-               break;
-            case 2:
-               this.difficultyIndex = (this.difficultyIndex + 1) % this.difficulties.length;
-               button.msg(this.difficultyTitle());
-               if (this.worldType.equals(RealmsServer.WorldType.NORMAL)) {
-                  this.spawnMonstersButton.active(this.difficultyIndex != 0);
-                  this.spawnMonstersButton.msg(this.spawnMonstersTitle());
-               }
-               break;
-            case 3:
-               this.gameModeIndex = (this.gameModeIndex + 1) % this.gameModes.length;
-               button.msg(this.gameModeTitle());
-               break;
-            case 4:
-               this.pvp = !this.pvp;
-               button.msg(this.pvpTitle());
-               break;
-            case 5:
-               this.spawnAnimals = !this.spawnAnimals;
-               button.msg(this.spawnAnimalsTitle());
-               break;
-            case 6:
-               this.spawnMonsters = !this.spawnMonsters;
-               button.msg(this.spawnMonstersTitle());
-               break;
-            case 7:
-               this.spawnNPCs = !this.spawnNPCs;
-               button.msg(this.spawnNPCsTitle());
-               break;
-            case 8:
-            default:
-               return;
-            case 9:
-               this.commandBlocks = !this.commandBlocks;
-               button.msg(this.commandBlocksTitle());
-               break;
-            case 10:
-               this.forceGameMode = !this.forceGameMode;
-               button.msg(this.forceGameModeTitle());
-         }
-
-      }
-   }
-
-   public void keyPressed(char eventCharacter, int eventKey) {
-      this.nameEdit.keyPressed(eventCharacter, eventKey);
+   public boolean keyPressed(int eventKey, int scancode, int mods) {
       switch(eventKey) {
-         case 1:
+         case 256:
             Realms.setScreen(this.parent);
-            break;
-         case 15:
-            this.nameEdit.setFocus(!this.nameEdit.isFocused());
-            break;
-         case 28:
-         case 156:
+            return true;
+         case 257:
+         case 335:
             this.saveSettings();
-            break;
+            return true;
+         case 258:
+            this.focusNext();
+            return true;
          default:
-            return;
+            return super.keyPressed(eventKey, scancode, mods);
       }
-
-   }
-
-   public void mouseClicked(int x, int y, int buttonNum) {
-      super.mouseClicked(x, y, buttonNum);
-      this.nameEdit.mouseClicked(x, y, buttonNum);
    }
 
    public void init() {
@@ -170,22 +110,76 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
       }
 
       this.nameEdit = this.newEditBox(11, this.column1_x + 2, RealmsConstants.row(1), this.column_width - 4, 20);
-      this.nameEdit.setFocus(true);
       this.nameEdit.setMaxLength(10);
       this.nameEdit.setValue(this.options.getSlotName(this.activeSlot));
-      this.buttonsAdd(this.pvpButton = newButton(4, this.column2_x, RealmsConstants.row(1), this.column_width, 20, this.pvpTitle()));
-      this.buttonsAdd(newButton(3, this.column1_x, RealmsConstants.row(3), this.column_width, 20, this.gameModeTitle()));
-      this.buttonsAdd(this.spawnAnimalsButton = newButton(5, this.column2_x, RealmsConstants.row(3), this.column_width, 20, this.spawnAnimalsTitle()));
-      this.buttonsAdd(newButton(2, this.column1_x, RealmsConstants.row(5), this.column_width, 20, this.difficultyTitle()));
-      this.buttonsAdd(this.spawnMonstersButton = newButton(6, this.column2_x, RealmsConstants.row(5), this.column_width, 20, this.spawnMonstersTitle()));
+      this.focusOn(this.nameEdit);
+      this.buttonsAdd(this.pvpButton = new RealmsButton(4, this.column2_x, RealmsConstants.row(1), this.column_width, 20, this.pvpTitle()) {
+         public void onClick(double mouseX, double mouseY) {
+            RealmsSlotOptionsScreen.this.pvp = !RealmsSlotOptionsScreen.this.pvp;
+            this.msg(RealmsSlotOptionsScreen.this.pvpTitle());
+         }
+      });
+      this.buttonsAdd(new RealmsButton(3, this.column1_x, RealmsConstants.row(3), this.column_width, 20, this.gameModeTitle()) {
+         public void onClick(double mouseX, double mouseY) {
+            RealmsSlotOptionsScreen.this.gameModeIndex = (RealmsSlotOptionsScreen.this.gameModeIndex + 1) % RealmsSlotOptionsScreen.this.gameModes.length;
+            this.msg(RealmsSlotOptionsScreen.this.gameModeTitle());
+         }
+      });
+      this.buttonsAdd(this.spawnAnimalsButton = new RealmsButton(5, this.column2_x, RealmsConstants.row(3), this.column_width, 20, this.spawnAnimalsTitle()) {
+         public void onClick(double mouseX, double mouseY) {
+            RealmsSlotOptionsScreen.this.spawnAnimals = !RealmsSlotOptionsScreen.this.spawnAnimals;
+            this.msg(RealmsSlotOptionsScreen.this.spawnAnimalsTitle());
+         }
+      });
+      this.buttonsAdd(
+         new RealmsButton(2, this.column1_x, RealmsConstants.row(5), this.column_width, 20, this.difficultyTitle()) {
+            public void onClick(double mouseX, double mouseY) {
+               RealmsSlotOptionsScreen.this.difficultyIndex = (RealmsSlotOptionsScreen.this.difficultyIndex + 1)
+                  % RealmsSlotOptionsScreen.this.difficulties.length;
+               this.msg(RealmsSlotOptionsScreen.this.difficultyTitle());
+               if (RealmsSlotOptionsScreen.this.worldType.equals(RealmsServer.WorldType.NORMAL)) {
+                  RealmsSlotOptionsScreen.this.spawnMonstersButton.active(RealmsSlotOptionsScreen.this.difficultyIndex != 0);
+                  RealmsSlotOptionsScreen.this.spawnMonstersButton.msg(RealmsSlotOptionsScreen.this.spawnMonstersTitle());
+               }
+   
+            }
+         }
+      );
+      this.buttonsAdd(
+         this.spawnMonstersButton = new RealmsButton(6, this.column2_x, RealmsConstants.row(5), this.column_width, 20, this.spawnMonstersTitle()) {
+            public void onClick(double mouseX, double mouseY) {
+               RealmsSlotOptionsScreen.this.spawnMonsters = !RealmsSlotOptionsScreen.this.spawnMonsters;
+               this.msg(RealmsSlotOptionsScreen.this.spawnMonstersTitle());
+            }
+         }
+      );
       this.buttonsAdd(
          this.spawnProtectionButton = new RealmsSlotOptionsScreen.SettingsSlider(
             8, this.column1_x, RealmsConstants.row(7), this.column_width, 17, this.spawnProtection, 0.0F, 16.0F
          )
       );
-      this.buttonsAdd(this.spawnNPCsButton = newButton(7, this.column2_x, RealmsConstants.row(7), this.column_width, 20, this.spawnNPCsTitle()));
-      this.buttonsAdd(this.forceGameModeButton = newButton(10, this.column1_x, RealmsConstants.row(9), this.column_width, 20, this.forceGameModeTitle()));
-      this.buttonsAdd(this.commandBlocksButton = newButton(9, this.column2_x, RealmsConstants.row(9), this.column_width, 20, this.commandBlocksTitle()));
+      this.buttonsAdd(this.spawnNPCsButton = new RealmsButton(7, this.column2_x, RealmsConstants.row(7), this.column_width, 20, this.spawnNPCsTitle()) {
+         public void onClick(double mouseX, double mouseY) {
+            RealmsSlotOptionsScreen.this.spawnNPCs = !RealmsSlotOptionsScreen.this.spawnNPCs;
+            this.msg(RealmsSlotOptionsScreen.this.spawnNPCsTitle());
+         }
+      });
+      this.buttonsAdd(
+         this.forceGameModeButton = new RealmsButton(10, this.column1_x, RealmsConstants.row(9), this.column_width, 20, this.forceGameModeTitle()) {
+            public void onClick(double mouseX, double mouseY) {
+               RealmsSlotOptionsScreen.this.forceGameMode = !RealmsSlotOptionsScreen.this.forceGameMode;
+               this.msg(RealmsSlotOptionsScreen.this.forceGameModeTitle());
+            }
+         }
+      );
+      this.buttonsAdd(
+         this.commandBlocksButton = new RealmsButton(9, this.column2_x, RealmsConstants.row(9), this.column_width, 20, this.commandBlocksTitle()) {
+            public void onClick(double mouseX, double mouseY) {
+               RealmsSlotOptionsScreen.this.commandBlocks = !RealmsSlotOptionsScreen.this.commandBlocks;
+               this.msg(RealmsSlotOptionsScreen.this.commandBlocksTitle());
+            }
+         }
+      );
       if (!this.worldType.equals(RealmsServer.WorldType.NORMAL)) {
          this.pvpButton.active(false);
          this.spawnAnimalsButton.active(false);
@@ -201,8 +195,19 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
          this.spawnMonstersButton.active(false);
       }
 
-      this.buttonsAdd(newButton(1, this.column1_x, RealmsConstants.row(13), this.column_width, 20, getLocalizedString("mco.configure.world.buttons.done")));
-      this.buttonsAdd(newButton(0, this.column2_x, RealmsConstants.row(13), this.column_width, 20, getLocalizedString("gui.cancel")));
+      this.buttonsAdd(
+         new RealmsButton(1, this.column1_x, RealmsConstants.row(13), this.column_width, 20, getLocalizedString("mco.configure.world.buttons.done")) {
+            public void onClick(double mouseX, double mouseY) {
+               RealmsSlotOptionsScreen.this.saveSettings();
+            }
+         }
+      );
+      this.buttonsAdd(new RealmsButton(0, this.column2_x, RealmsConstants.row(13), this.column_width, 20, getLocalizedString("gui.cancel")) {
+         public void onClick(double mouseX, double mouseY) {
+            Realms.setScreen(RealmsSlotOptionsScreen.this.parent);
+         }
+      });
+      this.addWidget(this.nameEdit);
    }
 
    private void createDifficultyAndGameMode() {
@@ -285,25 +290,31 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
          }
       }
 
-      this.nameEdit.render();
+      this.nameEdit.render(xm, ym, a);
       super.render(xm, ym, a);
    }
 
-   public void mouseReleased(int x, int y, int buttonNum) {
-      if (this.spawnProtectionButton.active()) {
-         this.spawnProtectionButton.released(x, y);
+   public boolean mouseReleased(double x, double y, int buttonNum) {
+      if (!this.spawnProtectionButton.active()) {
+         return super.mouseReleased(x, y, buttonNum);
+      } else {
+         this.spawnProtectionButton.onRelease(x, y);
+         return true;
       }
    }
 
-   public void mouseDragged(int x, int y, int buttonNum, long delta) {
-      if (this.spawnProtectionButton.active()) {
-         if (x < this.column1_x + this.spawnProtectionButton.getWidth()
-            && x > this.column1_x
-            && y < this.spawnProtectionButton.y() + 20
-            && y > this.spawnProtectionButton.y()) {
-            this.spawnProtectionButton.clicked(x, y);
+   public boolean mouseDragged(double x, double y, int buttonNum, double dx, double dy) {
+      if (!this.spawnProtectionButton.active()) {
+         return super.mouseDragged(x, y, buttonNum, dx, dy);
+      } else {
+         if (x < (double)(this.column1_x + this.spawnProtectionButton.getWidth())
+            && x > (double)this.column1_x
+            && y < (double)(this.spawnProtectionButton.y() + 20)
+            && y > (double)this.spawnProtectionButton.y()) {
+            this.spawnProtectionButton.onClick(x, y);
          }
 
+         return true;
       }
    }
 
@@ -352,7 +363,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 
    private class SettingsSlider extends RealmsSliderButton {
       public SettingsSlider(int id, int x, int y, int width, int steps, int currentValue, float minValue, float maxValue) {
-         super(id, x, y, width, steps, currentValue, minValue, maxValue);
+         super(id, x, y, width, steps, currentValue, (double)minValue, (double)maxValue);
       }
 
       public String getMessage() {
@@ -365,7 +376,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
             );
       }
 
-      public void clicked(float value) {
+      public void clicked(double value) {
          if (RealmsSlotOptionsScreen.this.spawnProtectionButton.active()) {
             RealmsSlotOptionsScreen.this.spawnProtection = (int)value;
          }

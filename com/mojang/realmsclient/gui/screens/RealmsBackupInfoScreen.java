@@ -10,7 +10,6 @@ import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.realms.RealmsSimpleScrolledSelectionList;
 import net.minecraft.realms.Tezzelator;
-import org.lwjgl.input.Keyboard;
 
 public class RealmsBackupInfoScreen extends RealmsScreen {
    private final RealmsScreen lastScreen;
@@ -41,38 +40,32 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 
    }
 
-   public void mouseEvent() {
-      super.mouseEvent();
-      this.backupInfoList.mouseEvent();
-   }
-
    public void tick() {
    }
 
    public void init() {
-      Keyboard.enableRepeatEvents(true);
-      this.buttonsAdd(newButton(0, this.width() / 2 - 100, this.height() / 4 + 120 + 24, getLocalizedString("gui.back")));
+      this.setKeyboardHandlerSendRepeatsToGui(true);
+      this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 100, this.height() / 4 + 120 + 24, getLocalizedString("gui.back")) {
+         public void onClick(double mouseX, double mouseY) {
+            Realms.setScreen(RealmsBackupInfoScreen.this.lastScreen);
+         }
+      });
       this.backupInfoList = new RealmsBackupInfoScreen.BackupInfoList();
+      this.addWidget(this.backupInfoList);
+      this.focusOn(this.backupInfoList);
    }
 
    public void removed() {
-      Keyboard.enableRepeatEvents(false);
+      this.setKeyboardHandlerSendRepeatsToGui(false);
    }
 
-   public void buttonClicked(RealmsButton button) {
-      if (button.active()) {
-         if (button.id() == 0) {
-            Realms.setScreen(this.lastScreen);
-         }
-
-      }
-   }
-
-   public void keyPressed(char ch, int eventKey) {
-      if (eventKey == 1) {
+   public boolean keyPressed(int eventKey, int scancode, int mods) {
+      if (eventKey == 256) {
          Realms.setScreen(this.lastScreen);
+         return true;
+      } else {
+         return super.keyPressed(eventKey, scancode, mods);
       }
-
    }
 
    public void render(int xm, int ym, float a) {
@@ -114,9 +107,6 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 
       public int getItemCount() {
          return RealmsBackupInfoScreen.this.backup.changeList.size();
-      }
-
-      public void selectItem(int item, boolean doubleClick, int xMouse, int yMouse) {
       }
 
       public boolean isSelectedItem(int item) {

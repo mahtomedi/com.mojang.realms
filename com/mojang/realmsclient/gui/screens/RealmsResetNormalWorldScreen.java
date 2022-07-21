@@ -5,7 +5,6 @@ import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsEditBox;
 import net.minecraft.realms.RealmsScreen;
-import org.lwjgl.input.Keyboard;
 
 public class RealmsResetNormalWorldScreen extends RealmsScreen {
    private final RealmsResetWorldScreen lastScreen;
@@ -44,68 +43,66 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
          getLocalizedString("generator.largeBiomes"),
          getLocalizedString("generator.amplified")
       };
-      Keyboard.enableRepeatEvents(true);
-      this.buttonsClear();
-      this.buttonsAdd(newButton(0, this.width() / 2 + 8, RealmsConstants.row(12), 97, 20, getLocalizedString("gui.back")));
-      this.buttonsAdd(this.resetButton = newButton(1, this.width() / 2 - 102, RealmsConstants.row(12), 97, 20, this.buttonTitle));
+      this.setKeyboardHandlerSendRepeatsToGui(true);
+      this.buttonsAdd(new RealmsButton(0, this.width() / 2 + 8, RealmsConstants.row(12), 97, 20, getLocalizedString("gui.back")) {
+         public void onClick(double mouseX, double mouseY) {
+            Realms.setScreen(RealmsResetNormalWorldScreen.this.lastScreen);
+         }
+      });
+      this.buttonsAdd(this.resetButton = new RealmsButton(1, this.width() / 2 - 102, RealmsConstants.row(12), 97, 20, this.buttonTitle) {
+         public void onClick(double mouseX, double mouseY) {
+            RealmsResetNormalWorldScreen.this.onReset();
+         }
+      });
       this.seedEdit = this.newEditBox(4, this.width() / 2 - 100, RealmsConstants.row(2), 200, 20);
-      this.seedEdit.setFocus(true);
       this.seedEdit.setMaxLength(32);
       this.seedEdit.setValue("");
-      this.buttonsAdd(this.levelTypeButton = newButton(2, this.width() / 2 - 102, RealmsConstants.row(4), 205, 20, this.levelTypeTitle()));
-      this.buttonsAdd(this.generateStructuresButton = newButton(3, this.width() / 2 - 102, RealmsConstants.row(6) - 2, 205, 20, this.generateStructuresTitle()));
+      this.addWidget(this.seedEdit);
+      this.focusOn(this.seedEdit);
+      this.buttonsAdd(
+         this.levelTypeButton = new RealmsButton(2, this.width() / 2 - 102, RealmsConstants.row(4), 205, 20, this.levelTypeTitle()) {
+            public void onClick(double mouseX, double mouseY) {
+               RealmsResetNormalWorldScreen.this.levelTypeIndex = (RealmsResetNormalWorldScreen.this.levelTypeIndex + 1)
+                  % RealmsResetNormalWorldScreen.this.levelTypes.length;
+               this.msg(RealmsResetNormalWorldScreen.this.levelTypeTitle());
+            }
+         }
+      );
+      this.buttonsAdd(
+         this.generateStructuresButton = new RealmsButton(3, this.width() / 2 - 102, RealmsConstants.row(6) - 2, 205, 20, this.generateStructuresTitle()) {
+            public void onClick(double mouseX, double mouseY) {
+               RealmsResetNormalWorldScreen.this.generateStructures = !RealmsResetNormalWorldScreen.this.generateStructures;
+               this.msg(RealmsResetNormalWorldScreen.this.generateStructuresTitle());
+            }
+         }
+      );
    }
 
    public void removed() {
-      Keyboard.enableRepeatEvents(false);
+      this.setKeyboardHandlerSendRepeatsToGui(false);
    }
 
-   public void keyPressed(char ch, int eventKey) {
-      this.seedEdit.keyPressed(ch, eventKey);
-      if (eventKey == 28 || eventKey == 156) {
-         this.buttonClicked(this.resetButton);
-      }
-
-      if (eventKey == 1) {
+   public boolean keyPressed(int eventKey, int scancode, int mods) {
+      if (eventKey == 257 || eventKey == 335) {
+         this.onReset();
+         return true;
+      } else if (eventKey == 256) {
          Realms.setScreen(this.lastScreen);
-      }
-
-   }
-
-   public void buttonClicked(RealmsButton button) {
-      if (button.active()) {
-         switch(button.id()) {
-            case 0:
-               Realms.setScreen(this.lastScreen);
-               break;
-            case 1:
-               this.lastScreen.resetWorld(new RealmsResetWorldScreen.ResetWorldInfo(this.seedEdit.getValue(), this.levelTypeIndex, this.generateStructures));
-               break;
-            case 2:
-               this.levelTypeIndex = (this.levelTypeIndex + 1) % this.levelTypes.length;
-               button.msg(this.levelTypeTitle());
-               break;
-            case 3:
-               this.generateStructures = !this.generateStructures;
-               button.msg(this.generateStructuresTitle());
-               break;
-            default:
-               return;
-         }
-
+         return true;
+      } else {
+         return super.keyPressed(eventKey, scancode, mods);
       }
    }
 
-   public void mouseClicked(int x, int y, int buttonNum) {
-      super.mouseClicked(x, y, buttonNum);
-      this.seedEdit.mouseClicked(x, y, buttonNum);
+   private void onReset() {
+      this.lastScreen.resetWorld(new RealmsResetWorldScreen.ResetWorldInfo(this.seedEdit.getValue(), this.levelTypeIndex, this.generateStructures));
    }
 
    public void render(int xm, int ym, float a) {
       this.renderBackground();
       this.drawCenteredString(getLocalizedString("mco.reset.world.generate"), this.width() / 2, 17, 16777215);
       this.drawString(getLocalizedString("mco.reset.world.seed"), this.width() / 2 - 100, RealmsConstants.row(1), 10526880);
-      this.seedEdit.render();
+      this.seedEdit.render(xm, ym, a);
       super.render(xm, ym, a);
    }
 

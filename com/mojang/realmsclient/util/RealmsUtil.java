@@ -9,14 +9,12 @@ import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.util.UUIDTypeAdapter;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import net.minecraft.realms.Realms;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import net.minecraft.realms.RealmsBridge;
 
 public class RealmsUtil {
    private static final YggdrasilAuthenticationService authenticationService = new YggdrasilAuthenticationService(
@@ -35,7 +33,6 @@ public class RealmsUtil {
             }
          }
       });
-   private static final Logger LOGGER = LogManager.getLogger();
    private static final int MINUTES = 60;
    private static final int HOURS = 3600;
    private static final int DAYS = 86400;
@@ -55,15 +52,7 @@ public class RealmsUtil {
    }
 
    public static void browseTo(String uri) {
-      try {
-         URI link = new URI(uri);
-         Class<?> desktopClass = Class.forName("java.awt.Desktop");
-         Object o = desktopClass.getMethod("getDesktop").invoke(null);
-         desktopClass.getMethod("browse", URI.class).invoke(o, link);
-      } catch (Throwable var4) {
-         LOGGER.error("Couldn't open link");
-      }
-
+      RealmsBridge.openUri(uri);
    }
 
    public static String convertToAgePresentation(Long timeDiff) {

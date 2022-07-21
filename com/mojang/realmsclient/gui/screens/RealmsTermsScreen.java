@@ -7,16 +7,13 @@ import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.gui.RealmsConstants;
 import com.mojang.realmsclient.util.RealmsTasks;
 import com.mojang.realmsclient.util.RealmsUtil;
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
 import java.util.concurrent.locks.ReentrantLock;
 import net.minecraft.realms.Realms;
+import net.minecraft.realms.RealmsBridge;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.input.Keyboard;
 
 public class RealmsTermsScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
@@ -36,40 +33,35 @@ public class RealmsTermsScreen extends RealmsScreen {
    }
 
    public void init() {
-      Keyboard.enableRepeatEvents(true);
-      this.buttonsClear();
+      this.setKeyboardHandlerSendRepeatsToGui(true);
       int column1X = this.width() / 4;
       int columnWidth = this.width() / 4 - 2;
       int column2X = this.width() / 2 + 4;
-      this.buttonsAdd(this.agreeButton = newButton(1, column1X, RealmsConstants.row(12), columnWidth, 20, getLocalizedString("mco.terms.buttons.agree")));
-      this.buttonsAdd(newButton(2, column2X, RealmsConstants.row(12), columnWidth, 20, getLocalizedString("mco.terms.buttons.disagree")));
+      this.buttonsAdd(
+         this.agreeButton = new RealmsButton(1, column1X, RealmsConstants.row(12), columnWidth, 20, getLocalizedString("mco.terms.buttons.agree")) {
+            public void onClick(double mouseX, double mouseY) {
+               RealmsTermsScreen.this.agreedToTos();
+            }
+         }
+      );
+      this.buttonsAdd(new RealmsButton(2, column2X, RealmsConstants.row(12), columnWidth, 20, getLocalizedString("mco.terms.buttons.disagree")) {
+         public void onClick(double mouseX, double mouseY) {
+            Realms.setScreen(RealmsTermsScreen.this.lastScreen);
+         }
+      });
    }
 
    public void removed() {
-      Keyboard.enableRepeatEvents(false);
+      this.setKeyboardHandlerSendRepeatsToGui(false);
    }
 
-   public void buttonClicked(RealmsButton button) {
-      if (button.active()) {
-         switch(button.id()) {
-            case 1:
-               this.agreedToTos();
-               break;
-            case 2:
-               Realms.setScreen(this.lastScreen);
-               break;
-            default:
-               return;
-         }
-
-      }
-   }
-
-   public void keyPressed(char eventCharacter, int eventKey) {
-      if (eventKey == 1) {
+   public boolean keyPressed(int eventKey, int scancode, int mods) {
+      if (eventKey == 256) {
          Realms.setScreen(this.lastScreen);
+         return true;
+      } else {
+         return super.keyPressed(eventKey, scancode, mods);
       }
-
    }
 
    private void agreedToTos() {
@@ -88,14 +80,14 @@ public class RealmsTermsScreen extends RealmsScreen {
 
    }
 
-   public void mouseClicked(int x, int y, int buttonNum) {
-      super.mouseClicked(x, y, buttonNum);
+   public boolean mouseClicked(double x, double y, int buttonNum) {
       if (this.onLink) {
-         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-         clipboard.setContents(new StringSelection("https://minecraft.net/realms/terms"), null);
+         RealmsBridge.setClipboard("https://minecraft.net/realms/terms");
          RealmsUtil.browseTo("https://minecraft.net/realms/terms");
+         return true;
+      } else {
+         return super.mouseClicked(x, y, buttonNum);
       }
-
    }
 
    public void render(int xm, int ym, float a) {

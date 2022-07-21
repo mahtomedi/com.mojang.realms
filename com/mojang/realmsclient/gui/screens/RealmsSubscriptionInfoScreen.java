@@ -6,9 +6,6 @@ import com.mojang.realmsclient.dto.Subscription;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.gui.RealmsConstants;
 import com.mojang.realmsclient.util.RealmsUtil;
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Calendar;
@@ -16,11 +13,11 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 import net.minecraft.realms.Realms;
+import net.minecraft.realms.RealmsBridge;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.input.Keyboard;
 
 public class RealmsSubscriptionInfoScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
@@ -43,11 +40,36 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 
    public void init() {
       this.getSubscription(this.serverData.id);
-      Keyboard.enableRepeatEvents(true);
-      this.buttonsAdd(newButton(2, this.width() / 2 - 100, RealmsConstants.row(6), getLocalizedString("mco.configure.world.subscription.extend")));
-      this.buttonsAdd(newButton(0, this.width() / 2 - 100, RealmsConstants.row(12), getLocalizedString("gui.back")));
+      this.setKeyboardHandlerSendRepeatsToGui(true);
+      this.buttonsAdd(
+         new RealmsButton(2, this.width() / 2 - 100, RealmsConstants.row(6), getLocalizedString("mco.configure.world.subscription.extend")) {
+            public void onClick(double mouseX, double mouseY) {
+               String extensionUrl = "https://account.mojang.com/buy/realms?sid="
+                  + RealmsSubscriptionInfoScreen.this.serverData.remoteSubscriptionId
+                  + "&pid="
+                  + Realms.getUUID();
+               RealmsBridge.setClipboard(extensionUrl);
+               RealmsUtil.browseTo(extensionUrl);
+            }
+         }
+      );
+      this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 100, RealmsConstants.row(12), getLocalizedString("gui.back")) {
+         public void onClick(double mouseX, double mouseY) {
+            Realms.setScreen(RealmsSubscriptionInfoScreen.this.lastScreen);
+         }
+      });
       if (this.serverData.expired) {
-         this.buttonsAdd(newButton(1, this.width() / 2 - 100, RealmsConstants.row(10), getLocalizedString("mco.configure.world.delete.button")));
+         this.buttonsAdd(
+            new RealmsButton(1, this.width() / 2 - 100, RealmsConstants.row(10), getLocalizedString("mco.configure.world.delete.button")) {
+               public void onClick(double mouseX, double mouseY) {
+                  String line2 = RealmsScreen.getLocalizedString("mco.configure.world.delete.question.line1");
+                  String line3 = RealmsScreen.getLocalizedString("mco.configure.world.delete.question.line2");
+                  Realms.setScreen(
+                     new RealmsLongConfirmationScreen(RealmsSubscriptionInfoScreen.this, RealmsLongConfirmationScreen.Type.Warning, line2, line3, true, 1)
+                  );
+               }
+            }
+         );
       }
 
    }
@@ -99,35 +121,16 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
    }
 
    public void removed() {
-      Keyboard.enableRepeatEvents(false);
+      this.setKeyboardHandlerSendRepeatsToGui(false);
    }
 
-   public void buttonClicked(RealmsButton button) {
-      if (button.active()) {
-         switch(button.id()) {
-            case 0:
-               Realms.setScreen(this.lastScreen);
-               break;
-            case 1:
-               String line2 = getLocalizedString("mco.configure.world.delete.question.line1");
-               String line3 = getLocalizedString("mco.configure.world.delete.question.line2");
-               Realms.setScreen(new RealmsLongConfirmationScreen(this, RealmsLongConfirmationScreen.Type.Warning, line2, line3, true, 1));
-               break;
-            case 2:
-               String extensionUrl = "https://account.mojang.com/buy/realms?sid=" + this.serverData.remoteSubscriptionId + "&pid=" + Realms.getUUID();
-               Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-               clipboard.setContents(new StringSelection(extensionUrl), null);
-               RealmsUtil.browseTo(extensionUrl);
-         }
-
-      }
-   }
-
-   public void keyPressed(char ch, int eventKey) {
-      if (eventKey == 1) {
+   public boolean keyPressed(int eventKey, int scancode, int mods) {
+      if (eventKey == 256) {
          Realms.setScreen(this.lastScreen);
+         return true;
+      } else {
+         return super.keyPressed(eventKey, scancode, mods);
       }
-
    }
 
    public void render(int xm, int ym, float a) {

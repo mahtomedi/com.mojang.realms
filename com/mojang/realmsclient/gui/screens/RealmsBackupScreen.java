@@ -17,8 +17,6 @@ import net.minecraft.realms.RealmsClickableScrolledSelectionList;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 public class RealmsBackupScreen extends RealmsScreen {
@@ -46,14 +44,8 @@ public class RealmsBackupScreen extends RealmsScreen {
       this.slotId = slotId;
    }
 
-   public void mouseEvent() {
-      super.mouseEvent();
-      this.backupSelectionList.mouseEvent();
-   }
-
    public void init() {
-      Keyboard.enableRepeatEvents(true);
-      this.buttonsClear();
+      this.setKeyboardHandlerSendRepeatsToGui(true);
       this.backupSelectionList = new RealmsBackupScreen.BackupSelectionList();
       if (lastScrollPosition != -1) {
          this.backupSelectionList.scroll(lastScrollPosition);
@@ -107,30 +99,31 @@ public class RealmsBackupScreen extends RealmsScreen {
    }
 
    private void postInit() {
-      this.buttonsAdd(this.downloadButton = newButton(2, this.width() - 135, 32, 120, 20, getLocalizedString("mco.backup.button.download")));
-      this.buttonsAdd(newButton(0, this.width() - 100, this.height() - 35, 85, 20, getLocalizedString("gui.back")));
+      this.buttonsAdd(this.downloadButton = new RealmsButton(2, this.width() - 135, 32, 120, 20, getLocalizedString("mco.backup.button.download")) {
+         public void onClick(double mouseX, double mouseY) {
+            RealmsBackupScreen.this.downloadClicked();
+         }
+      });
+      this.buttonsAdd(new RealmsButton(0, this.width() - 100, this.height() - 35, 85, 20, getLocalizedString("gui.back")) {
+         public void onClick(double mouseX, double mouseY) {
+            Realms.setScreen(RealmsBackupScreen.this.lastScreen);
+         }
+      });
+      this.addWidget(this.backupSelectionList);
+      this.focusOn(this.backupSelectionList);
    }
 
    public void tick() {
       super.tick();
    }
 
-   public void buttonClicked(RealmsButton button) {
-      if (button.active()) {
-         if (button.id() == 0) {
-            Realms.setScreen(this.lastScreen);
-         } else if (button.id() == 2) {
-            this.downloadClicked();
-         }
-
-      }
-   }
-
-   public void keyPressed(char eventCharacter, int eventKey) {
-      if (eventKey == 1) {
+   public boolean keyPressed(int eventKey, int scancode, int mods) {
+      if (eventKey == 256) {
          Realms.setScreen(this.lastScreen);
+         return true;
+      } else {
+         return super.keyPressed(eventKey, scancode, mods);
       }
-
    }
 
    private void restoreClicked(int selectedBackup) {
@@ -231,23 +224,28 @@ public class RealmsBackupScreen extends RealmsScreen {
          RealmsBackupScreen.this.renderBackground();
       }
 
-      public void customMouseEvent(int y0, int y1, int headerHeight, float yo, int itemHeight) {
-         if (Mouse.isButtonDown(0) && this.ym() >= y0 && this.ym() <= y1) {
+      public boolean mouseClicked(double xm, double ym, int buttonNum) {
+         if (buttonNum != 0) {
+            return false;
+         } else if (xm < (double)this.getScrollbarPosition() && ym >= (double)this.y0() && ym <= (double)this.y1()) {
             int x0 = this.width() / 2 - 92;
             int x1 = this.width();
-            int clickSlotPos = this.ym() - y0 - headerHeight + (int)yo - 4;
-            int slot = clickSlotPos / itemHeight;
-            if (this.xm() >= x0 && this.xm() <= x1 && slot >= 0 && clickSlotPos >= 0 && slot < this.getItemCount()) {
-               this.itemClicked(clickSlotPos, slot, this.xm(), this.ym(), this.width());
+            int clickSlotPos = (int)Math.floor(ym - (double)this.y0()) - this.headerHeight() + (int)this.yo();
+            int slot = clickSlotPos / this.itemHeight();
+            if (xm >= (double)x0 && xm <= (double)x1 && slot >= 0 && clickSlotPos >= 0 && slot < this.getItemCount()) {
+               this.itemClicked(clickSlotPos, slot, xm, ym, this.width());
             }
-         }
 
+            return true;
+         } else {
+            return false;
+         }
       }
 
       public void renderItem(int i, int x, int y, int h, int mouseX, int mouseY) {
          x += 16;
          if (i < RealmsBackupScreen.this.backups.size()) {
-            this.renderBackupItem(i, x, y, h, RealmsBackupScreen.this.width);
+            this.renderBackupItem(i, x, y, h, RealmsBackupScreen.this.width, mouseX, mouseY);
          }
 
       }
@@ -256,24 +254,24 @@ public class RealmsBackupScreen extends RealmsScreen {
          return this.width() - 5;
       }
 
-      public void itemClicked(int clickSlotPos, int slot, int xm, int ym, int width) {
+      public void itemClicked(int clickSlotPos, int slot, double xm, double ym, int width) {
          int infox = this.width() - 40;
-         int infoy = clickSlotPos + 30 - this.getScroll();
+         int infoy = slot * this.itemHeight() + 36 - this.getScroll();
          int mx = infox + 10;
          int my = infoy - 3;
-         if (xm >= infox && xm <= infox + 9 && ym >= infoy && ym <= infoy + 9) {
+         if (xm >= (double)infox && xm <= (double)(infox + 9) && ym >= (double)infoy && ym <= (double)(infoy + 9)) {
             if (!((Backup)RealmsBackupScreen.this.backups.get(slot)).changeList.isEmpty()) {
                RealmsBackupScreen.lastScrollPosition = this.getScroll();
                Realms.setScreen(new RealmsBackupInfoScreen(RealmsBackupScreen.this, (Backup)RealmsBackupScreen.this.backups.get(slot)));
             }
-         } else if (xm >= mx && xm <= mx + 9 && ym >= my && ym <= my + 9) {
+         } else if (xm >= (double)mx && xm < (double)(mx + 13) && ym >= (double)my && ym < (double)(my + 15)) {
             RealmsBackupScreen.lastScrollPosition = this.getScroll();
             RealmsBackupScreen.this.restoreClicked(slot);
          }
 
       }
 
-      private void renderBackupItem(int i, int x, int y, int h, int width) {
+      private void renderBackupItem(int i, int x, int y, int h, int width, int mouseX, int mouseY) {
          Backup backup = (Backup)RealmsBackupScreen.this.backups.get(i);
          int color = backup.isUploadedVersion() ? -8388737 : 16777215;
          RealmsBackupScreen.this.drawString(
@@ -285,11 +283,11 @@ public class RealmsBackupScreen extends RealmsScreen {
          int infox = dx - 10;
          int infoy = 0;
          if (!RealmsBackupScreen.this.serverData.expired) {
-            this.drawRestore(dx, y + -3, this.xm(), this.ym());
+            this.drawRestore(dx, y + -3, mouseX, mouseY);
          }
 
          if (!backup.changeList.isEmpty()) {
-            this.drawInfo(infox, y + 0, this.xm(), this.ym());
+            this.drawInfo(infox, y + 0, mouseX, mouseY);
          }
 
       }

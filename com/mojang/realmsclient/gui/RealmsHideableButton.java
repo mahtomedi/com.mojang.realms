@@ -2,7 +2,7 @@ package com.mojang.realmsclient.gui;
 
 import net.minecraft.realms.RealmsButton;
 
-public class RealmsHideableButton extends RealmsButton {
+public abstract class RealmsHideableButton extends RealmsButton {
    boolean visible = true;
 
    public RealmsHideableButton(int id, int x, int y, int width, int height, String msg) {
@@ -15,15 +15,17 @@ public class RealmsHideableButton extends RealmsButton {
       }
    }
 
-   public void clicked(int mx, int my) {
+   public void onClick(double mx, double my) {
       if (this.visible) {
-         super.clicked(mx, my);
+         this.clicked(mx, my);
       }
    }
 
-   public void released(int mx, int my) {
+   public abstract void clicked(double var1, double var3);
+
+   public void onRelease(double mx, double my) {
       if (this.visible) {
-         super.released(mx, my);
+         super.onRelease(mx, my);
       }
    }
 

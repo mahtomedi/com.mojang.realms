@@ -30,7 +30,6 @@ import java.net.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
 import net.minecraft.realms.Realms;
-import net.minecraft.realms.RealmsSharedConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -385,7 +384,7 @@ public class RealmsClient {
    private String execute(Request<?> r) throws RealmsServiceException {
       r.cookie("sid", this.sessionId);
       r.cookie("user", this.username);
-      r.cookie("version", RealmsSharedConstants.VERSION_STRING);
+      r.cookie("version", "1.13");
       String realmsVersion = RealmsVersion.getVersion();
       if (realmsVersion != null) {
          r.cookie("realms_version", realmsVersion);

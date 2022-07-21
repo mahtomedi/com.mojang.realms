@@ -25,10 +25,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.ARBMultitexture;
-import org.lwjgl.opengl.ContextCapabilities;
+import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GLContext;
+import org.lwjgl.opengl.GLCapabilities;
 
 public class RealmsTextureManager {
    private static final Map<String, RealmsTextureManager.RealmsTexture> textures = new HashMap();
@@ -174,6 +174,12 @@ public class RealmsTextureManager {
 
       glActiveTexture(GL_TEXTURE0);
       GL11.glBindTexture(3553, textureId);
+      GL11.glPixelStorei(3312, 0);
+      GL11.glPixelStorei(3313, 0);
+      GL11.glPixelStorei(3314, 0);
+      GL11.glPixelStorei(3315, 0);
+      GL11.glPixelStorei(3316, 0);
+      GL11.glPixelStorei(3317, 4);
       GL11.glTexImage2D(3553, 0, 6408, width, height, 0, 32993, 33639, buf);
       GL11.glTexParameteri(3553, 10242, 10497);
       GL11.glTexParameteri(3553, 10243, 10497);
@@ -194,7 +200,7 @@ public class RealmsTextureManager {
 
    public static boolean getUseMultiTextureArb() {
       if (useMultitextureArb == null) {
-         ContextCapabilities caps = GLContext.getCapabilities();
+         GLCapabilities caps = GL.getCapabilities();
          useMultitextureArb = caps.GL_ARB_multitexture && !caps.OpenGL13;
       }
 

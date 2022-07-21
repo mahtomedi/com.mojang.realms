@@ -2,17 +2,16 @@ package com.mojang.realmsclient.gui.screens;
 
 import com.mojang.realmsclient.client.FileDownload;
 import com.mojang.realmsclient.dto.WorldDownload;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsDefaultVertexFormat;
 import net.minecraft.realms.RealmsScreen;
-import net.minecraft.realms.RealmsSharedConstants;
 import net.minecraft.realms.Tezzelator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
@@ -52,9 +51,13 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
    }
 
    public void init() {
-      Keyboard.enableRepeatEvents(true);
-      this.buttonsClear();
-      this.buttonsAdd(this.cancelButton = newButton(0, this.width() / 2 - 100, this.height() - 42, 200, 20, getLocalizedString("gui.cancel")));
+      this.setKeyboardHandlerSendRepeatsToGui(true);
+      this.buttonsAdd(this.cancelButton = new RealmsButton(0, this.width() / 2 - 100, this.height() - 42, 200, 20, getLocalizedString("gui.cancel")) {
+         public void onClick(double mouseX, double mouseY) {
+            RealmsDownloadLatestWorldScreen.this.cancelled = true;
+            RealmsDownloadLatestWorldScreen.this.backButtonClicked();
+         }
+      });
       this.checkDownloadSize();
    }
 
@@ -87,22 +90,14 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
       ++this.animTick;
    }
 
-   public void buttonClicked(RealmsButton button) {
-      if (button.active()) {
-         if (button.id() == 0) {
-            this.cancelled = true;
-            this.backButtonClicked();
-         }
-
-      }
-   }
-
-   public void keyPressed(char ch, int eventKey) {
-      if (eventKey == 1) {
+   public boolean keyPressed(int eventKey, int scancode, int mods) {
+      if (eventKey == 256) {
          this.cancelled = true;
          this.backButtonClicked();
+         return true;
+      } else {
+         return super.keyPressed(eventKey, scancode, mods);
       }
-
    }
 
    private void backButtonClicked() {
@@ -148,7 +143,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 
    private void drawProgressBar() {
       double percentage = this.downloadStatus.bytesWritten.doubleValue() / this.downloadStatus.totalBytes.doubleValue() * 100.0;
-      this.progress = String.format("%.1f", percentage);
+      this.progress = String.format(Locale.ROOT, "%.1f", percentage);
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glDisable(3553);
       Tezzelator t = Tezzelator.instance;
@@ -169,7 +164,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
    }
 
    private void drawDownloadSpeed() {
-      if (this.animTick % RealmsSharedConstants.TICKS_PER_SECOND == 0) {
+      if (this.animTick % 20 == 0) {
          if (this.previousWrittenBytes != null) {
             long timeElapsed = System.currentTimeMillis() - this.previousTimeSnapshot;
             if (timeElapsed == 0L) {
@@ -204,7 +199,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
       } else {
          int exp = (int)(Math.log((double)bytes) / Math.log(1024.0));
          String pre = "KMGTPE".charAt(exp - 1) + "";
-         return String.format("%.1f %sB/s", (double)bytes / Math.pow(1024.0, (double)exp), pre);
+         return String.format(Locale.ROOT, "%.1f %sB/s", (double)bytes / Math.pow(1024.0, (double)exp), pre);
       }
    }
 
@@ -215,12 +210,8 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
       } else {
          int exp = (int)(Math.log((double)bytes) / Math.log(1024.0));
          String pre = "KMGTPE".charAt(exp - 1) + "";
-         return String.format("%.0f %sB", (double)bytes / Math.pow(1024.0, (double)exp), pre);
+         return String.format(Locale.ROOT, "%.0f %sB", (double)bytes / Math.pow(1024.0, (double)exp), pre);
       }
-   }
-
-   public void mouseEvent() {
-      super.mouseEvent();
    }
 
    private void downloadSave() {

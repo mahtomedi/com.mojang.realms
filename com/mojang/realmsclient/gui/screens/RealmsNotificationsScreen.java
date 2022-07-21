@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsScreen;
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 public class RealmsNotificationsScreen extends RealmsScreen {
@@ -30,8 +29,7 @@ public class RealmsNotificationsScreen extends RealmsScreen {
 
    public void init() {
       this.checkIfMcoEnabled();
-      Keyboard.enableRepeatEvents(true);
-      this.buttonsClear();
+      this.setKeyboardHandlerSendRepeatsToGui(true);
    }
 
    public void tick() {
@@ -93,7 +91,8 @@ public class RealmsNotificationsScreen extends RealmsScreen {
       super.render(xm, ym, a);
    }
 
-   public void mouseClicked(int xm, int ym, int button) {
+   public boolean mouseClicked(double xm, double ym, int button) {
+      return super.mouseClicked(xm, ym, button);
    }
 
    private void drawIcons(int xm, int ym) {

@@ -25,7 +25,6 @@ import net.minecraft.realms.RealmsScrolledSelectionList;
 import net.minecraft.realms.Tezzelator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 public class RealmsActivityScreen extends RealmsScreen {
@@ -63,17 +62,16 @@ public class RealmsActivityScreen extends RealmsScreen {
       this.getActivities();
    }
 
-   public void mouseEvent() {
-      super.mouseEvent();
-      this.list.mouseEvent();
-   }
-
    public void init() {
-      Keyboard.enableRepeatEvents(true);
-      this.buttonsClear();
+      this.setKeyboardHandlerSendRepeatsToGui(true);
       this.matrixWidth = this.width();
       this.list = new RealmsActivityScreen.DetailsList();
-      this.buttonsAdd(newButton(0, this.width() / 2 - 100, this.height() - 30, 200, 20, getLocalizedString("gui.back")));
+      this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 100, this.height() - 30, 200, 20, getLocalizedString("gui.back")) {
+         public void onClick(double mouseX, double mouseY) {
+            Realms.setScreen(RealmsActivityScreen.this.lastScreen);
+         }
+      });
+      this.addWidget(this.list);
    }
 
    private RealmsActivityScreen.Color getColor() {
@@ -178,18 +176,13 @@ public class RealmsActivityScreen extends RealmsScreen {
       super.tick();
    }
 
-   public void buttonClicked(RealmsButton button) {
-      if (button.id() == 0) {
+   public boolean keyPressed(int eventKey, int scancode, int mods) {
+      if (eventKey == 256) {
          Realms.setScreen(this.lastScreen);
+         return true;
+      } else {
+         return super.keyPressed(eventKey, scancode, mods);
       }
-
-   }
-
-   public void keyPressed(char ch, int eventKey) {
-      if (eventKey == 1) {
-         Realms.setScreen(this.lastScreen);
-      }
-
    }
 
    public void render(int xm, int ym, float a) {
@@ -393,9 +386,6 @@ public class RealmsActivityScreen extends RealmsScreen {
          return RealmsActivityScreen.this.activityMap.size();
       }
 
-      public void selectItem(int item, boolean doubleClick, int xMouse, int yMouse) {
-      }
-
       public boolean isSelectedItem(int item) {
          return false;
       }
@@ -476,10 +466,10 @@ public class RealmsActivityScreen extends RealmsScreen {
                t.vertex(render.start, (double)y + 1.5, 0.0).color(r, g, b, 255).endVertex();
                t.end();
                GL11.glEnable(3553);
-               if ((double)this.xm() >= render.start
-                  && (double)this.xm() <= render.start + render.width
-                  && (double)this.ym() >= (double)y + 1.5
-                  && (double)this.ym() <= (double)y + 6.5) {
+               if ((double)mouseX >= render.start
+                  && (double)mouseX <= render.start + render.width
+                  && (double)mouseY >= (double)y + 1.5
+                  && (double)mouseY <= (double)y + 6.5) {
                   RealmsActivityScreen.this.toolTip = render.tooltip.trim();
                }
             }

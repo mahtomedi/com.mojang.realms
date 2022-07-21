@@ -32,12 +32,16 @@ public class RealmsConfirmScreen extends RealmsScreen {
    }
 
    public void init() {
-      this.buttonsAdd(newButton(0, this.width() / 2 - 105, RealmsConstants.row(9), 100, 20, this.yesButton));
-      this.buttonsAdd(newButton(1, this.width() / 2 + 5, RealmsConstants.row(9), 100, 20, this.noButton));
-   }
-
-   public void buttonClicked(RealmsButton button) {
-      this.parent.confirmResult(button.id() == 0, this.id);
+      this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 105, RealmsConstants.row(9), 100, 20, this.yesButton) {
+         public void onClick(double mouseX, double mouseY) {
+            RealmsConfirmScreen.this.parent.confirmResult(true, RealmsConfirmScreen.this.id);
+         }
+      });
+      this.buttonsAdd(new RealmsButton(1, this.width() / 2 + 5, RealmsConstants.row(9), 100, 20, this.noButton) {
+         public void onClick(double mouseX, double mouseY) {
+            RealmsConfirmScreen.this.parent.confirmResult(false, RealmsConfirmScreen.this.id);
+         }
+      });
    }
 
    public void render(int xm, int ym, float a) {

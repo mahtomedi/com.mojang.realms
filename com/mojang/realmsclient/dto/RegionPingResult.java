@@ -1,5 +1,7 @@
 package com.mojang.realmsclient.dto;
 
+import java.util.Locale;
+
 public class RegionPingResult {
    private final String regionName;
    private final int ping;
@@ -14,6 +16,6 @@ public class RegionPingResult {
    }
 
    public String toString() {
-      return String.format("%s --> %.2f ms", this.regionName, this.ping);
+      return String.format(Locale.ROOT, "%s --> %.2f ms", this.regionName, this.ping);
    }
 }

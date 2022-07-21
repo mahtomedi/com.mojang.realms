@@ -1,12 +1,13 @@
 package com.mojang.realmsclient.gui;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public enum ChatFormatting {
    BLACK('0'),
@@ -33,8 +34,10 @@ public enum ChatFormatting {
    RESET('r');
 
    public static final char PREFIX_CODE = '§';
-   private static final Map<Character, ChatFormatting> FORMATTING_BY_CHAR = new HashMap();
-   private static final Map<String, ChatFormatting> FORMATTING_BY_NAME = new HashMap();
+   private static final Map<Character, ChatFormatting> FORMATTING_BY_CHAR = (Map<Character, ChatFormatting>)Arrays.stream(values())
+      .collect(Collectors.toMap(ChatFormatting::getChar, f -> f));
+   private static final Map<String, ChatFormatting> FORMATTING_BY_NAME = (Map<String, ChatFormatting>)Arrays.stream(values())
+      .collect(Collectors.toMap(ChatFormatting::getName, f -> f));
    private static final Pattern STRIP_FORMATTING_PATTERN = Pattern.compile("(?i)§[0-9A-FK-OR]");
    private final char code;
    private final boolean isFormat;
@@ -92,13 +95,5 @@ public enum ChatFormatting {
       }
 
       return result;
-   }
-
-   static {
-      for(ChatFormatting format : values()) {
-         FORMATTING_BY_CHAR.put(format.getChar(), format);
-         FORMATTING_BY_NAME.put(format.getName(), format);
-      }
-
    }
 }

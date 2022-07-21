@@ -1,22 +1,26 @@
 package com.mojang.realmsclient.gui.screens;
 
 import com.mojang.realmsclient.gui.RealmsConstants;
+import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
+import net.minecraft.realms.RealmsConfirmResultListener;
 import net.minecraft.realms.RealmsScreen;
 
 public class RealmsLongConfirmationScreen extends RealmsScreen {
    private final RealmsLongConfirmationScreen.Type type;
    private final String line2;
    private final String line3;
-   protected final RealmsScreen parent;
+   protected final RealmsConfirmResultListener listener;
    protected final String yesButton;
    protected final String noButton;
    private final String okButton;
    protected final int id;
    private final boolean yesNoQuestion;
 
-   public RealmsLongConfirmationScreen(RealmsScreen parent, RealmsLongConfirmationScreen.Type type, String line2, String line3, boolean yesNoQuestion, int id) {
-      this.parent = parent;
+   public RealmsLongConfirmationScreen(
+      RealmsConfirmResultListener listener, RealmsLongConfirmationScreen.Type type, String line2, String line3, boolean yesNoQuestion, int id
+   ) {
+      this.listener = listener;
       this.id = id;
       this.type = type;
       this.line2 = line2;
@@ -28,21 +32,22 @@ public class RealmsLongConfirmationScreen extends RealmsScreen {
    }
 
    public void init() {
+      Realms.narrateNow(new String[]{this.type.text, this.line2, this.line3});
       if (this.yesNoQuestion) {
          this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 105, RealmsConstants.row(8), 100, 20, this.yesButton) {
             public void onPress() {
-               RealmsLongConfirmationScreen.this.parent.confirmResult(true, RealmsLongConfirmationScreen.this.id);
+               RealmsLongConfirmationScreen.this.listener.confirmResult(true, RealmsLongConfirmationScreen.this.id);
             }
          });
          this.buttonsAdd(new RealmsButton(1, this.width() / 2 + 5, RealmsConstants.row(8), 100, 20, this.noButton) {
             public void onPress() {
-               RealmsLongConfirmationScreen.this.parent.confirmResult(false, RealmsLongConfirmationScreen.this.id);
+               RealmsLongConfirmationScreen.this.listener.confirmResult(false, RealmsLongConfirmationScreen.this.id);
             }
          });
       } else {
          this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 50, RealmsConstants.row(8), 100, 20, this.okButton) {
             public void onPress() {
-               RealmsLongConfirmationScreen.this.parent.confirmResult(true, RealmsLongConfirmationScreen.this.id);
+               RealmsLongConfirmationScreen.this.listener.confirmResult(true, RealmsLongConfirmationScreen.this.id);
             }
          });
       }
@@ -51,7 +56,7 @@ public class RealmsLongConfirmationScreen extends RealmsScreen {
 
    public boolean keyPressed(int eventKey, int scancode, int mods) {
       if (eventKey == 256) {
-         this.parent.confirmResult(false, this.id);
+         this.listener.confirmResult(false, this.id);
          return true;
       } else {
          return super.keyPressed(eventKey, scancode, mods);

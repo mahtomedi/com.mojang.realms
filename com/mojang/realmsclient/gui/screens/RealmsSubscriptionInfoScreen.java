@@ -27,6 +27,10 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
    private final int BUTTON_BACK_ID = 0;
    private final int BUTTON_DELETE_ID = 1;
    private final int BUTTON_SUBSCRIPTION_ID = 2;
+   private final String subscriptionTitle;
+   private final String subscriptionStartLabelText;
+   private final String timeLeftLabelText;
+   private final String daysLeftLabelText;
    private int daysLeft;
    private String startDate;
    private Subscription.SubscriptionType type;
@@ -36,10 +40,19 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
       this.lastScreen = lastScreen;
       this.serverData = serverData;
       this.mainScreen = mainScreen;
+      this.subscriptionTitle = getLocalizedString("mco.configure.world.subscription.title");
+      this.subscriptionStartLabelText = getLocalizedString("mco.configure.world.subscription.start");
+      this.timeLeftLabelText = getLocalizedString("mco.configure.world.subscription.timeleft");
+      this.daysLeftLabelText = getLocalizedString("mco.configure.world.subscription.recurring.daysleft");
    }
 
    public void init() {
       this.getSubscription(this.serverData.id);
+      Realms.narrateNow(
+         new String[]{
+            this.subscriptionTitle, this.subscriptionStartLabelText, this.startDate, this.timeLeftLabelText, this.daysLeftPresentation(this.daysLeft)
+         }
+      );
       this.setKeyboardHandlerSendRepeatsToGui(true);
       this.buttonsAdd(
          new RealmsButton(2, this.width() / 2 - 100, RealmsConstants.row(6), getLocalizedString("mco.configure.world.subscription.extend")) {
@@ -136,13 +149,13 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
    public void render(int xm, int ym, float a) {
       this.renderBackground();
       int center = this.width() / 2 - 100;
-      this.drawCenteredString(getLocalizedString("mco.configure.world.subscription.title"), this.width() / 2, 17, 16777215);
-      this.drawString(getLocalizedString("mco.configure.world.subscription.start"), center, RealmsConstants.row(0), 10526880);
+      this.drawCenteredString(this.subscriptionTitle, this.width() / 2, 17, 16777215);
+      this.drawString(this.subscriptionStartLabelText, center, RealmsConstants.row(0), 10526880);
       this.drawString(this.startDate, center, RealmsConstants.row(1), 16777215);
       if (this.type == Subscription.SubscriptionType.NORMAL) {
-         this.drawString(getLocalizedString("mco.configure.world.subscription.timeleft"), center, RealmsConstants.row(3), 10526880);
+         this.drawString(this.timeLeftLabelText, center, RealmsConstants.row(3), 10526880);
       } else if (this.type == Subscription.SubscriptionType.RECURRING) {
-         this.drawString(getLocalizedString("mco.configure.world.subscription.recurring.daysleft"), center, RealmsConstants.row(3), 10526880);
+         this.drawString(this.daysLeftLabelText, center, RealmsConstants.row(3), 10526880);
       }
 
       this.drawString(this.daysLeftPresentation(this.daysLeft), center, RealmsConstants.row(4), 16777215);

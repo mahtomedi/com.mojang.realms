@@ -6,6 +6,7 @@ import com.mojang.realmsclient.gui.RealmsConstants;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsEditBox;
+import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.realms.RealmsSliderButton;
 
@@ -50,6 +51,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
    String[] difficulties;
    String[] gameModes;
    String[][] gameModeHints;
+   private RealmsLabel titleLabel;
 
    public RealmsSlotOptionsScreen(RealmsConfigureWorldScreen configureWorldScreen, RealmsWorldOptions options, RealmsServer.WorldType worldType, int activeSlot) {
       this.parent = configureWorldScreen;
@@ -70,10 +72,6 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
       switch(eventKey) {
          case 256:
             Realms.setScreen(this.parent);
-            return true;
-         case 257:
-         case 335:
-            this.saveSettings();
             return true;
          default:
             return super.keyPressed(eventKey, scancode, mods);
@@ -205,6 +203,8 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
          }
       });
       this.addWidget(this.nameEdit);
+      this.addWidget(this.titleLabel = new RealmsLabel(getLocalizedString("mco.configure.world.buttons.options"), this.width() / 2, 17, 16777215));
+      this.narrateLabels();
    }
 
    private void createDifficultyAndGameMode() {
@@ -276,7 +276,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
       this.renderBackground();
       String slotName = getLocalizedString("mco.configure.world.edit.slot.name");
       this.drawString(slotName, this.column1_x + this.column_width / 2 - this.fontWidth(slotName) / 2, RealmsConstants.row(0) - 5, 16777215);
-      this.drawCenteredString(getLocalizedString("mco.configure.world.buttons.options"), this.width() / 2, 17, 16777215);
+      this.titleLabel.render(this);
       if (this.notNormal) {
          if (this.worldType.equals(RealmsServer.WorldType.ADVENTUREMAP)) {
             this.drawCenteredString(getLocalizedString("mco.configure.world.edit.subscreen.adventuremap"), this.width() / 2, 26, 16711680);

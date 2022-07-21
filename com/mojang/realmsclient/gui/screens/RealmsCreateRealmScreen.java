@@ -6,6 +6,7 @@ import com.mojang.realmsclient.util.RealmsTasks;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsEditBox;
+import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsScreen;
 
 public class RealmsCreateRealmScreen extends RealmsScreen {
@@ -18,6 +19,7 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
    private static final int NAME_BOX_ID = 3;
    private static final int DESCRIPTION_BOX_ID = 4;
    private RealmsButton createButton;
+   private RealmsLabel createRealmLabel;
 
    public RealmsCreateRealmScreen(RealmsServer server, RealmsMainScreen lastScreen) {
       this.server = server;
@@ -55,6 +57,9 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
       this.focusOn(this.nameBox);
       this.descriptionBox = this.newEditBox(4, this.width() / 2 - 100, 115, 200, 20);
       this.addWidget(this.descriptionBox);
+      this.createRealmLabel = new RealmsLabel(getLocalizedString("mco.selectServer.create"), this.width() / 2, 11, 16777215);
+      this.addWidget(this.createRealmLabel);
+      this.narrateLabels();
    }
 
    public void removed() {
@@ -70,10 +75,6 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
       switch(eventKey) {
          case 256:
             Realms.setScreen(this.lastScreen);
-            return true;
-         case 257:
-         case 335:
-            this.createWorld();
             return true;
          default:
             this.createButton.active(this.valid());
@@ -109,7 +110,7 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
 
    public void render(int xm, int ym, float a) {
       this.renderBackground();
-      this.drawCenteredString(getLocalizedString("mco.selectServer.create"), this.width() / 2, 11, 16777215);
+      this.createRealmLabel.render(this);
       this.drawString(getLocalizedString("mco.configure.world.name"), this.width() / 2 - 100, 52, 10526880);
       this.drawString(getLocalizedString("mco.configure.world.description"), this.width() / 2 - 100, 102, 10526880);
       if (this.nameBox != null) {

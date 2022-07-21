@@ -477,8 +477,8 @@ public class RealmsActivityScreen extends RealmsScreen {
             RealmsScreen.bind("realms:textures/gui/realms/user_icon.png");
             RealmsTextureManager.withBoundFace(((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).uuid, () -> {
                GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-               RealmsScreen.blit(10, y, 8.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);
-               RealmsScreen.blit(10, y, 40.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);
+               RealmsScreen.blit(10, y, 8.0F, 8.0F, 8, 8, 8, 8, 64, 64);
+               RealmsScreen.blit(10, y, 40.0F, 8.0F, 8, 8, 8, 8, 64, 64);
             });
          }
 

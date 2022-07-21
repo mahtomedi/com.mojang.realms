@@ -107,7 +107,7 @@ public class RealmsNotificationsScreen extends RealmsScreen {
          GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
          GlStateManager.pushMatrix();
          GlStateManager.scalef(0.4F, 0.4F, 0.4F);
-         RealmsScreen.blit((int)((double)(baseX + 2 - iconOffset) * 2.5), (int)((double)baseY * 2.5), 0.0F, 0.0F, 40, 40, 40.0F, 40.0F);
+         RealmsScreen.blit((int)((double)(baseX + 2 - iconOffset) * 2.5), (int)((double)baseY * 2.5), 0.0F, 0.0F, 40, 40, 40, 40);
          GlStateManager.popMatrix();
          iconOffset += 14;
       }
@@ -116,7 +116,7 @@ public class RealmsNotificationsScreen extends RealmsScreen {
          RealmsScreen.bind("realms:textures/gui/realms/invite_icon.png");
          GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
          GlStateManager.pushMatrix();
-         RealmsScreen.blit(baseX - iconOffset, baseY - 6, 0.0F, 0.0F, 15, 25, 31.0F, 25.0F);
+         RealmsScreen.blit(baseX - iconOffset, baseY - 6, 0.0F, 0.0F, 15, 25, 31, 25);
          GlStateManager.popMatrix();
          iconOffset += 16;
       }
@@ -130,7 +130,7 @@ public class RealmsNotificationsScreen extends RealmsScreen {
             ySprite = 8;
          }
 
-         RealmsScreen.blit(baseX + 4 - iconOffset, baseY + 4, 0.0F, (float)ySprite, 8, 8, 8.0F, 16.0F);
+         RealmsScreen.blit(baseX + 4 - iconOffset, baseY + 4, 0.0F, (float)ySprite, 8, 8, 8, 16);
          GlStateManager.popMatrix();
       }
 

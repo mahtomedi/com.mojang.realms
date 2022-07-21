@@ -5,6 +5,7 @@ import com.mojang.realmsclient.gui.RealmsConstants;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsEditBox;
+import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsScreen;
 
 public class RealmsSettingsScreen extends RealmsScreen {
@@ -19,6 +20,7 @@ public class RealmsSettingsScreen extends RealmsScreen {
    private RealmsButton doneButton;
    private RealmsEditBox descEdit;
    private RealmsEditBox nameEdit;
+   private RealmsLabel titleLabel;
 
    public RealmsSettingsScreen(RealmsConfigureWorldScreen configureWorldScreen, RealmsServer serverData) {
       this.configureWorldScreen = configureWorldScreen;
@@ -82,6 +84,8 @@ public class RealmsSettingsScreen extends RealmsScreen {
       }
 
       this.addWidget(this.descEdit);
+      this.addWidget(this.titleLabel = new RealmsLabel(getLocalizedString("mco.configure.world.settings.title"), this.width() / 2, 17, 16777215));
+      this.narrateLabels();
    }
 
    public void removed() {
@@ -104,10 +108,6 @@ public class RealmsSettingsScreen extends RealmsScreen {
          case 256:
             Realms.setScreen(this.configureWorldScreen);
             return true;
-         case 257:
-         case 335:
-            this.save();
-            return true;
          default:
             return super.keyPressed(eventKey, scancode, mods);
       }
@@ -115,7 +115,7 @@ public class RealmsSettingsScreen extends RealmsScreen {
 
    public void render(int xm, int ym, float a) {
       this.renderBackground();
-      this.drawCenteredString(getLocalizedString("mco.configure.world.settings.title"), this.width() / 2, 17, 16777215);
+      this.titleLabel.render(this);
       this.drawString(getLocalizedString("mco.configure.world.name"), this.width() / 2 - 106, RealmsConstants.row(3), 10526880);
       this.drawString(getLocalizedString("mco.configure.world.description"), this.width() / 2 - 106, RealmsConstants.row(7), 10526880);
       this.nameEdit.render(xm, ym, a);

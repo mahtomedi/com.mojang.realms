@@ -81,10 +81,7 @@ public class RealmsInviteScreen extends RealmsScreen {
    }
 
    public boolean keyPressed(int eventKey, int scancode, int mods) {
-      if (eventKey == 257 || eventKey == 335) {
-         this.onInvite();
-         return true;
-      } else if (eventKey == 256) {
+      if (eventKey == 256) {
          Realms.setScreen(this.lastScreen);
          return true;
       } else {

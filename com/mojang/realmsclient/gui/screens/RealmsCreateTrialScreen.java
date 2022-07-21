@@ -74,10 +74,6 @@ public class RealmsCreateTrialScreen extends RealmsScreen {
          case 256:
             Realms.setScreen(this.lastScreen);
             return true;
-         case 257:
-         case 335:
-            this.createWorld();
-            return true;
          default:
             this.createButton.active(this.valid());
             return false;

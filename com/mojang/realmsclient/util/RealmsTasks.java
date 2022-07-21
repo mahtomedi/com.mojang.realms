@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.concurrent.locks.ReentrantLock;
 import net.minecraft.realms.Realms;
+import net.minecraft.realms.RealmsConfirmResultListener;
 import net.minecraft.realms.RealmsConnect;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
@@ -536,13 +537,13 @@ public class RealmsTasks {
    public static class SwitchSlotTask extends LongRunningTask {
       private final long worldId;
       private final int slot;
-      private final RealmsScreen lastScreen;
+      private final RealmsConfirmResultListener listener;
       private final int confirmId;
 
-      public SwitchSlotTask(long worldId, int slot, RealmsScreen lastScreen, int confirmId) {
+      public SwitchSlotTask(long worldId, int slot, RealmsConfirmResultListener listener, int confirmId) {
          this.worldId = worldId;
          this.slot = slot;
-         this.lastScreen = lastScreen;
+         this.listener = listener;
          this.confirmId = confirmId;
       }
 
@@ -558,7 +559,7 @@ public class RealmsTasks {
                }
 
                if (client.switchSlot(this.worldId, this.slot)) {
-                  this.lastScreen.confirmResult(true, this.confirmId);
+                  this.listener.confirmResult(true, this.confirmId);
                   break;
                }
             } catch (RetryCallException var5) {

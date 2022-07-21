@@ -4,10 +4,12 @@ import com.mojang.realmsclient.gui.RealmsConstants;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsEditBox;
+import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsScreen;
 
 public class RealmsResetNormalWorldScreen extends RealmsScreen {
    private final RealmsResetWorldScreen lastScreen;
+   private RealmsLabel titleLabel;
    private RealmsEditBox seedEdit;
    private Boolean generateStructures = true;
    private Integer levelTypeIndex = 0;
@@ -76,6 +78,9 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
             }
          }
       );
+      this.titleLabel = new RealmsLabel(getLocalizedString("mco.reset.world.generate"), this.width() / 2, 17, 16777215);
+      this.addWidget(this.titleLabel);
+      this.narrateLabels();
    }
 
    public void removed() {
@@ -83,10 +88,7 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
    }
 
    public boolean keyPressed(int eventKey, int scancode, int mods) {
-      if (eventKey == 257 || eventKey == 335) {
-         this.onReset();
-         return true;
-      } else if (eventKey == 256) {
+      if (eventKey == 256) {
          Realms.setScreen(this.lastScreen);
          return true;
       } else {
@@ -100,7 +102,7 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
 
    public void render(int xm, int ym, float a) {
       this.renderBackground();
-      this.drawCenteredString(getLocalizedString("mco.reset.world.generate"), this.width() / 2, 17, 16777215);
+      this.titleLabel.render(this);
       this.drawString(getLocalizedString("mco.reset.world.seed"), this.width() / 2 - 100, RealmsConstants.row(1), 10526880);
       this.seedEdit.render(xm, ym, a);
       super.render(xm, ym, a);

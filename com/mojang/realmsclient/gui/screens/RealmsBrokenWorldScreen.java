@@ -300,7 +300,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
          GlStateManager.color4f(c, c, c, 1.0F);
       }
 
-      RealmsScreen.blit(x + 3, y + 3, 0.0F, 0.0F, 74, 74, 74.0F, 74.0F);
+      RealmsScreen.blit(x + 3, y + 3, 0.0F, 0.0F, 74, 74, 74, 74);
       bind("realms:textures/gui/realms/slot_frame.png");
       if (active) {
          GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -308,7 +308,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
          GlStateManager.color4f(0.56F, 0.56F, 0.56F, 1.0F);
       }
 
-      RealmsScreen.blit(x, y, 0.0F, 0.0F, 80, 80, 80.0F, 80.0F);
+      RealmsScreen.blit(x, y, 0.0F, 0.0F, 80, 80, 80, 80);
       this.drawCenteredString(text, x + 40, y + 66, 16777215);
    }
 

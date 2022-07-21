@@ -8,12 +8,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import net.minecraft.realms.RealmListEntry;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsAnvilLevelStorageSource;
 import net.minecraft.realms.RealmsButton;
+import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsLevelSummary;
+import net.minecraft.realms.RealmsObjectSelectionList;
 import net.minecraft.realms.RealmsScreen;
-import net.minecraft.realms.RealmsScrolledSelectionList;
 import net.minecraft.realms.Tezzelator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,6 +35,8 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
    private String worldLang;
    private String conversionLang;
    private final String[] gameModesLang = new String[4];
+   private RealmsLabel titleLabel;
+   private RealmsLabel subtitleLabel;
 
    public RealmsSelectFileToUploadScreen(long worldId, int slotId, RealmsResetWorldScreen lastScreen) {
       this.lastScreen = lastScreen;
@@ -44,10 +48,16 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
       RealmsAnvilLevelStorageSource levelSource = this.getLevelStorageSource();
       this.levelList = levelSource.getLevelList();
       Collections.sort(this.levelList);
+
+      for(RealmsLevelSummary summary : this.levelList) {
+         this.worldSelectionList.addEntry(summary);
+      }
+
    }
 
    public void init() {
       this.setKeyboardHandlerSendRepeatsToGui(true);
+      this.worldSelectionList = new RealmsSelectFileToUploadScreen.WorldSelectionList();
 
       try {
          this.loadLevelList();
@@ -63,6 +73,7 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
       this.gameModesLang[Realms.creativeId()] = getLocalizedString("gameMode.creative");
       this.gameModesLang[Realms.adventureId()] = getLocalizedString("gameMode.adventure");
       this.gameModesLang[Realms.spectatorId()] = getLocalizedString("gameMode.spectator");
+      this.addWidget(this.worldSelectionList);
       this.buttonsAdd(new RealmsButton(1, this.width() / 2 + 6, this.height() - 32, 153, 20, getLocalizedString("gui.back")) {
          public void onPress() {
             Realms.setScreen(RealmsSelectFileToUploadScreen.this.lastScreen);
@@ -76,8 +87,11 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
          }
       );
       this.uploadButton.active(this.selectedWorld >= 0 && this.selectedWorld < this.levelList.size());
-      this.worldSelectionList = new RealmsSelectFileToUploadScreen.WorldSelectionList();
-      this.addWidget(this.worldSelectionList);
+      this.addWidget(this.titleLabel = new RealmsLabel(getLocalizedString("mco.upload.select.world.title"), this.width() / 2, 13, 16777215));
+      this.addWidget(
+         this.subtitleLabel = new RealmsLabel(getLocalizedString("mco.upload.select.world.subtitle"), this.width() / 2, RealmsConstants.row(-1), 10526880)
+      );
+      this.narrateLabels();
    }
 
    public void removed() {
@@ -95,8 +109,8 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
    public void render(int xm, int ym, float a) {
       this.renderBackground();
       this.worldSelectionList.render(xm, ym, a);
-      this.drawCenteredString(getLocalizedString("mco.upload.select.world.title"), this.width() / 2, 13, 16777215);
-      this.drawCenteredString(getLocalizedString("mco.upload.select.world.subtitle"), this.width() / 2, RealmsConstants.row(-1), 10526880);
+      this.titleLabel.render(this);
+      this.subtitleLabel.render(this);
       if (this.levelList.size() == 0) {
          this.drawCenteredString(getLocalizedString("mco.upload.select.world.none"), this.width() / 2, this.height() / 2 - 20, 16777215);
       }
@@ -117,46 +131,23 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
       super.tick();
    }
 
-   private class WorldSelectionList extends RealmsScrolledSelectionList {
-      public WorldSelectionList() {
-         super(
-            RealmsSelectFileToUploadScreen.this.width(),
-            RealmsSelectFileToUploadScreen.this.height(),
-            RealmsConstants.row(0),
-            RealmsSelectFileToUploadScreen.this.height() - 40,
-            36
-         );
+   private class WorldListEntry extends RealmListEntry {
+      final RealmsLevelSummary levelSummary;
+
+      public WorldListEntry(RealmsLevelSummary levelSummary) {
+         this.levelSummary = levelSummary;
       }
 
-      public int getItemCount() {
-         return RealmsSelectFileToUploadScreen.this.levelList.size();
+      public void render(int index, int rowTop, int rowLeft, int rowWidth, int rowHeight, int mouseX, int mouseY, boolean hovered, float a) {
+         this.renderItem(this.levelSummary, index, rowLeft, rowTop, rowHeight, Tezzelator.instance, mouseX, mouseY);
       }
 
-      public boolean selectItem(int item, int buttonNum, double xMouse, double yMouse) {
-         RealmsSelectFileToUploadScreen.this.selectedWorld = item;
-         RealmsSelectFileToUploadScreen.this.uploadButton
-            .active(
-               RealmsSelectFileToUploadScreen.this.selectedWorld >= 0
-                  && RealmsSelectFileToUploadScreen.this.selectedWorld < this.getItemCount()
-                  && !((RealmsLevelSummary)RealmsSelectFileToUploadScreen.this.levelList.get(RealmsSelectFileToUploadScreen.this.selectedWorld)).isHardcore()
-            );
+      public boolean mouseClicked(double x, double y, int buttonNum) {
+         RealmsSelectFileToUploadScreen.this.worldSelectionList.selectItem(RealmsSelectFileToUploadScreen.this.levelList.indexOf(this.levelSummary));
          return true;
       }
 
-      public boolean isSelectedItem(int item) {
-         return item == RealmsSelectFileToUploadScreen.this.selectedWorld;
-      }
-
-      public int getMaxPosition() {
-         return RealmsSelectFileToUploadScreen.this.levelList.size() * 36;
-      }
-
-      public void renderBackground() {
-         RealmsSelectFileToUploadScreen.this.renderBackground();
-      }
-
-      protected void renderItem(int i, int x, int y, int h, Tezzelator t, int mouseX, int mouseY) {
-         RealmsLevelSummary levelSummary = (RealmsLevelSummary)RealmsSelectFileToUploadScreen.this.levelList.get(i);
+      protected void renderItem(RealmsLevelSummary levelSummary, int i, int x, int y, int h, Tezzelator t, int mouseX, int mouseY) {
          String name = levelSummary.getLevelName();
          if (name == null || name.isEmpty()) {
             name = RealmsSelectFileToUploadScreen.this.worldLang + " " + (i + 1);
@@ -182,6 +173,66 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
          RealmsSelectFileToUploadScreen.this.drawString(name, x + 2, y + 1, 16777215);
          RealmsSelectFileToUploadScreen.this.drawString(id, x + 2, y + 12, 8421504);
          RealmsSelectFileToUploadScreen.this.drawString(info, x + 2, y + 12 + 10, 8421504);
+      }
+   }
+
+   private class WorldSelectionList extends RealmsObjectSelectionList {
+      public WorldSelectionList() {
+         super(
+            RealmsSelectFileToUploadScreen.this.width(),
+            RealmsSelectFileToUploadScreen.this.height(),
+            RealmsConstants.row(0),
+            RealmsSelectFileToUploadScreen.this.height() - 40,
+            36
+         );
+      }
+
+      public void addEntry(RealmsLevelSummary levelSummary) {
+         this.addEntry(RealmsSelectFileToUploadScreen.this.new WorldListEntry(levelSummary));
+      }
+
+      public int getItemCount() {
+         return RealmsSelectFileToUploadScreen.this.levelList.size();
+      }
+
+      public int getMaxPosition() {
+         return RealmsSelectFileToUploadScreen.this.levelList.size() * 36;
+      }
+
+      public boolean isFocused() {
+         return RealmsSelectFileToUploadScreen.this.isFocused(this);
+      }
+
+      public void renderBackground() {
+         RealmsSelectFileToUploadScreen.this.renderBackground();
+      }
+
+      public boolean selectItem(int item, int buttonNum, double xMouse, double yMouse) {
+         this.selectItem(item);
+         return true;
+      }
+
+      public void selectItem(int item) {
+         this.setSelected(item);
+         if (item != -1) {
+            Realms.narrateNow(
+               RealmsScreen.getLocalizedString(
+                  "narrator.select", new Object[]{((RealmsLevelSummary)RealmsSelectFileToUploadScreen.this.levelList.get(item)).getLevelName()}
+               )
+            );
+         }
+
+         RealmsSelectFileToUploadScreen.this.selectedWorld = item;
+         RealmsSelectFileToUploadScreen.this.uploadButton
+            .active(
+               RealmsSelectFileToUploadScreen.this.selectedWorld >= 0
+                  && RealmsSelectFileToUploadScreen.this.selectedWorld < this.getItemCount()
+                  && !((RealmsLevelSummary)RealmsSelectFileToUploadScreen.this.levelList.get(RealmsSelectFileToUploadScreen.this.selectedWorld)).isHardcore()
+            );
+      }
+
+      public boolean isSelectedItem(int item) {
+         return item == RealmsSelectFileToUploadScreen.this.selectedWorld;
       }
    }
 }

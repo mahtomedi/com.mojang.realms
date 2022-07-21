@@ -61,6 +61,7 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements Erro
 
    public void tick() {
       super.tick();
+      Realms.narrateRepeatedly(this.title);
       ++this.animTicks;
       this.task.tick();
    }

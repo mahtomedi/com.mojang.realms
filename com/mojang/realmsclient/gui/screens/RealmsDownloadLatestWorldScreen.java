@@ -1,8 +1,10 @@
 package com.mojang.realmsclient.gui.screens;
 
+import com.google.common.util.concurrent.RateLimiter;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.realmsclient.client.FileDownload;
 import com.mojang.realmsclient.dto.WorldDownload;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -18,6 +20,8 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
    private final RealmsScreen lastScreen;
    private final WorldDownload worldDownload;
+   private final String downloadTitle;
+   private final RateLimiter narrationRateLimiter;
    private RealmsButton cancelButton;
    private final String worldName;
    private final RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus;
@@ -44,6 +48,8 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
       this.worldName = worldName;
       this.worldDownload = worldDownload;
       this.downloadStatus = new RealmsDownloadLatestWorldScreen.DownloadStatus();
+      this.downloadTitle = getLocalizedString("mco.download.title");
+      this.narrationRateLimiter = RateLimiter.create(0.1F);
    }
 
    public void setConfirmationId(int confirmationId) {
@@ -88,6 +94,23 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
    public void tick() {
       super.tick();
       ++this.animTick;
+      if (this.status != null && this.narrationRateLimiter.tryAcquire(1)) {
+         ArrayList<String> elements = new ArrayList();
+         elements.add(this.downloadTitle);
+         elements.add(this.status);
+         if (this.progress != null) {
+            elements.add(this.progress + "%");
+            elements.add(humanReadableSpeed(this.bytesPersSecond));
+         }
+
+         if (this.errorMessage != null) {
+            elements.add(this.errorMessage);
+         }
+
+         String toNarrate = String.join(System.lineSeparator(), elements);
+         Realms.narrateNow(toNarrate);
+      }
+
    }
 
    public boolean keyPressed(int eventKey, int scancode, int mods) {
@@ -114,7 +137,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
          this.status = getLocalizedString("mco.download.extracting");
       }
 
-      this.drawCenteredString(getLocalizedString("mco.download.title"), this.width() / 2, 20, 16777215);
+      this.drawCenteredString(this.downloadTitle, this.width() / 2, 20, 16777215);
       this.drawCenteredString(this.status, this.width() / 2, 50, 16777215);
       if (this.showDots) {
          this.drawDots();
@@ -195,7 +218,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
    public static String humanReadableSpeed(long bytes) {
       int unit = 1024;
       if (bytes < 1024L) {
-         return bytes + " B";
+         return bytes + " B/s";
       } else {
          int exp = (int)(Math.log((double)bytes) / Math.log(1024.0));
          String pre = "KMGTPE".charAt(exp - 1) + "";

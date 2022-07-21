@@ -1,5 +1,6 @@
 package com.mojang.realmsclient.gui.screens;
 
+import com.google.common.util.concurrent.RateLimiter;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.realmsclient.client.FileUpload;
 import com.mojang.realmsclient.client.RealmsClient;
@@ -12,6 +13,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -38,6 +40,7 @@ public class RealmsUploadScreen extends RealmsScreen {
    private final long worldId;
    private final int slotId;
    private final UploadStatus uploadStatus;
+   private final RateLimiter narrationRateLimiter;
    private volatile String errorMessage;
    private volatile String status;
    private volatile String progress;
@@ -62,6 +65,7 @@ public class RealmsUploadScreen extends RealmsScreen {
       this.lastScreen = lastScreen;
       this.selectedLevel = selectedLevel;
       this.uploadStatus = new UploadStatus();
+      this.narrationRateLimiter = RateLimiter.create(0.1F);
    }
 
    public void init() {
@@ -228,6 +232,20 @@ public class RealmsUploadScreen extends RealmsScreen {
    public void tick() {
       super.tick();
       ++this.animTick;
+      if (this.status != null && this.narrationRateLimiter.tryAcquire(1)) {
+         ArrayList<String> elements = new ArrayList();
+         elements.add(this.status);
+         if (this.progress != null) {
+            elements.add(this.progress + "%");
+         }
+
+         if (this.errorMessage != null) {
+            elements.add(this.errorMessage);
+         }
+
+         Realms.narrateNow(String.join(System.lineSeparator(), elements));
+      }
+
    }
 
    public static RealmsUploadScreen.Unit getLargestUnit(long bytes) {

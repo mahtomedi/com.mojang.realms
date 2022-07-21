@@ -20,6 +20,8 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
    private static final int BUTTON_ACCEPT_ID = 1;
    private static final int BUTTON_REJECT_ID = 2;
    private final RealmsScreen lastScreen;
+   private RealmsButton acceptButton;
+   private RealmsButton rejectButton;
    private RealmsPendingInvitesScreen.PendingInvitationList pendingList;
    private List<PendingInvite> pendingInvites = Lists.newArrayList();
    private int selectedItem = -1;
@@ -43,6 +45,10 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 
             try {
                RealmsPendingInvitesScreen.this.pendingInvites = client.pendingInvites().pendingInvites;
+               if (RealmsPendingInvitesScreen.this.pendingInvites.size() == 1) {
+                  RealmsPendingInvitesScreen.this.selectedItem = 0;
+                  RealmsPendingInvitesScreen.this.changeButtonState(true);
+               }
             } catch (RealmsServiceException var3) {
                RealmsPendingInvitesScreen.LOGGER.error("Couldn't list invites");
             }
@@ -53,9 +59,15 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
    }
 
    private void postInit() {
-      this.buttonsAdd(newButton(1, this.width() / 2 - 154, this.height() - 57, 153, 20, getLocalizedString("mco.invites.button.accept")));
-      this.buttonsAdd(newButton(2, this.width() / 2 + 6, this.height() - 57, 153, 20, getLocalizedString("mco.invites.button.reject")));
+      this.buttonsAdd(this.acceptButton = newButton(1, this.width() / 2 - 154, this.height() - 57, 153, 20, getLocalizedString("mco.invites.button.accept")));
+      this.buttonsAdd(this.rejectButton = newButton(2, this.width() / 2 + 6, this.height() - 57, 153, 20, getLocalizedString("mco.invites.button.reject")));
       this.buttonsAdd(newButton(0, this.width() / 2 - 75, this.height() - 32, 153, 20, getLocalizedString("gui.back")));
+      this.changeButtonState(false);
+   }
+
+   private void changeButtonState(boolean active) {
+      this.acceptButton.active(active);
+      this.rejectButton.active(active);
    }
 
    public void tick() {
@@ -161,6 +173,7 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
       public void selectItem(int item, boolean doubleClick, int xMouse, int yMouse) {
          if (item < RealmsPendingInvitesScreen.this.pendingInvites.size()) {
             RealmsPendingInvitesScreen.this.selectedItem = item;
+            RealmsPendingInvitesScreen.this.changeButtonState(true);
          }
       }
 

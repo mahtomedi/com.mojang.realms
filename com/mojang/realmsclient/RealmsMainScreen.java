@@ -97,6 +97,7 @@ public class RealmsMainScreen extends RealmsScreen {
    }
 
    public void init() {
+      Realms.setConnectedToRealms(false);
       if (realmsGenericErrorScreen != null) {
          Realms.setScreen(realmsGenericErrorScreen);
       } else {

@@ -1,12 +1,15 @@
 package com.mojang.realmsclient.gui.screens;
 
 import com.mojang.realmsclient.client.RealmsClient;
+import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.WorldTemplate;
+import com.mojang.realmsclient.dto.WorldTemplatePaginatedList;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.gui.RealmsConstants;
 import com.mojang.realmsclient.util.RealmsTextureManager;
 import com.mojang.realmsclient.util.RealmsUtil;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
@@ -28,7 +31,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
    private static final String SLOT_FRAME_LOCATION = "realms:textures/gui/realms/slot_frame.png";
    private final RealmsScreenWithCallback<WorldTemplate> lastScreen;
    private WorldTemplate selectedWorldTemplate;
-   private List<WorldTemplate> templates = Collections.emptyList();
+   private final List<WorldTemplate> templates = new ArrayList();
    private RealmsSelectWorldTemplateScreen.WorldTemplateSelectionList worldTemplateSelectionList;
    private int selectedTemplate = -1;
    private String title;
@@ -37,27 +40,51 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
    private RealmsButton selectButton;
    private String toolTip = null;
    private String currentLink = null;
-   private boolean isMiniGame;
+   private RealmsServer.WorldType worldType;
    private int clicks = 0;
    private String warning = null;
    private String warningURL = null;
    private boolean displayWarning = false;
    private boolean hoverWarning = false;
    private boolean prepopulated = false;
+   private WorldTemplatePaginatedList paginatedList;
+   private boolean loading = false;
+   private boolean stopLoadingTemplates = false;
 
-   public RealmsSelectWorldTemplateScreen(RealmsScreenWithCallback<WorldTemplate> lastScreen, WorldTemplate selectedWorldTemplate, boolean isMiniGame) {
+   public RealmsSelectWorldTemplateScreen(
+      RealmsScreenWithCallback<WorldTemplate> lastScreen, WorldTemplate selectedWorldTemplate, RealmsServer.WorldType worldType
+   ) {
       this.lastScreen = lastScreen;
       this.selectedWorldTemplate = selectedWorldTemplate;
-      this.isMiniGame = isMiniGame;
-      this.title = isMiniGame ? getLocalizedString("mco.template.title.minigame") : getLocalizedString("mco.template.title");
+      this.worldType = worldType;
+      this.title = this.worldType == RealmsServer.WorldType.MINIGAME
+         ? getLocalizedString("mco.template.title.minigame")
+         : getLocalizedString("mco.template.title");
+      if (this.paginatedList == null) {
+         this.paginatedList = new WorldTemplatePaginatedList();
+         this.paginatedList.size = 10;
+      }
+
+      if (this.paginatedList.size == 0) {
+         this.paginatedList.size = 10;
+      }
+
    }
 
    public RealmsSelectWorldTemplateScreen(
-      RealmsScreenWithCallback<WorldTemplate> lastScreen, WorldTemplate selectedWorldTemplate, boolean isMiniGame, List<WorldTemplate> templates
+      RealmsScreenWithCallback<WorldTemplate> lastScreen,
+      WorldTemplate selectedWorldTemplate,
+      RealmsServer.WorldType worldType,
+      WorldTemplatePaginatedList list
    ) {
-      this(lastScreen, selectedWorldTemplate, isMiniGame);
+      this(lastScreen, selectedWorldTemplate, worldType);
       this.prepopulated = true;
-      this.templates = templates;
+      this.templates.addAll((Collection)(list == null ? new ArrayList() : list.templates));
+      this.paginatedList = list;
+      if (this.paginatedList.size == 0) {
+         this.paginatedList.size = 10;
+      }
+
    }
 
    public void setTitle(String title) {
@@ -90,27 +117,20 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
       this.buttonsClear();
       this.worldTemplateSelectionList = new RealmsSelectWorldTemplateScreen.WorldTemplateSelectionList();
       if (!this.prepopulated && this.templates.isEmpty()) {
-         final boolean isMiniGame = this.isMiniGame;
-         (new Thread("Realms-minigame-fetcher") {
-            public void run() {
-               RealmsClient client = RealmsClient.createRealmsClient();
-
-               try {
-                  if (isMiniGame) {
-                     RealmsSelectWorldTemplateScreen.this.templates = client.fetchMinigames().templates;
-                  } else {
-                     RealmsSelectWorldTemplateScreen.this.templates = client.fetchWorldTemplates().templates;
-                  }
-               } catch (RealmsServiceException var3) {
-                  RealmsSelectWorldTemplateScreen.LOGGER.error("Couldn't fetch templates");
-               }
-
-            }
-         }).start();
+         this.paginatedList.page = 0;
+         this.paginatedList.size = 10;
+         this.fetchMoreTemplatesAsync();
       }
 
       this.buttonsAdd(
-         newButton(0, this.width() / 2 + 6, this.height() - 32, 153, 20, this.isMiniGame ? getLocalizedString("gui.cancel") : getLocalizedString("gui.back"))
+         newButton(
+            0,
+            this.width() / 2 + 6,
+            this.height() - 32,
+            153,
+            20,
+            this.worldType == RealmsServer.WorldType.MINIGAME ? getLocalizedString("gui.cancel") : getLocalizedString("gui.back")
+         )
       );
       this.buttonsAdd(this.selectButton = newButton(1, this.width() / 2 - 154, this.height() - 32, 153, 20, getLocalizedString("mco.template.button.select")));
       this.selectButton.active(false);
@@ -233,8 +253,37 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
    private void selectTemplate() {
       if (this.selectedTemplate >= 0 && this.selectedTemplate < this.templates.size()) {
          WorldTemplate template = (WorldTemplate)this.templates.get(this.selectedTemplate);
-         template.setMinigame(this.isMiniGame);
+         template.setMinigame(this.worldType == RealmsServer.WorldType.MINIGAME);
          this.lastScreen.callback(template);
+      }
+
+   }
+
+   private void fetchMoreTemplatesAsync() {
+      if (!this.loading && !this.stopLoadingTemplates) {
+         this.loading = true;
+         (new Thread("realms-template-fetcher") {
+               public void run() {
+                  try {
+                     RealmsClient client = RealmsClient.createRealmsClient();
+                     RealmsSelectWorldTemplateScreen.this.paginatedList = client.fetchWorldTemplates(
+                        RealmsSelectWorldTemplateScreen.this.paginatedList.page + 1,
+                        RealmsSelectWorldTemplateScreen.this.paginatedList.size,
+                        RealmsSelectWorldTemplateScreen.this.worldType
+                     );
+                     RealmsSelectWorldTemplateScreen.this.templates.addAll(RealmsSelectWorldTemplateScreen.this.paginatedList.templates);
+                     if (RealmsSelectWorldTemplateScreen.this.paginatedList.templates.size() == 0) {
+                        RealmsSelectWorldTemplateScreen.this.stopLoadingTemplates = true;
+                     }
+                  } catch (RealmsServiceException var5) {
+                     RealmsSelectWorldTemplateScreen.LOGGER.error("Couldn't fetch templates");
+                  } finally {
+                     RealmsSelectWorldTemplateScreen.this.loading = false;
+                  }
+   
+               }
+            })
+            .start();
       }
 
    }
@@ -243,6 +292,10 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
       this.toolTip = null;
       this.currentLink = null;
       this.hoverWarning = false;
+      if (!this.paginatedList.isLastPage()) {
+         this.fetchMoreTemplatesAsync();
+      }
+
       this.renderBackground();
       this.worldTemplateSelectionList.render(xm, ym, a);
       this.drawCenteredString(this.title, this.width() / 2, 13, 16777215);

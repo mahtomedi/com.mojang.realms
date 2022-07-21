@@ -182,7 +182,7 @@ public class RealmsTasks {
          final RealmsServerAddress address = null;
          boolean tosNotAccepted = false;
 
-         for(int i = 0; i < 20 && !this.aborted(); ++i) {
+         for(int i = 0; i < 40 && !this.aborted(); ++i) {
             try {
                address = client.join(this.server.id);
                addressRetrieved = true;

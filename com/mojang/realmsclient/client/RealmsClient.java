@@ -20,6 +20,7 @@ import com.mojang.realmsclient.dto.Subscription;
 import com.mojang.realmsclient.dto.UploadInfo;
 import com.mojang.realmsclient.dto.WorldDownload;
 import com.mojang.realmsclient.dto.WorldTemplateList;
+import com.mojang.realmsclient.dto.WorldTemplatePaginatedList;
 import com.mojang.realmsclient.exception.RealmsHttpException;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.exception.RetryCallException;
@@ -55,7 +56,7 @@ public class RealmsClient {
    private static final String PATH_OP = "/$WORLD_ID/$PROFILE_UUID";
    private static final String PATH_PUT_INTO_MINIGAMES_MODE = "/minigames/$MINIGAME_ID/$WORLD_ID";
    private static final String PATH_AVAILABLE = "/available";
-   private static final String PATH_TEMPLATES = "/templates";
+   private static final String PATH_TEMPLATES = "/templates/$WORLD_TYPE";
    private static final String PATH_WORLD_JOIN = "/$ID/join";
    private static final String PATH_WORLD_GET = "/$ID";
    private static final String PATH_WORLD_INVITES = "/$WORLD_ID";
@@ -230,10 +231,12 @@ public class RealmsClient {
       this.execute(Request.put(asciiUrl, "", 40000, 40000));
    }
 
-   public WorldTemplateList fetchWorldTemplates() throws RealmsServiceException {
-      String asciiUrl = this.url("worlds/templates");
+   public WorldTemplatePaginatedList fetchWorldTemplates(int page, int pageSize, RealmsServer.WorldType type) throws RealmsServiceException {
+      String asciiUrl = this.url(
+         "worlds" + "/templates/$WORLD_TYPE".replace("$WORLD_TYPE", type.toString()), String.format("page=%d&pageSize=%d", page, pageSize)
+      );
       String json = this.execute(Request.get(asciiUrl));
-      return WorldTemplateList.parse(json);
+      return WorldTemplatePaginatedList.parse(json);
    }
 
    public WorldTemplateList fetchMinigames() throws RealmsServiceException {

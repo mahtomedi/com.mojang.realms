@@ -284,7 +284,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
                   Realms.setScreen(new RealmsResetWorldScreen(this, this.serverData.clone(), this.getNewScreen()));
                   break;
                case 8:
-                  Realms.setScreen(new RealmsSelectWorldTemplateScreen(this, null, true));
+                  Realms.setScreen(new RealmsSelectWorldTemplateScreen(this, null, RealmsServer.WorldType.MINIGAME));
             }
 
          }
@@ -390,7 +390,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
                   Realms.setScreen(new RealmsLongConfirmationScreen(this, RealmsLongConfirmationScreen.Type.Info, line2, line3, true, 9));
                }
             } else if (!this.isMinigame() && !this.serverData.expired) {
-               RealmsSelectWorldTemplateScreen screen = new RealmsSelectWorldTemplateScreen(this, null, true);
+               RealmsSelectWorldTemplateScreen screen = new RealmsSelectWorldTemplateScreen(this, null, RealmsServer.WorldType.MINIGAME);
                screen.setWarning(getLocalizedString("mco.minigame.world.info.line1") + "\\n" + getLocalizedString("mco.minigame.world.info.line2"));
                Realms.setScreen(screen);
             }

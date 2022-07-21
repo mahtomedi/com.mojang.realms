@@ -54,7 +54,7 @@ public class BackupLinkScreen extends RealmsScreen {
       clipboard.setContents(new StringSelection(this.downloadLink), null);
    }
 
-   protected void buttonClicked(RealmsButton button) {
+   public void buttonClicked(RealmsButton button) {
       if (button.active()) {
          if (button.id() == 1) {
             this.backButtonClicked();
@@ -65,7 +65,7 @@ public class BackupLinkScreen extends RealmsScreen {
       }
    }
 
-   protected void keyPressed(char ch, int eventKey) {
+   public void keyPressed(char ch, int eventKey) {
       if (eventKey == 1) {
          this.backButtonClicked();
       } else if (eventKey == 28 || eventKey == 156) {
@@ -79,7 +79,7 @@ public class BackupLinkScreen extends RealmsScreen {
       Realms.setScreen(this.lastScreen);
    }
 
-   protected void mouseClicked(int x, int y, int buttonNum) {
+   public void mouseClicked(int x, int y, int buttonNum) {
       super.mouseClicked(x, y, buttonNum);
       this.linkBox.mouseClicked(x, y, buttonNum);
    }

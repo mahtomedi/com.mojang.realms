@@ -37,7 +37,7 @@ import org.lwjgl.opengl.GL11;
 
 public class RealmsMainScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
-   protected static final int CANCEL_BUTTON_ID = 0;
+   protected static final int BACK_BUTTON_ID = 0;
    protected static final int PLAY_BUTTON_ID = 1;
    protected static final int BUY_BUTTON_ID = 2;
    protected static final int CONFIGURE_BUTTON_ID = 3;
@@ -55,6 +55,7 @@ public class RealmsMainScreen extends RealmsScreen {
    private static final ThreadPoolExecutor THREAD_POOL = new ScheduledThreadPoolExecutor(
       5, new ThreadFactoryBuilder().setNameFormat("Server Pinger #%d").setDaemon(true).build()
    );
+   private static int lastScrollYPosition = -1;
    private RealmsScreen lastScreen;
    private volatile RealmsMainScreen.ServerSelectionList serverSelectionList;
    private long selectedServerId = -1L;
@@ -100,6 +101,10 @@ public class RealmsMainScreen extends RealmsScreen {
       this.buttonsAdd(newButton(0, this.width() / 2 + 58, this.height() - 28, 102, 20, getLocalizedString("gui.back")));
       this.serverSelectionList = new RealmsMainScreen.ServerSelectionList();
       this.serverSelectionList.updateSize(this.width(), this.height(), 32, this.height() - 64);
+      if (lastScrollYPosition != -1) {
+         this.serverSelectionList.scroll(lastScrollYPosition);
+      }
+
       McoServer server = this.findServer(this.selectedServerId);
       this.playButton.active(server != null && server.state == McoServer.State.OPEN && !server.expired);
       this.configureButton.active(server != null && server.state != McoServer.State.ADMIN_LOCK && server.owner.equals(Realms.getName()));
@@ -107,7 +112,6 @@ public class RealmsMainScreen extends RealmsScreen {
    }
 
    public void tick() {
-      super.tick();
       ++this.animTick;
       if (this.isMcoEnabled()) {
          realmsDataFetcher.init();
@@ -142,7 +146,7 @@ public class RealmsMainScreen extends RealmsScreen {
       Keyboard.enableRepeatEvents(false);
    }
 
-   protected void buttonClicked(RealmsButton button) {
+   public void buttonClicked(RealmsButton button) {
       if (button.active()) {
          if (button.id() == 1) {
             this.play(this.selectedServerId);
@@ -154,6 +158,7 @@ public class RealmsMainScreen extends RealmsScreen {
             this.stopRealmsFetcherAndPinger();
             Realms.setScreen(this.lastScreen);
          } else if (button.id() == 2) {
+            this.saveListScrollPosition();
             this.stopRealmsFetcherAndPinger();
             Realms.setScreen(new BuyRealmsScreen(this));
          } else if (button.id() == 4) {
@@ -243,25 +248,31 @@ public class RealmsMainScreen extends RealmsScreen {
    }
 
    private void configureClicked() {
-      McoServer editingServer = this.findServer(this.selectedServerId);
-      if (editingServer != null && Realms.getName().equals(editingServer.owner)) {
-         McoServer server = this.getOwnWorld(editingServer.id);
+      McoServer selectedServer = this.findServer(this.selectedServerId);
+      if (selectedServer != null && Realms.getName().equals(selectedServer.owner)) {
+         McoServer server = this.getOwnWorld(selectedServer.id);
          if (server != null) {
             this.stopRealmsFetcherAndPinger();
-            Realms.setScreen(new ConfigureWorldScreen(this, editingServer.id));
+            this.saveListScrollPosition();
+            Realms.setScreen(new ConfigureWorldScreen(this, selectedServer.id));
          }
       }
 
    }
 
    private void leaveClicked() {
-      McoServer editingServer = this.findServer(this.selectedServerId);
-      if (editingServer != null && !Realms.getName().equals(editingServer.owner)) {
+      McoServer selectedServer = this.findServer(this.selectedServerId);
+      if (selectedServer != null && !Realms.getName().equals(selectedServer.owner)) {
+         this.saveListScrollPosition();
          String line2 = getLocalizedString("mco.configure.world.leave.question.line1");
          String line3 = getLocalizedString("mco.configure.world.leave.question.line2");
          Realms.setScreen(new LongConfirmationScreen(this, LongConfirmationScreen.Type.Info, line2, line3, 5));
       }
 
+   }
+
+   private void saveListScrollPosition() {
+      lastScrollYPosition = this.serverSelectionList.getScroll();
    }
 
    private McoServer findServer(long id) {
@@ -345,14 +356,12 @@ public class RealmsMainScreen extends RealmsScreen {
       return null;
    }
 
-   protected void keyPressed(char ch, int eventKey) {
+   public void keyPressed(char ch, int eventKey) {
       if (eventKey == 28 || eventKey == 156) {
          this.buttonClicked(this.playButton);
       } else if (eventKey == 1) {
          this.stopRealmsFetcherAndPinger();
          Realms.setScreen(this.lastScreen);
-      } else {
-         super.keyPressed(ch, eventKey);
       }
 
    }
@@ -363,12 +372,12 @@ public class RealmsMainScreen extends RealmsScreen {
       this.serverSelectionList.render(xm, ym, a);
       this.drawRealmsLogo(this.width() / 2 - 50, 7);
       this.renderLink(xm, ym);
-      super.render(xm, ym, a);
       if (this.toolTip != null) {
          this.renderMousehoverTooltip(this.toolTip, xm, ym);
       }
 
       this.drawInvitationPendingIcon(xm, ym);
+      super.render(xm, ym, a);
    }
 
    private void drawRealmsLogo(int x, int y) {
@@ -380,8 +389,7 @@ public class RealmsMainScreen extends RealmsScreen {
       GL11.glPopMatrix();
    }
 
-   protected void mouseClicked(int x, int y, int buttonNum) {
-      super.mouseClicked(x, y, buttonNum);
+   public void mouseClicked(int x, int y, int buttonNum) {
       if (this.inPendingInvitationArea(x, y) && this.numberOfPendingInvites != 0) {
          this.stopRealmsFetcherAndPinger();
          PendingInvitationScreen pendingInvitationScreen = new PendingInvitationScreen(this.lastScreen);

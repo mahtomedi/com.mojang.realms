@@ -26,14 +26,14 @@ public class ClientOutdatedScreen extends RealmsScreen {
       super.render(xm, ym, a);
    }
 
-   protected void buttonClicked(RealmsButton button) {
+   public void buttonClicked(RealmsButton button) {
       if (button.id() == 0) {
          Realms.setScreen(this.lastScreen);
       }
 
    }
 
-   protected void keyPressed(char eventCharacter, int eventKey) {
+   public void keyPressed(char eventCharacter, int eventKey) {
       if (eventKey == 28 || eventKey == 156 || eventKey == 1) {
          Realms.setScreen(this.lastScreen);
       }

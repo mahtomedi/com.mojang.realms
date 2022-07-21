@@ -152,7 +152,7 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
       }
    }
 
-   protected void keyPressed(char ch, int eventKey) {
+   public void keyPressed(char ch, int eventKey) {
       if (eventKey == 1) {
          this.backButtonClicked();
       }
@@ -300,7 +300,7 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
       this.serverData.players.remove(selectedInvitedIndex);
    }
 
-   protected void mouseClicked(int x, int y, int buttonNum) {
+   public void mouseClicked(int x, int y, int buttonNum) {
       if (this.closeButtonHovered && !this.serverData.expired) {
          this.openTheWorld();
       } else if (this.openButtonHovered && !this.serverData.expired) {

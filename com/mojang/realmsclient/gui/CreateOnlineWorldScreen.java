@@ -66,7 +66,7 @@ public class CreateOnlineWorldScreen extends ScreenWithCallback<WorldTemplate> {
       Keyboard.enableRepeatEvents(false);
    }
 
-   protected void buttonClicked(RealmsButton button) {
+   public void buttonClicked(RealmsButton button) {
       if (button.active()) {
          if (button.id() == CANCEL_BUTTON) {
             Realms.setScreen(this.lastScreen);
@@ -79,7 +79,7 @@ public class CreateOnlineWorldScreen extends ScreenWithCallback<WorldTemplate> {
       }
    }
 
-   protected void keyPressed(char ch, int eventKey) {
+   public void keyPressed(char ch, int eventKey) {
       this.nameBox.keyPressed(ch, eventKey);
       if (eventKey == 15) {
          this.nameBox.setFocus(!this.nameBox.isFocused());
@@ -112,7 +112,7 @@ public class CreateOnlineWorldScreen extends ScreenWithCallback<WorldTemplate> {
       return !this.error;
    }
 
-   protected void mouseClicked(int x, int y, int buttonNum) {
+   public void mouseClicked(int x, int y, int buttonNum) {
       super.mouseClicked(x, y, buttonNum);
       this.nameBox.mouseClicked(x, y, buttonNum);
    }

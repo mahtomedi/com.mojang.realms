@@ -73,7 +73,7 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
       Keyboard.enableRepeatEvents(false);
    }
 
-   protected void buttonClicked(RealmsButton button) {
+   public void buttonClicked(RealmsButton button) {
       if (button.active()) {
          if (button.id() == 1) {
             Realms.setScreen(this.lastScreen);
@@ -103,7 +103,7 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
       super.render(xm, ym, a);
    }
 
-   protected void keyPressed(char eventCharacter, int eventKey) {
+   public void keyPressed(char eventCharacter, int eventKey) {
    }
 
    public void mouseEvent() {
@@ -125,26 +125,26 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
          );
       }
 
-      protected int getItemCount() {
+      public int getItemCount() {
          return RealmsSelectFileToUploadScreen.this.levelList.size();
       }
 
-      protected void selectItem(int item, boolean doubleClick, int xMouse, int yMouse) {
+      public void selectItem(int item, boolean doubleClick, int xMouse, int yMouse) {
          RealmsSelectFileToUploadScreen.this.selectedWorld = item;
          RealmsSelectFileToUploadScreen.this.uploadButton
             .active(RealmsSelectFileToUploadScreen.this.selectedWorld >= 0 && RealmsSelectFileToUploadScreen.this.selectedWorld < this.getItemCount());
          RealmsSelectFileToUploadScreen.this.errorMessage = null;
       }
 
-      protected boolean isSelectedItem(int item) {
+      public boolean isSelectedItem(int item) {
          return item == RealmsSelectFileToUploadScreen.this.selectedWorld;
       }
 
-      protected int getMaxPosition() {
+      public int getMaxPosition() {
          return RealmsSelectFileToUploadScreen.this.levelList.size() * 36;
       }
 
-      protected void renderBackground() {
+      public void renderBackground() {
          RealmsSelectFileToUploadScreen.this.renderBackground();
       }
 

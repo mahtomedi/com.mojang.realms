@@ -55,7 +55,7 @@ public class BuyRealmsScreen extends RealmsScreen {
       Keyboard.enableRepeatEvents(false);
    }
 
-   protected void buttonClicked(RealmsButton button) {
+   public void buttonClicked(RealmsButton button) {
       if (button.active()) {
          if (button.id() == BACK_BUTTON_ID) {
             Realms.setScreen(this.lastScreen);
@@ -64,14 +64,14 @@ public class BuyRealmsScreen extends RealmsScreen {
       }
    }
 
-   protected void keyPressed(char ch, int eventKey) {
+   public void keyPressed(char ch, int eventKey) {
       if (eventKey == 1) {
          Realms.setScreen(this.lastScreen);
       }
 
    }
 
-   protected void mouseClicked(int x, int y, int buttonNum) {
+   public void mouseClicked(int x, int y, int buttonNum) {
       super.mouseClicked(x, y, buttonNum);
       if (this.onLink) {
          Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();

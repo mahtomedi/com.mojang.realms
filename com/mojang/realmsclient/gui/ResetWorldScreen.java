@@ -4,6 +4,7 @@ import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.McoServer;
 import com.mojang.realmsclient.dto.WorldTemplate;
 import com.mojang.realmsclient.exception.RealmsServiceException;
+import com.mojang.realmsclient.exception.RetryCallException;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsEditBox;
@@ -77,7 +78,7 @@ public class ResetWorldScreen extends ScreenWithCallback<WorldTemplate> {
       Keyboard.enableRepeatEvents(false);
    }
 
-   protected void keyPressed(char ch, int eventKey) {
+   public void keyPressed(char ch, int eventKey) {
       this.seedEdit.keyPressed(ch, eventKey);
       if (eventKey == 28 || eventKey == 156) {
          this.buttonClicked(this.resetButton);
@@ -89,7 +90,7 @@ public class ResetWorldScreen extends ScreenWithCallback<WorldTemplate> {
 
    }
 
-   protected void buttonClicked(RealmsButton button) {
+   public void buttonClicked(RealmsButton button) {
       if (button.active()) {
          if (button.id() == 2) {
             Realms.setScreen(this.worldManagementScreen);
@@ -128,7 +129,7 @@ public class ResetWorldScreen extends ScreenWithCallback<WorldTemplate> {
       Realms.setScreen(longRunningMcoTaskScreen);
    }
 
-   protected void mouseClicked(int x, int y, int buttonNum) {
+   public void mouseClicked(int x, int y, int buttonNum) {
       super.mouseClicked(x, y, buttonNum);
       this.seedEdit.mouseClicked(x, y, buttonNum);
    }
@@ -176,38 +177,60 @@ public class ResetWorldScreen extends ScreenWithCallback<WorldTemplate> {
          RealmsClient client = RealmsClient.createRealmsClient();
          String title = RealmsScreen.getLocalizedString("mco.reset.world.resetting.screen.title");
          this.setTitle(title);
+         int i = 0;
 
-         try {
-            if (this.aborted()) {
-               return;
-            }
+         while(i < 6) {
+            try {
+               if (this.aborted()) {
+                  return;
+               }
 
-            if (this.worldTemplate != null) {
-               client.resetWorldWithTemplate(this.worldId, this.worldTemplate.id);
+               if (this.worldTemplate != null) {
+                  client.resetWorldWithTemplate(this.worldId, this.worldTemplate.id);
+                  Realms.setScreen(new ConfigureWorldScreen(ResetWorldScreen.this.onlineScreen, this.worldId));
+                  return;
+               }
+
+               client.resetWorldWithSeed(this.worldId, this.seed, this.levelType, this.generateStructures);
+               if (this.aborted()) {
+                  return;
+               }
+
                Realms.setScreen(new ConfigureWorldScreen(ResetWorldScreen.this.onlineScreen, this.worldId));
                return;
-            }
+            } catch (RetryCallException var5) {
+               if (this.aborted()) {
+                  return;
+               }
 
-            client.resetWorldWithSeed(this.worldId, this.seed, this.levelType, this.generateStructures);
-            if (this.aborted()) {
+               this.pause(var5.delaySeconds);
+               ++i;
+            } catch (RealmsServiceException var6) {
+               if (this.aborted()) {
+                  return;
+               }
+
+               ResetWorldScreen.LOGGER.error("Couldn't reset world");
+               this.error(var6.toString());
+               return;
+            } catch (Exception var7) {
+               if (this.aborted()) {
+                  return;
+               }
+
+               ResetWorldScreen.LOGGER.error("Couldn't reset world");
+               this.error(var7.toString());
                return;
             }
+         }
 
-            Realms.setScreen(new ConfigureWorldScreen(ResetWorldScreen.this.onlineScreen, this.worldId));
-         } catch (RealmsServiceException var4) {
-            if (this.aborted()) {
-               return;
-            }
+      }
 
-            ResetWorldScreen.LOGGER.error("Couldn't reset world");
-            this.error(var4.toString());
-         } catch (Exception var5) {
-            if (this.aborted()) {
-               return;
-            }
-
-            ResetWorldScreen.LOGGER.error("Couldn't reset world");
-            this.error(var5.toString());
+      private void pause(int pauseTimeSeconds) {
+         try {
+            Thread.sleep((long)(pauseTimeSeconds * 1000));
+         } catch (InterruptedException var3) {
+            ResetWorldScreen.LOGGER.error(var3);
          }
 
       }

@@ -93,6 +93,13 @@ public abstract class MCRSelectionList {
       return x >= x0 && x <= x1 && slot >= 0 && clickSlotPos >= 0 && slot < this.getNumberOfItems() ? slot : -1;
    }
 
+   public void scrollToItem(int itemIndex) {
+      if (itemIndex >= 0) {
+         int yo = this.headerHeight + itemIndex * this.itemHeight;
+         this.scroll(yo);
+      }
+   }
+
    private void capYPosition() {
       int max = this.getMaxScroll();
       if (max < 0) {

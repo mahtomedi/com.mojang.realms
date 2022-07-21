@@ -46,7 +46,7 @@ public class RealmsTermsScreen extends RealmsScreen {
       Keyboard.enableRepeatEvents(false);
    }
 
-   protected void buttonClicked(RealmsButton button) {
+   public void buttonClicked(RealmsButton button) {
       if (button.active()) {
          if (button.id() == 2) {
             Realms.setScreen(this.lastScreen);
@@ -57,7 +57,7 @@ public class RealmsTermsScreen extends RealmsScreen {
       }
    }
 
-   protected void keyPressed(char eventCharacter, int eventKey) {
+   public void keyPressed(char eventCharacter, int eventKey) {
       if (eventKey == 1) {
          Realms.setScreen(this.lastScreen);
       }
@@ -80,7 +80,7 @@ public class RealmsTermsScreen extends RealmsScreen {
 
    }
 
-   protected void mouseClicked(int x, int y, int buttonNum) {
+   public void mouseClicked(int x, int y, int buttonNum) {
       super.mouseClicked(x, y, buttonNum);
       if (this.onLink) {
          Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();

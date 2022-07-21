@@ -25,10 +25,10 @@ public class RealmsErrorScreen extends RealmsScreen {
       super.render(xm, ym, a);
    }
 
-   protected void keyPressed(char eventCharacter, int eventKey) {
+   public void keyPressed(char eventCharacter, int eventKey) {
    }
 
-   protected void buttonClicked(RealmsButton button) {
+   public void buttonClicked(RealmsButton button) {
       Realms.setScreen(null);
    }
 }

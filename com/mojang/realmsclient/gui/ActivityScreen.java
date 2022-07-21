@@ -166,7 +166,7 @@ public class ActivityScreen extends RealmsScreen {
       super.tick();
    }
 
-   protected void buttonClicked(RealmsButton button) {
+   public void buttonClicked(RealmsButton button) {
       if (button.id() == 1) {
          Realms.setScreen(this.lastScreen);
       }
@@ -293,18 +293,18 @@ public class ActivityScreen extends RealmsScreen {
          super(ActivityScreen.this.width(), ActivityScreen.this.height(), 30, ActivityScreen.this.height() - 40, ActivityScreen.this.fontLineHeight() + 1);
       }
 
-      protected int getItemCount() {
+      public int getItemCount() {
          return ActivityScreen.this.activityMap.size();
       }
 
-      protected void selectItem(int item, boolean doubleClick, int xMouse, int yMouse) {
+      public void selectItem(int item, boolean doubleClick, int xMouse, int yMouse) {
       }
 
-      protected boolean isSelectedItem(int item) {
+      public boolean isSelectedItem(int item) {
          return false;
       }
 
-      protected void renderBackground() {
+      public void renderBackground() {
       }
 
       protected void renderItem(int i, int x, int y, int h, Tezzelator t, int mouseX, int mouseY) {
@@ -427,7 +427,7 @@ public class ActivityScreen extends RealmsScreen {
 
       }
 
-      protected int getScrollbarPosition() {
+      public int getScrollbarPosition() {
          return this.width() - 10;
       }
    }

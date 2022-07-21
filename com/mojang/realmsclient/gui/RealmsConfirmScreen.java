@@ -35,7 +35,7 @@ public class RealmsConfirmScreen extends RealmsScreen {
       this.buttonsAdd(newButton(1, this.width() / 2 + 5, this.height() / 6 + 96, 100, 20, this.noButton));
    }
 
-   protected void buttonClicked(RealmsButton button) {
+   public void buttonClicked(RealmsButton button) {
       this.parent.confirmResult(button.id() == 0, this.id);
    }
 

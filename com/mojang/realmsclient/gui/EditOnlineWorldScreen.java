@@ -67,7 +67,7 @@ public class EditOnlineWorldScreen extends RealmsScreen implements RealmsConfirm
       Keyboard.enableRepeatEvents(false);
    }
 
-   protected void buttonClicked(RealmsButton button) {
+   public void buttonClicked(RealmsButton button) {
       if (button.active()) {
          if (button.id() == 1) {
             Realms.setScreen(this.configureWorldScreen);
@@ -86,7 +86,7 @@ public class EditOnlineWorldScreen extends RealmsScreen implements RealmsConfirm
       this.serverData.setMotd(this.descEdit.getValue());
    }
 
-   protected void keyPressed(char ch, int eventKey) {
+   public void keyPressed(char ch, int eventKey) {
       this.nameEdit.keyPressed(ch, eventKey);
       this.descEdit.keyPressed(ch, eventKey);
       if (eventKey == 15) {
@@ -122,7 +122,7 @@ public class EditOnlineWorldScreen extends RealmsScreen implements RealmsConfirm
 
    }
 
-   protected void mouseClicked(int x, int y, int buttonNum) {
+   public void mouseClicked(int x, int y, int buttonNum) {
       super.mouseClicked(x, y, buttonNum);
       this.descEdit.mouseClicked(x, y, buttonNum);
       this.nameEdit.mouseClicked(x, y, buttonNum);

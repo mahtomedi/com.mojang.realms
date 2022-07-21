@@ -50,7 +50,7 @@ public class InviteScreen extends RealmsScreen {
       Keyboard.enableRepeatEvents(false);
    }
 
-   protected void buttonClicked(RealmsButton button) {
+   public void buttonClicked(RealmsButton button) {
       if (button.active()) {
          if (button.id() == 1) {
             Realms.setScreen(this.configureScreen);
@@ -85,7 +85,7 @@ public class InviteScreen extends RealmsScreen {
       this.errorMsg = errorMsg;
    }
 
-   protected void keyPressed(char ch, int eventKey) {
+   public void keyPressed(char ch, int eventKey) {
       this.profileName.keyPressed(ch, eventKey);
       if (eventKey == 15) {
          if (this.profileName.isFocused()) {
@@ -105,7 +105,7 @@ public class InviteScreen extends RealmsScreen {
 
    }
 
-   protected void mouseClicked(int x, int y, int buttonNum) {
+   public void mouseClicked(int x, int y, int buttonNum) {
       super.mouseClicked(x, y, buttonNum);
       this.profileName.mouseClicked(x, y, buttonNum);
    }

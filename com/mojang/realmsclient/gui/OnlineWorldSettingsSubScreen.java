@@ -46,7 +46,7 @@ public class OnlineWorldSettingsSubScreen extends RealmsScreen {
       Keyboard.enableRepeatEvents(false);
    }
 
-   protected void buttonClicked(RealmsButton button) {
+   public void buttonClicked(RealmsButton button) {
       if (button.active()) {
          if (button.id() == 0) {
             this.parent
@@ -79,7 +79,7 @@ public class OnlineWorldSettingsSubScreen extends RealmsScreen {
       }
    }
 
-   protected void keyPressed(char eventCharacter, int eventKey) {
+   public void keyPressed(char eventCharacter, int eventKey) {
       if (eventKey == 1) {
          this.parent.confirmResult(false, 1);
       }
@@ -192,13 +192,17 @@ public class OnlineWorldSettingsSubScreen extends RealmsScreen {
       this.drawString(this.gameModeHints[this.gameModeIndex][1], this.column1_x + 2, this.height() / 4 + 96 + 2 + this.fontLineHeight(), 10526880);
    }
 
+   public void mouseReleased(int x, int y, int buttonNum) {
+      this.spawnProtectionButton.released(x, y);
+   }
+
+   public void mouseDragged(int x, int y, int buttonNum, long delta) {
+      this.spawnProtectionButton.clicked(x, y);
+   }
+
    private class SettingsSlider extends RealmsSliderButton {
       public SettingsSlider(int id, int x, int y, int width, int steps, int currentValue, float minValue, float maxValue) {
          super(id, x, y, width, steps, currentValue, minValue, maxValue);
-      }
-
-      public void released(int mx, int my) {
-         super.released(mx, my);
       }
 
       public String getMessage() {

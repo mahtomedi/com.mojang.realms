@@ -64,7 +64,7 @@ public class McoWorldTemplateScreen extends RealmsScreen {
       super.tick();
    }
 
-   protected void buttonClicked(RealmsButton button) {
+   public void buttonClicked(RealmsButton button) {
       if (button.active()) {
          if (button.id() == 1) {
             this.selectTemplate();
@@ -77,7 +77,7 @@ public class McoWorldTemplateScreen extends RealmsScreen {
       }
    }
 
-   protected void keyPressed(char eventCharacter, int eventKey) {
+   public void keyPressed(char eventCharacter, int eventKey) {
       if (eventKey == 1) {
          this.backButtonClicked();
       }

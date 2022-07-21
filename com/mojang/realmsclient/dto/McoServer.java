@@ -1,5 +1,6 @@
 package com.mojang.realmsclient.dto;
 
+import com.google.common.collect.ComparisonChain;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -225,25 +226,13 @@ public class McoServer extends ValueObject {
       }
 
       public int compare(McoServer server1, McoServer server2) {
-         if (server1.owner.equals(server2.owner)) {
-            if (server1.state == McoServer.State.UNINITIALIZED) {
-               return -1;
-            } else {
-               return server2.state == McoServer.State.UNINITIALIZED ? 1 : (int)(server2.id - server1.id);
-            }
-         } else if (server1.owner.equals(this.refOwner)) {
-            return -1;
-         } else if (server2.owner.equals(this.refOwner)) {
-            return 1;
-         } else if (server1.state != McoServer.State.CLOSED && server2.state != McoServer.State.CLOSED) {
-            if (server1.id < server2.id) {
-               return 1;
-            } else {
-               return server1.id > server2.id ? -1 : 0;
-            }
-         } else {
-            return server1.state == McoServer.State.CLOSED ? 1 : 0;
-         }
+         return ComparisonChain.start()
+            .compareTrueFirst(server1.state.equals(McoServer.State.UNINITIALIZED), server2.state.equals(McoServer.State.UNINITIALIZED))
+            .compareFalseFirst(server1.expired, server2.expired)
+            .compareTrueFirst(server1.owner.equals(this.refOwner), server2.owner.equals(this.refOwner))
+            .compareTrueFirst(server1.state.equals(McoServer.State.OPEN), server2.state.equals(McoServer.State.OPEN))
+            .compare(server1.id, server2.id)
+            .result();
       }
    }
 

@@ -49,7 +49,7 @@ public class StartMinigameWorldScreen extends ScreenWithCallback<WorldTemplate> 
       Keyboard.enableRepeatEvents(false);
    }
 
-   protected void keyPressed(char ch, int eventKey) {
+   public void keyPressed(char ch, int eventKey) {
       if (eventKey == 28 || eventKey == 156) {
          this.buttonClicked(this.startButton);
       }
@@ -60,7 +60,7 @@ public class StartMinigameWorldScreen extends ScreenWithCallback<WorldTemplate> 
 
    }
 
-   protected void buttonClicked(RealmsButton button) {
+   public void buttonClicked(RealmsButton button) {
       if (button.active()) {
          if (button.id() == 2) {
             Realms.setScreen(this.lastScreen);
@@ -82,7 +82,7 @@ public class StartMinigameWorldScreen extends ScreenWithCallback<WorldTemplate> 
       Realms.setScreen(longRunningMcoTaskScreen);
    }
 
-   protected void mouseClicked(int x, int y, int buttonNum) {
+   public void mouseClicked(int x, int y, int buttonNum) {
       super.mouseClicked(x, y, buttonNum);
    }
 

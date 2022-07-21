@@ -4,6 +4,7 @@ import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.Backup;
 import com.mojang.realmsclient.dto.McoServer;
 import com.mojang.realmsclient.exception.RealmsServiceException;
+import com.mojang.realmsclient.exception.RetryCallException;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -25,6 +26,7 @@ public class WorldManagementScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
    private static final String PLUS_ICON_LOCATION = "textures/gui/realms/plus_icon.png";
    private static final String RESTORE_ICON_LOCATION = "textures/gui/realms/restore_icon.png";
+   private static int lastScrollPosition = -1;
    private final ConfigureWorldScreen lastScreen;
    private final RealmsScreen onlineScreen;
    private List<Backup> backups = Collections.emptyList();
@@ -54,6 +56,10 @@ public class WorldManagementScreen extends RealmsScreen {
       Keyboard.enableRepeatEvents(true);
       this.buttonsClear();
       this.backupSelectionList = new WorldManagementScreen.BackupSelectionList();
+      if (lastScrollPosition != -1) {
+         this.backupSelectionList.scroll(lastScrollPosition);
+      }
+
       (new Thread("Realms-fetch-backups") {
          public void run() {
             RealmsClient client = RealmsClient.createRealmsClient();
@@ -111,7 +117,7 @@ public class WorldManagementScreen extends RealmsScreen {
       super.tick();
    }
 
-   protected void buttonClicked(RealmsButton button) {
+   public void buttonClicked(RealmsButton button) {
       if (button.active()) {
          if (button.id() == 0) {
             Realms.setScreen(this.lastScreen);
@@ -126,7 +132,7 @@ public class WorldManagementScreen extends RealmsScreen {
       }
    }
 
-   protected void keyPressed(char eventCharacter, int eventKey) {
+   public void keyPressed(char eventCharacter, int eventKey) {
       if (eventKey == 1) {
          Realms.setScreen(this.lastScreen);
       }
@@ -326,11 +332,13 @@ public class WorldManagementScreen extends RealmsScreen {
          int my = infoy - 3;
          if (xm >= infox && xm <= infox + 9 && ym >= infoy && ym <= infoy + 9) {
             if (!((Backup)WorldManagementScreen.this.backups.get(WorldManagementScreen.this.selectedBackup)).changeList.isEmpty()) {
+               WorldManagementScreen.lastScrollPosition = this.getScroll();
                Realms.setScreen(
                   new BackupInfoScreen(WorldManagementScreen.this, (Backup)WorldManagementScreen.this.backups.get(WorldManagementScreen.this.selectedBackup))
                );
             }
          } else if (xm >= mx && xm <= mx + 9 && ym >= my && ym <= my + 9) {
+            WorldManagementScreen.lastScrollPosition = this.getScroll();
             WorldManagementScreen.this.restoreClicked();
          }
 
@@ -400,40 +408,56 @@ public class WorldManagementScreen extends RealmsScreen {
 
       public void run() {
          this.setTitle(RealmsScreen.getLocalizedString("mco.backup.restoring"));
+         int i = 0;
 
-         try {
-            if (this.aborted()) {
-               return;
-            }
-
-            RealmsClient client = RealmsClient.createRealmsClient();
-            client.restoreWorld(WorldManagementScreen.this.serverData.id, this.backup.backupId);
-
+         while(i < 6) {
             try {
-               Thread.sleep(1000L);
-            } catch (InterruptedException var3) {
-               Thread.currentThread().interrupt();
-            }
+               if (this.aborted()) {
+                  return;
+               }
 
-            if (this.aborted()) {
+               RealmsClient client = RealmsClient.createRealmsClient();
+               client.restoreWorld(WorldManagementScreen.this.serverData.id, this.backup.backupId);
+               this.pause(1);
+               if (this.aborted()) {
+                  return;
+               }
+
+               Realms.setScreen(WorldManagementScreen.this.lastScreen);
+               return;
+            } catch (RetryCallException var3) {
+               if (this.aborted()) {
+                  return;
+               }
+
+               this.pause(var3.delaySeconds);
+               ++i;
+            } catch (RealmsServiceException var4) {
+               if (this.aborted()) {
+                  return;
+               }
+
+               WorldManagementScreen.LOGGER.error("Couldn't restore backup");
+               Realms.setScreen(new RealmsGenericErrorScreen(var4, WorldManagementScreen.this.lastScreen));
+               return;
+            } catch (Exception var5) {
+               if (this.aborted()) {
+                  return;
+               }
+
+               WorldManagementScreen.LOGGER.error("Couldn't restore backup");
+               this.error(var5.getLocalizedMessage());
                return;
             }
+         }
 
-            Realms.setScreen(WorldManagementScreen.this.lastScreen);
-         } catch (RealmsServiceException var4) {
-            if (this.aborted()) {
-               return;
-            }
+      }
 
-            WorldManagementScreen.LOGGER.error("Couldn't restore backup");
-            Realms.setScreen(new RealmsGenericErrorScreen(var4, WorldManagementScreen.this.lastScreen));
-         } catch (Exception var5) {
-            if (this.aborted()) {
-               return;
-            }
-
-            WorldManagementScreen.LOGGER.error("Couldn't restore backup");
-            this.error(var5.getLocalizedMessage());
+      private void pause(int pauseSeconds) {
+         try {
+            Thread.sleep((long)(pauseSeconds * 1000));
+         } catch (InterruptedException var3) {
+            WorldManagementScreen.LOGGER.error(var3);
          }
 
       }

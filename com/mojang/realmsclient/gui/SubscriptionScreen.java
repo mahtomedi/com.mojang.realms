@@ -73,7 +73,7 @@ public class SubscriptionScreen extends RealmsScreen {
       Keyboard.enableRepeatEvents(false);
    }
 
-   protected void buttonClicked(RealmsButton button) {
+   public void buttonClicked(RealmsButton button) {
       if (button.active()) {
          if (button.id() == 0) {
             Realms.setScreen(this.lastScreen);
@@ -82,7 +82,7 @@ public class SubscriptionScreen extends RealmsScreen {
       }
    }
 
-   protected void keyPressed(char ch, int eventKey) {
+   public void keyPressed(char ch, int eventKey) {
       if (eventKey == 1) {
          Realms.setScreen(this.lastScreen);
       }
@@ -107,7 +107,7 @@ public class SubscriptionScreen extends RealmsScreen {
 
    }
 
-   protected void mouseClicked(int x, int y, int buttonNum) {
+   public void mouseClicked(int x, int y, int buttonNum) {
       super.mouseClicked(x, y, buttonNum);
       if (this.onLink) {
          String extensionUrl = "https://account.mojang.com/buy/realms?sid=" + this.serverData.remoteSubscriptionId + "&pid=" + this.getProfileUuid();

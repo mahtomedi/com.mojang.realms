@@ -46,7 +46,7 @@ public class RealmsGenericErrorScreen extends RealmsScreen {
       super.tick();
    }
 
-   protected void buttonClicked(RealmsButton button) {
+   public void buttonClicked(RealmsButton button) {
       if (button.id() == 10) {
          Realms.setScreen(this.nextScreen);
       }

@@ -56,7 +56,7 @@ public class LongRunningMcoTaskScreen extends RealmsScreen implements ErrorCallb
       this.task.tick();
    }
 
-   protected void keyPressed(char eventCharacter, int eventKey) {
+   public void keyPressed(char eventCharacter, int eventKey) {
       if (eventKey == 1) {
          this.cancelOrBackButtonClicked();
       }
@@ -68,7 +68,7 @@ public class LongRunningMcoTaskScreen extends RealmsScreen implements ErrorCallb
       this.buttonsAdd(newButton(666, this.width() / 2 - this.buttonLength / 2, this.height() / 2 + 50, this.buttonLength, 20, getLocalizedString("gui.cancel")));
    }
 
-   protected void buttonClicked(RealmsButton button) {
+   public void buttonClicked(RealmsButton button) {
       if (button.id() == 666 || button.id() == 667) {
          this.cancelOrBackButtonClicked();
       }

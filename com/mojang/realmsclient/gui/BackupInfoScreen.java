@@ -39,7 +39,7 @@ public class BackupInfoScreen extends RealmsScreen {
       Keyboard.enableRepeatEvents(false);
    }
 
-   protected void buttonClicked(RealmsButton button) {
+   public void buttonClicked(RealmsButton button) {
       if (button.active()) {
          if (button.id() == 0) {
             Realms.setScreen(this.lastScreen);
@@ -48,7 +48,7 @@ public class BackupInfoScreen extends RealmsScreen {
       }
    }
 
-   protected void keyPressed(char ch, int eventKey) {
+   public void keyPressed(char ch, int eventKey) {
       if (eventKey == 1) {
          Realms.setScreen(this.lastScreen);
       }

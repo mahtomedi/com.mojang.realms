@@ -20,10 +20,10 @@ mco.selectServer.create=Create Realm
 mco.selectServer.buy=Buy Realm
 mco.selectServer.whatisrealms=What is Realms?
 
-mco.selectServer.expired=Expired Server
-mco.selectServer.open=Open Server
-mco.selectServer.closed=Closed Server
-mco.selectServer.locked=Locked Server
+mco.selectServer.expired=Expired Realm
+mco.selectServer.open=Open Realm
+mco.selectServer.closed=Closed Realm
+mco.selectServer.locked=Locked Realm
 
 mco.selectServer.openserver=Open Server
 mco.selectServer.closeserver=Close Server
@@ -37,7 +37,7 @@ mco.selectServer.expires.soon=Expires soon
 
 mco.configure.world.settings.title=Settings
 
-mco.configure.world.title=Configure Realm
+mco.configure.world.title=Configure Realm:
 mco.configure.worlds.title=Worlds
 mco.configure.world.name=Name
 mco.configure.world.description=Description
@@ -60,13 +60,16 @@ mco.configure.world.invites.ops.tooltip=Operator
 mco.configure.world.invites.normal.tooltip=Normal user
 mco.configure.world.invites.remove.tooltip=Remove
 
+mco.configure.world.buttons.open=Open Realm
+mco.configure.world.buttons.close=Close Realm
+
 mco.configure.world.buttons.players=Players
 mco.configure.world.buttons.settings=Settings
 mco.configure.world.buttons.subscription=Subscription
 
-mco.configure.world.buttons.options=Options
-mco.configure.world.backup=Backups
-mco.configure.world.buttons.resetworld=Reset
+mco.configure.world.buttons.options=World options
+mco.configure.world.backup=World backups
+mco.configure.world.buttons.resetworld=Reset world
 
 mco.configure.world.buttons.switchminigame=Switch Minigame
 mco.configure.current.minigame=Current
@@ -131,6 +134,9 @@ mco.configure.world.close.question.line2=Are you sure you want to do this?
 
 mco.configure.world.leave.question.line1=If you leave this realm you won't see it unless invited again
 mco.configure.world.leave.question.line2=Are you sure you want to do this?
+
+mco.configure.world.resourcepack.question.line1=This realm requires a custom resource pack.
+mco.configure.world.resourcepack.question.line2=Do you want to automatically download and install it to play?
 
 mco.configure.world.reset.question.line1=Your world will be regenerated and your current world will be lost
 mco.configure.world.reset.question.line2=Are you sure you want to do this?

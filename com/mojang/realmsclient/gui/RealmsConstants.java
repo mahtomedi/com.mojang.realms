@@ -4,6 +4,7 @@ public class RealmsConstants {
    public static final String GUI_ICONS_LOCATION = "textures/gui/icons.png";
    public static final int TITLE_HEIGHT = 17;
    public static final int COMPONENT_HEIGHT = 20;
+   public static final int EXPIRATION_NOTIFICATION_DAYS = 7;
    public static final int COLOR_WHITE = 16777215;
    public static final int COLOR_GRAY = 10526880;
    public static final int COLOR_DARK_GRAY = 5000268;

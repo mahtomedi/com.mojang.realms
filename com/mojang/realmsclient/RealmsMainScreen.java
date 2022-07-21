@@ -52,6 +52,8 @@ public class RealmsMainScreen extends RealmsScreen {
    protected static final int BUTTON_CONFIGURE_ID = 2;
    protected static final int BUTTON_LEAVE_ID = 3;
    protected static final int BUTTON_BUY_ID = 4;
+   protected static final int RESOURCEPACK_ID = 100;
+   private RealmsServer resourcePackServer;
    private static final String ON_ICON_LOCATION = "realms:textures/gui/realms/on_icon.png";
    private static final String OFF_ICON_LOCATION = "realms:textures/gui/realms/off_icon.png";
    private static final String EXPIRED_ICON_LOCATION = "realms:textures/gui/realms/expired_icon.png";
@@ -76,7 +78,6 @@ public class RealmsMainScreen extends RealmsScreen {
    private List<RealmsServer> realmsServers = Lists.newArrayList();
    private static final String mcoInfoUrl = "https://minecraft.net/realms";
    private volatile int numberOfPendingInvites = 0;
-   public static final int EXPIRATION_NOTIFICATION_DAYS = 7;
    private int animTick;
    private static volatile boolean mcoEnabled;
    private static volatile boolean mcoEnabledCheck;
@@ -233,7 +234,7 @@ public class RealmsMainScreen extends RealmsScreen {
                Realms.setScreen(this.lastScreen);
                break;
             case 1:
-               this.play(this.selectedServerId);
+               this.play(this.findServer(this.selectedServerId));
                break;
             case 2:
                this.configureClicked();
@@ -483,9 +484,15 @@ public class RealmsMainScreen extends RealmsScreen {
 
             }
          }).start();
+         Realms.setScreen(this);
+      } else if (id == 100) {
+         if (!result) {
+            Realms.setScreen(this);
+         } else {
+            this.connectToServer(this.resourcePackServer);
+         }
       }
 
-      Realms.setScreen(this);
    }
 
    private void updateSelectedItemPointer() {
@@ -654,16 +661,27 @@ public class RealmsMainScreen extends RealmsScreen {
       return x1 <= xm && xm <= x2 && y1 <= ym && ym <= y2;
    }
 
-   private void play(long serverId) {
-      RealmsServer server = this.findServer(serverId);
+   public void play(RealmsServer server) {
       if (server != null) {
          this.stopRealmsFetcherAndPinger();
          this.dontSetConnectedToRealms = true;
-         RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(this, new RealmsConnectTask(this, server));
-         longRunningMcoTaskScreen.start();
-         Realms.setScreen(longRunningMcoTaskScreen);
+         if (server.resourcePackUrl != null && server.resourcePackHash != null) {
+            this.resourcePackServer = server;
+            this.saveListScrollPosition();
+            String line2 = getLocalizedString("mco.configure.world.resourcepack.question.line1");
+            String line3 = getLocalizedString("mco.configure.world.resourcepack.question.line2");
+            Realms.setScreen(new RealmsLongConfirmationScreen(this, RealmsLongConfirmationScreen.Type.Info, line2, line3, true, 100));
+         } else {
+            this.connectToServer(server);
+         }
       }
 
+   }
+
+   private void connectToServer(RealmsServer server) {
+      RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(this, new RealmsConnectTask(this, server));
+      longRunningMcoTaskScreen.start();
+      Realms.setScreen(longRunningMcoTaskScreen);
    }
 
    private boolean isSelfOwnedServer(RealmsServer serverData) {
@@ -832,18 +850,25 @@ public class RealmsMainScreen extends RealmsScreen {
 
          if (item < RealmsMainScreen.this.realmsServers.size()) {
             RealmsServer server = (RealmsServer)RealmsMainScreen.this.realmsServers.get(item);
-            RealmsMainScreen.this.selectedServerId = server.id;
             if (server.state == RealmsServer.State.UNINITIALIZED) {
+               RealmsMainScreen.this.selectedServerId = -1L;
                RealmsMainScreen.this.stopRealmsFetcherAndPinger();
                Realms.setScreen(new RealmsCreateRealmsWorldScreen(server.id, RealmsMainScreen.this));
+            } else {
+               RealmsMainScreen.this.selectedServerId = server.id;
             }
 
             RealmsMainScreen.this.configureButton
-               .active(RealmsMainScreen.overrideConfigure || RealmsMainScreen.this.isSelfOwnedServer(server) && server.state != RealmsServer.State.ADMIN_LOCK);
+               .active(
+                  RealmsMainScreen.overrideConfigure
+                     || RealmsMainScreen.this.isSelfOwnedServer(server)
+                        && server.state != RealmsServer.State.ADMIN_LOCK
+                        && server.state != RealmsServer.State.UNINITIALIZED
+               );
             RealmsMainScreen.this.leaveButton.active(!RealmsMainScreen.this.isSelfOwnedServer(server));
             RealmsMainScreen.this.playButton.active(server.state == RealmsServer.State.OPEN && !server.expired);
             if (doubleClick && RealmsMainScreen.this.playButton.active()) {
-               RealmsMainScreen.this.play(RealmsMainScreen.this.selectedServerId);
+               RealmsMainScreen.this.play(RealmsMainScreen.this.findServer(RealmsMainScreen.this.selectedServerId));
             }
 
          }

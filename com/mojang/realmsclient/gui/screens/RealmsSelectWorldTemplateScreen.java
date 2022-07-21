@@ -179,7 +179,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
                RealmsSelectWorldTemplateScreen.this.selectButton.active(true);
                RealmsSelectWorldTemplateScreen.this.selectedTemplate = slot;
                RealmsSelectWorldTemplateScreen.this.selectedWorldTemplate = null;
-               RealmsSelectWorldTemplateScreen.this.clicks = RealmsSelectWorldTemplateScreen.this.clicks + RealmsSharedConstants.TICKS_PER_SECOND / 3 + 1;
+               RealmsSelectWorldTemplateScreen.this.clicks += RealmsSharedConstants.TICKS_PER_SECOND / 3 + 1;
                if (RealmsSelectWorldTemplateScreen.this.clicks >= RealmsSharedConstants.TICKS_PER_SECOND / 2) {
                   RealmsSelectWorldTemplateScreen.this.selectTemplate();
                }

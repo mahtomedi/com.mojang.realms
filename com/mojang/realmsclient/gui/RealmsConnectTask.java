@@ -1,5 +1,7 @@
 package com.mojang.realmsclient.gui;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.RealmsServerAddress;
@@ -7,6 +9,7 @@ import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.exception.RetryCallException;
 import com.mojang.realmsclient.gui.screens.RealmsTermsScreen;
 import java.io.IOException;
+import javax.annotation.Nullable;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsConnect;
 import net.minecraft.realms.RealmsScreen;
@@ -31,30 +34,30 @@ public class RealmsConnectTask extends LongRunningTask {
       boolean addressRetrieved = false;
       boolean hasError = false;
       int sleepTime = 5;
-      RealmsServerAddress a = null;
+      final RealmsServerAddress a = null;
       boolean tosNotAccepted = false;
 
       for(int i = 0; i < 20 && !this.aborted(); ++i) {
          try {
             a = client.join(this.data.id);
             addressRetrieved = true;
-         } catch (RetryCallException var9) {
-            sleepTime = var9.delaySeconds;
-         } catch (RealmsServiceException var10) {
-            if (var10.errorCode == 6002) {
+         } catch (RetryCallException var10) {
+            sleepTime = var10.delaySeconds;
+         } catch (RealmsServiceException var11) {
+            if (var11.errorCode == 6002) {
                tosNotAccepted = true;
             } else {
                hasError = true;
-               this.error(var10.toString());
-               LOGGER.error("Couldn't connect to world", var10);
+               this.error(var11.toString());
+               LOGGER.error("Couldn't connect to world", var11);
             }
             break;
-         } catch (IOException var11) {
-            LOGGER.error("Couldn't parse response connecting to world", var11);
-         } catch (Exception var12) {
+         } catch (IOException var12) {
+            LOGGER.error("Couldn't parse response connecting to world", var12);
+         } catch (Exception var13) {
             hasError = true;
-            LOGGER.error("Couldn't connect to world", var12);
-            this.error(var12.getLocalizedMessage());
+            LOGGER.error("Couldn't connect to world", var13);
+            this.error(var13.getLocalizedMessage());
          }
 
          if (addressRetrieved) {
@@ -68,8 +71,28 @@ public class RealmsConnectTask extends LongRunningTask {
          Realms.setScreen(new RealmsTermsScreen(this.onlineScreen, this.data));
       } else if (!this.aborted() && !hasError) {
          if (addressRetrieved) {
-            net.minecraft.realms.RealmsServerAddress address = net.minecraft.realms.RealmsServerAddress.parseString(a.address);
-            this.realmsConnect.connect(address.getHost(), address.getPort());
+            if (this.data.resourcePackUrl != null && this.data.resourcePackHash != null) {
+               try {
+                  Futures.addCallback(Realms.downloadResourcePack(this.data.resourcePackUrl, this.data.resourcePackHash), new FutureCallback<Object>() {
+                     public void onSuccess(@Nullable Object result) {
+                        net.minecraft.realms.RealmsServerAddress address = net.minecraft.realms.RealmsServerAddress.parseString(a.address);
+                        RealmsConnectTask.this.realmsConnect.connect(address.getHost(), address.getPort());
+                     }
+
+                     public void onFailure(Throwable t) {
+                        RealmsConnectTask.LOGGER.error(t);
+                        RealmsConnectTask.this.error("Failed to download resource pack!");
+                     }
+                  });
+               } catch (Exception var9) {
+                  Realms.clearResourcePack();
+                  LOGGER.error(var9);
+                  this.error("Failed to download resource pack!");
+               }
+            } else {
+               net.minecraft.realms.RealmsServerAddress address = net.minecraft.realms.RealmsServerAddress.parseString(a.address);
+               this.realmsConnect.connect(address.getHost(), address.getPort());
+            }
          } else {
             this.error(RealmsScreen.getLocalizedString("mco.errorMessage.connectionFailure"));
          }

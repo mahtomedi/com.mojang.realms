@@ -1,6 +1,7 @@
 package com.mojang.realmsclient.gui.screens;
 
 import com.mojang.realmsclient.dto.RealmsServer;
+import com.mojang.realmsclient.gui.RealmsConfirmResultListener;
 import com.mojang.realmsclient.gui.RealmsConstants;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
@@ -8,13 +9,14 @@ import net.minecraft.realms.RealmsEditBox;
 import net.minecraft.realms.RealmsScreen;
 import org.lwjgl.input.Keyboard;
 
-public class RealmsSettingsScreen extends RealmsScreen {
+public class RealmsSettingsScreen extends RealmsScreen implements RealmsConfirmResultListener {
    private RealmsConfigureWorldScreen configureWorldScreen;
    private RealmsServer serverData;
    private static final int BUTTON_CANCEL_ID = 0;
    private static final int BUTTON_DONE_ID = 1;
    private static final int NAME_EDIT_BOX = 2;
    private static final int DESC_EDIT_BOX = 3;
+   private static final int BUTTON_OPEN_CLOSE_ID = 5;
    private final int COMPONENT_WIDTH = 212;
    private RealmsButton doneButton;
    private RealmsEditBox descEdit;
@@ -34,16 +36,28 @@ public class RealmsSettingsScreen extends RealmsScreen {
       Keyboard.enableRepeatEvents(true);
       this.buttonsClear();
       int center = this.width() / 2 - 106;
-      this.buttonsAdd(this.doneButton = newButton(1, center, RealmsConstants.row(12), 106, 20, getLocalizedString("mco.configure.world.buttons.done")));
-      this.buttonsAdd(newButton(0, this.width() / 2 + 4, RealmsConstants.row(12), 106, 20, getLocalizedString("gui.cancel")));
-      this.nameEdit = this.newEditBox(2, center, RealmsConstants.row(1), 212, 20);
+      this.buttonsAdd(this.doneButton = newButton(1, center - 2, RealmsConstants.row(12), 106, 20, getLocalizedString("mco.configure.world.buttons.done")));
+      this.buttonsAdd(newButton(0, this.width() / 2 + 2, RealmsConstants.row(12), 106, 20, getLocalizedString("gui.cancel")));
+      this.buttonsAdd(
+         newButton(
+            5,
+            this.width() / 2 - 53,
+            RealmsConstants.row(0),
+            106,
+            20,
+            this.serverData.state.equals(RealmsServer.State.OPEN)
+               ? getLocalizedString("mco.configure.world.buttons.close")
+               : getLocalizedString("mco.configure.world.buttons.open")
+         )
+      );
+      this.nameEdit = this.newEditBox(2, center, RealmsConstants.row(4), 212, 20);
       this.nameEdit.setFocus(true);
       this.nameEdit.setMaxLength(32);
       if (this.serverData.getName() != null) {
          this.nameEdit.setValue(this.serverData.getName());
       }
 
-      this.descEdit = this.newEditBox(3, center, RealmsConstants.row(5), 212, 20);
+      this.descEdit = this.newEditBox(3, center, RealmsConstants.row(8), 212, 20);
       this.descEdit.setMaxLength(32);
       if (this.serverData.getDescription() != null) {
          this.descEdit.setValue(this.serverData.getDescription());
@@ -64,10 +78,31 @@ public class RealmsSettingsScreen extends RealmsScreen {
             case 1:
                this.save();
                break;
+            case 5:
+               if (this.serverData.state.equals(RealmsServer.State.OPEN)) {
+                  String line2 = getLocalizedString("mco.configure.world.close.question.line1");
+                  String line3 = getLocalizedString("mco.configure.world.close.question.line2");
+                  Realms.setScreen(new RealmsLongConfirmationScreen(this, RealmsLongConfirmationScreen.Type.Info, line2, line3, true, 5));
+               } else {
+                  this.configureWorldScreen.openTheWorld(false);
+               }
+               break;
             default:
                return;
          }
 
+      }
+   }
+
+   @Override
+   public void confirmResult(boolean result, int id) {
+      switch(id) {
+         case 5:
+            if (result) {
+               this.configureWorldScreen.closeTheWorld();
+            } else {
+               Realms.setScreen(this);
+            }
       }
    }
 
@@ -100,8 +135,8 @@ public class RealmsSettingsScreen extends RealmsScreen {
    public void render(int xm, int ym, float a) {
       this.renderBackground();
       this.drawCenteredString(getLocalizedString("mco.configure.world.settings.title"), this.width() / 2, 17, 16777215);
-      this.drawString(getLocalizedString("mco.configure.world.name"), this.width() / 2 - 106, RealmsConstants.row(0), 10526880);
-      this.drawString(getLocalizedString("mco.configure.world.description"), this.width() / 2 - 106, RealmsConstants.row(4), 10526880);
+      this.drawString(getLocalizedString("mco.configure.world.name"), this.width() / 2 - 106, RealmsConstants.row(3), 10526880);
+      this.drawString(getLocalizedString("mco.configure.world.description"), this.width() / 2 - 106, RealmsConstants.row(7), 10526880);
       this.nameEdit.render();
       this.descEdit.render();
       super.render(xm, ym, a);

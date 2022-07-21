@@ -97,11 +97,7 @@ public class RealmsServer extends ValueObject {
          if (node.get("slots") != null && node.get("slots").isJsonArray()) {
             server.slots = parseSlots(node.get("slots").getAsJsonArray());
          } else {
-            HashMap slots = new HashMap();
-            slots.put(1, RealmsOptions.getDefaults());
-            slots.put(2, RealmsOptions.getDefaults());
-            slots.put(3, RealmsOptions.getDefaults());
-            server.slots = slots;
+            server.slots = getEmptySlots();
          }
 
          server.minigameName = JsonUtils.getStringOr("minigameName", node, null);
@@ -120,7 +116,7 @@ public class RealmsServer extends ValueObject {
    private static void sortInvited(RealmsServer server) {
       Collections.sort(server.players, new Comparator<PlayerInfo>() {
          public int compare(PlayerInfo o1, PlayerInfo o2) {
-            return o1.getName().toLowerCase().compareTo(o2.getName().toLowerCase());
+            return ComparisonChain.start().compare(o2.getAccepted(), o1.getAccepted()).compare(o1.getName().toLowerCase(), o2.getName().toLowerCase()).result();
          }
       });
    }
@@ -135,6 +131,7 @@ public class RealmsServer extends ValueObject {
             playerInfo.setName(JsonUtils.getStringOr("name", node, null));
             playerInfo.setUuid(JsonUtils.getStringOr("uuid", node, null));
             playerInfo.setOperator(JsonUtils.getBooleanOr("operator", node, false));
+            playerInfo.setAccepted(JsonUtils.getBooleanOr("accepted", node, false));
             invited.add(playerInfo);
          } catch (Exception var6) {
          }
@@ -166,10 +163,18 @@ public class RealmsServer extends ValueObject {
 
       for(int i = 1; i <= 3; ++i) {
          if (!slots.containsKey(i)) {
-            slots.put(i, RealmsOptions.getDefaults());
+            slots.put(i, RealmsOptions.getEmptyDefaults());
          }
       }
 
+      return slots;
+   }
+
+   private static Map<Integer, RealmsOptions> getEmptySlots() {
+      HashMap slots = new HashMap();
+      slots.put(1, RealmsOptions.getEmptyDefaults());
+      slots.put(2, RealmsOptions.getEmptyDefaults());
+      slots.put(3, RealmsOptions.getEmptyDefaults());
       return slots;
    }
 

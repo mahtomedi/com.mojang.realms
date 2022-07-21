@@ -2,6 +2,7 @@ package com.mojang.realmsclient.dto;
 
 import com.google.gson.JsonObject;
 import com.mojang.realmsclient.util.JsonUtils;
+import net.minecraft.realms.RealmsScreen;
 
 public class RealmsOptions {
    public Boolean pvp;
@@ -14,6 +15,9 @@ public class RealmsOptions {
    public Integer difficulty;
    public Integer gameMode;
    public String slotName;
+   public long templateId;
+   public String templateImage;
+   public boolean empty = false;
    private static boolean forceGameModeDefault = false;
    private static boolean pvpDefault = true;
    private static boolean spawnAnimalsDefault = true;
@@ -24,6 +28,8 @@ public class RealmsOptions {
    private static int difficultyDefault = 2;
    private static int gameModeDefault = 0;
    private static String slotNameDefault = null;
+   private static long templateIdDefault = -1L;
+   private static String templateImageDefault = null;
 
    public RealmsOptions(
       Boolean pvp,
@@ -64,8 +70,29 @@ public class RealmsOptions {
       );
    }
 
+   public static RealmsOptions getEmptyDefaults() {
+      RealmsOptions options = new RealmsOptions(
+         pvpDefault,
+         spawnAnimalsDefault,
+         spawnMonstersDefault,
+         spawnNPCsDefault,
+         spawnProtectionDefault,
+         commandBlocksDefault,
+         difficultyDefault,
+         gameModeDefault,
+         forceGameModeDefault,
+         slotNameDefault
+      );
+      options.setEmpty(true);
+      return options;
+   }
+
+   public void setEmpty(boolean empty) {
+      this.empty = empty;
+   }
+
    public static RealmsOptions parse(JsonObject jsonObject) {
-      return new RealmsOptions(
+      RealmsOptions newOptions = new RealmsOptions(
          JsonUtils.getBooleanOr("pvp", jsonObject, pvpDefault),
          JsonUtils.getBooleanOr("spawnAnimals", jsonObject, spawnAnimalsDefault),
          JsonUtils.getBooleanOr("spawnMonsters", jsonObject, spawnMonstersDefault),
@@ -77,14 +104,23 @@ public class RealmsOptions {
          JsonUtils.getBooleanOr("forceGameMode", jsonObject, forceGameModeDefault),
          JsonUtils.getStringOr("slotName", jsonObject, slotNameDefault)
       );
+      newOptions.templateId = JsonUtils.getLongOr("worldTemplateId", jsonObject, templateIdDefault);
+      newOptions.templateImage = JsonUtils.getStringOr("worldTemplateImage", jsonObject, templateImageDefault);
+      return newOptions;
    }
 
    public String getSlotName(int i) {
-      return this.slotName != null && !this.slotName.equals("") ? this.slotName : "World " + i;
+      if (this.slotName != null && !this.slotName.equals("")) {
+         return this.slotName;
+      } else {
+         return this.empty
+            ? RealmsScreen.getLocalizedString("mco.configure.world.slot.empty")
+            : RealmsScreen.getLocalizedString("mco.configure.world.slot", new Object[]{i});
+      }
    }
 
    public String getDefaultSlotName(int i) {
-      return "World " + i;
+      return RealmsScreen.getLocalizedString("mco.configure.world.slot", new Object[]{i});
    }
 
    public String toJson() {

@@ -1,7 +1,6 @@
 package com.mojang.realmsclient.gui.screens;
 
 import com.mojang.realmsclient.dto.RealmsServer;
-import com.mojang.realmsclient.gui.RealmsConfirmResultListener;
 import com.mojang.realmsclient.gui.RealmsConstants;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
@@ -9,7 +8,7 @@ import net.minecraft.realms.RealmsEditBox;
 import net.minecraft.realms.RealmsScreen;
 import org.lwjgl.input.Keyboard;
 
-public class RealmsSettingsScreen extends RealmsScreen implements RealmsConfirmResultListener {
+public class RealmsSettingsScreen extends RealmsScreen {
    private RealmsConfigureWorldScreen configureWorldScreen;
    private RealmsServer serverData;
    private static final int BUTTON_CANCEL_ID = 0;
@@ -84,7 +83,7 @@ public class RealmsSettingsScreen extends RealmsScreen implements RealmsConfirmR
                   String line3 = getLocalizedString("mco.configure.world.close.question.line2");
                   Realms.setScreen(new RealmsLongConfirmationScreen(this, RealmsLongConfirmationScreen.Type.Info, line2, line3, true, 5));
                } else {
-                  this.configureWorldScreen.openTheWorld(false);
+                  this.configureWorldScreen.openTheWorld(false, this);
                }
                break;
             default:
@@ -94,12 +93,11 @@ public class RealmsSettingsScreen extends RealmsScreen implements RealmsConfirmR
       }
    }
 
-   @Override
    public void confirmResult(boolean result, int id) {
       switch(id) {
          case 5:
             if (result) {
-               this.configureWorldScreen.closeTheWorld();
+               this.configureWorldScreen.closeTheWorld(this);
             } else {
                Realms.setScreen(this);
             }

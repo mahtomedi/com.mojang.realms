@@ -4,6 +4,7 @@ public class PlayerInfo {
    private String name;
    private String uuid;
    private boolean operator = false;
+   private boolean accepted = false;
 
    public String getName() {
       return this.name;
@@ -27,5 +28,13 @@ public class PlayerInfo {
 
    public void setOperator(boolean operator) {
       this.operator = operator;
+   }
+
+   public boolean getAccepted() {
+      return this.accepted;
+   }
+
+   public void setAccepted(boolean accepted) {
+      this.accepted = accepted;
    }
 }

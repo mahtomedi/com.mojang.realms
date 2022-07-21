@@ -123,7 +123,7 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
       }
 
       public int getMaxPosition() {
-         return this.getItemCount() * 30;
+         return this.getItemCount() * 36;
       }
 
       public void renderBackground() {

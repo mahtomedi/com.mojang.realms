@@ -7,6 +7,7 @@ import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.exception.RetryCallException;
 import com.mojang.realmsclient.gui.LongRunningTask;
+import com.mojang.realmsclient.util.RealmsUtil;
 import java.text.DateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -34,11 +35,7 @@ public class RealmsBackupScreen extends RealmsScreen {
    private static final int BACK_BUTTON_ID = 0;
    private static final int RESTORE_BUTTON_ID = 1;
    private static final int DOWNLOAD_BUTTON_ID = 2;
-   private static final int MINUTES = 60;
-   private static final int HOURS = 3600;
-   private static final int DAYS = 86400;
    private RealmsButton downloadButton;
-   private RealmsButton uploadButton;
    private Boolean noBackups = false;
    private RealmsServer serverData;
    private static final String UPLOADED_KEY = "Uploaded";
@@ -140,7 +137,7 @@ public class RealmsBackupScreen extends RealmsScreen {
          this.selectedBackup = selectedBackup;
          Date backupDate = ((Backup)this.backups.get(selectedBackup)).lastModifiedDate;
          String datePresentation = DateFormat.getDateTimeInstance(3, 3).format(backupDate);
-         String age = this.convertToAgePresentation(System.currentTimeMillis() - backupDate.getTime());
+         String age = RealmsUtil.convertToAgePresentation(System.currentTimeMillis() - backupDate.getTime());
          String line2 = getLocalizedString("mco.configure.world.restore.question.line1", new Object[]{datePresentation, age});
          String line3 = getLocalizedString("mco.configure.world.restore.question.line2");
          Realms.setScreen(new RealmsLongConfirmationScreen(this, RealmsLongConfirmationScreen.Type.Warning, line2, line3, true, 1));
@@ -190,7 +187,7 @@ public class RealmsBackupScreen extends RealmsScreen {
    private void restore() {
       Backup backup = (Backup)this.backups.get(this.selectedBackup);
       RealmsBackupScreen.RestoreTask restoreTask = new RealmsBackupScreen.RestoreTask(backup);
-      RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(this.lastScreen, restoreTask);
+      RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(this.lastScreen.getNewScreen(), restoreTask);
       longRunningMcoTaskScreen.start();
       Realms.setScreen(longRunningMcoTaskScreen);
    }
@@ -211,26 +208,6 @@ public class RealmsBackupScreen extends RealmsScreen {
          this.renderMousehoverTooltip(this.toolTip, xm, ym);
       }
 
-   }
-
-   private String convertToAgePresentation(Long timeDiff) {
-      if (timeDiff < 0L) {
-         return "right now";
-      } else {
-         long timeDiffInSeconds = timeDiff / 1000L;
-         if (timeDiffInSeconds < 60L) {
-            return (timeDiffInSeconds == 1L ? "1 second" : timeDiffInSeconds + " seconds") + " ago";
-         } else if (timeDiffInSeconds < 3600L) {
-            long minutes = timeDiffInSeconds / 60L;
-            return (minutes == 1L ? "1 minute" : minutes + " minutes") + " ago";
-         } else if (timeDiffInSeconds < 86400L) {
-            long hours = timeDiffInSeconds / 3600L;
-            return (hours == 1L ? "1 hour" : hours + " hours") + " ago";
-         } else {
-            long days = timeDiffInSeconds / 86400L;
-            return (days == 1L ? "1 day" : days + " days") + " ago";
-         }
-      }
    }
 
    protected void renderMousehoverTooltip(String msg, int x, int y) {
@@ -306,10 +283,7 @@ public class RealmsBackupScreen extends RealmsScreen {
          Backup backup = (Backup)RealmsBackupScreen.this.backups.get(i);
          int color = backup.isUploadedVersion() ? -8388737 : 16777215;
          RealmsBackupScreen.this.drawString(
-            "Backup (" + RealmsBackupScreen.this.convertToAgePresentation(System.currentTimeMillis() - backup.lastModifiedDate.getTime()) + ")",
-            x + 2,
-            y + 1,
-            color
+            "Backup (" + RealmsUtil.convertToAgePresentation(System.currentTimeMillis() - backup.lastModifiedDate.getTime()) + ")", x + 2, y + 1, color
          );
          RealmsBackupScreen.this.drawString(this.getMediumDatePresentation(backup.lastModifiedDate), x + 2, y + 12, 5000268);
          int dx = this.width() - 30;
@@ -331,26 +305,28 @@ public class RealmsBackupScreen extends RealmsScreen {
       }
 
       private void drawRestore(int x, int y, int xm, int ym) {
+         boolean hovered = xm >= x && xm <= x + 12 && ym >= y && ym <= y + 14 && ym < RealmsBackupScreen.this.height() - 15 && ym > 32;
          RealmsScreen.bind("realms:textures/gui/realms/restore_icon.png");
          GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
          GL11.glPushMatrix();
          GL11.glScalef(0.5F, 0.5F, 0.5F);
-         RealmsScreen.blit(x * 2, y * 2, 0.0F, 0.0F, 23, 28, 23.0F, 28.0F);
+         RealmsScreen.blit(x * 2, y * 2, 0.0F, hovered ? 28.0F : 0.0F, 23, 28, 23.0F, 56.0F);
          GL11.glPopMatrix();
-         if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9 && ym < RealmsBackupScreen.this.height() - 15 && ym > 32) {
+         if (hovered) {
             RealmsBackupScreen.this.toolTip = RealmsScreen.getLocalizedString("mco.backup.button.restore");
          }
 
       }
 
       private void drawInfo(int x, int y, int xm, int ym) {
+         boolean hovered = xm >= x && xm <= x + 8 && ym >= y && ym <= y + 8 && ym < RealmsBackupScreen.this.height() - 15 && ym > 32;
          RealmsScreen.bind("realms:textures/gui/realms/plus_icon.png");
          GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
          GL11.glPushMatrix();
          GL11.glScalef(0.5F, 0.5F, 0.5F);
-         RealmsScreen.blit(x * 2, y * 2, 0.0F, 0.0F, 15, 15, 15.0F, 15.0F);
+         RealmsScreen.blit(x * 2, y * 2, 0.0F, hovered ? 15.0F : 0.0F, 15, 15, 15.0F, 30.0F);
          GL11.glPopMatrix();
-         if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9 && ym < RealmsBackupScreen.this.height() - 15 && ym > 32) {
+         if (hovered) {
             RealmsBackupScreen.this.toolTip = RealmsScreen.getLocalizedString("mco.backup.changes.tooltip");
          }
 
@@ -381,7 +357,7 @@ public class RealmsBackupScreen extends RealmsScreen {
                   return;
                }
 
-               Realms.setScreen(RealmsBackupScreen.this.lastScreen);
+               Realms.setScreen(RealmsBackupScreen.this.lastScreen.getNewScreen());
                return;
             } catch (RetryCallException var3) {
                if (this.aborted()) {

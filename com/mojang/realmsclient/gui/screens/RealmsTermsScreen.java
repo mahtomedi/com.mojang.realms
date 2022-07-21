@@ -3,8 +3,8 @@ package com.mojang.realmsclient.gui.screens;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.exception.RealmsServiceException;
-import com.mojang.realmsclient.gui.RealmsConnectTask;
 import com.mojang.realmsclient.gui.RealmsConstants;
+import com.mojang.realmsclient.util.RealmsTasks;
 import com.mojang.realmsclient.util.RealmsUtil;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -74,7 +74,7 @@ public class RealmsTermsScreen extends RealmsScreen {
       try {
          client.agreeToTos();
          RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(
-            this.lastScreen, new RealmsConnectTask(this.lastScreen, this.realmsServer)
+            this.lastScreen, new RealmsTasks.RealmsConnectTask(this.lastScreen, this.realmsServer)
          );
          longRunningMcoTaskScreen.start();
          Realms.setScreen(longRunningMcoTaskScreen);

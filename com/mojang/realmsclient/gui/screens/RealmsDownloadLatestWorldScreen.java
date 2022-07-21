@@ -53,14 +53,16 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
    }
 
    private void checkDownloadSize() {
-      if (!this.checked && this.getContentLength(this.downloadLink) >= 524288000L) {
-         String line1 = getLocalizedString("mco.download.confirmation.line1", new Object[]{humanReadableSize(524288000L)});
-         String line2 = getLocalizedString("mco.download.confirmation.line2");
-         Realms.setScreen(new RealmsLongConfirmationScreen(this, RealmsLongConfirmationScreen.Type.Warning, line1, line2, false, 100));
-      } else {
-         this.downloadSave();
-      }
+      if (!this.finished) {
+         if (!this.checked && this.getContentLength(this.downloadLink) >= 1048576000L) {
+            String line1 = getLocalizedString("mco.download.confirmation.line1", new Object[]{humanReadableSize(1048576000L)});
+            String line2 = getLocalizedString("mco.download.confirmation.line2");
+            Realms.setScreen(new RealmsLongConfirmationScreen(this, RealmsLongConfirmationScreen.Type.Warning, line1, line2, false, 100));
+         } else {
+            this.downloadSave();
+         }
 
+      }
    }
 
    public void confirmResult(boolean result, int id) {
@@ -279,6 +281,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
                   RealmsDownloadLatestWorldScreen.downloadLock.unlock();
                   RealmsDownloadLatestWorldScreen.this.showDots = false;
                   RealmsDownloadLatestWorldScreen.this.buttonsRemove(RealmsDownloadLatestWorldScreen.this.cancelButton);
+                  RealmsDownloadLatestWorldScreen.this.finished = true;
                }
    
             }

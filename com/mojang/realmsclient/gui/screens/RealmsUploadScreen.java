@@ -5,6 +5,7 @@ import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.client.UploadStatus;
 import com.mojang.realmsclient.dto.UploadInfo;
 import com.mojang.realmsclient.exception.RealmsServiceException;
+import com.mojang.realmsclient.exception.RetryCallException;
 import com.mojang.realmsclient.util.UploadTokenCache;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,7 +33,7 @@ public class RealmsUploadScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
    private static final int CANCEL_BUTTON = 0;
    private static final int BACK_BUTTON = 1;
-   private final RealmsScreen lastScreen;
+   private final RealmsResetWorldScreen lastScreen;
    private final RealmsLevelSummary selectedLevel;
    private final long worldId;
    private final int slotId;
@@ -43,6 +44,7 @@ public class RealmsUploadScreen extends RealmsScreen {
    private volatile boolean cancelled = false;
    private volatile boolean uploadFinished = false;
    private volatile boolean showDots = true;
+   private volatile boolean uploadStarted = false;
    private RealmsButton backButton;
    private RealmsButton cancelButton;
    private int animTick = 0;
@@ -52,9 +54,8 @@ public class RealmsUploadScreen extends RealmsScreen {
    private Long previousTimeSnapshot = null;
    private long bytesPersSecond = 0L;
    private static final ReentrantLock uploadLock = new ReentrantLock();
-   public static final long SIZE_LIMIT = 524288000L;
 
-   public RealmsUploadScreen(long worldId, int slotId, RealmsScreen lastScreen, RealmsLevelSummary selectedLevel) {
+   public RealmsUploadScreen(long worldId, int slotId, RealmsResetWorldScreen lastScreen, RealmsLevelSummary selectedLevel) {
       this.worldId = worldId;
       this.slotId = slotId;
       this.lastScreen = lastScreen;
@@ -67,7 +68,23 @@ public class RealmsUploadScreen extends RealmsScreen {
       this.buttonsClear();
       this.backButton = newButton(1, this.width() / 2 - 100, this.height() - 42, 200, 20, getLocalizedString("gui.back"));
       this.buttonsAdd(this.cancelButton = newButton(0, this.width() / 2 - 100, this.height() - 42, 200, 20, getLocalizedString("gui.cancel")));
-      this.upload();
+      if (!this.uploadStarted) {
+         if (this.lastScreen.slot != -1) {
+            this.lastScreen.switchSlot(this);
+         } else {
+            this.upload();
+         }
+      }
+
+   }
+
+   public void confirmResult(boolean result, int buttonId) {
+      if (result && !this.uploadStarted) {
+         this.uploadStarted = true;
+         Realms.setScreen(this);
+         this.upload();
+      }
+
    }
 
    public void removed() {
@@ -77,7 +94,7 @@ public class RealmsUploadScreen extends RealmsScreen {
    public void buttonClicked(RealmsButton button) {
       if (button.active()) {
          if (button.id() == 1) {
-            Realms.setScreen(this.lastScreen);
+            this.lastScreen.confirmResult(true, 0);
          } else if (button.id() == 0) {
             this.cancelled = true;
             Realms.setScreen(this.lastScreen);
@@ -202,6 +219,7 @@ public class RealmsUploadScreen extends RealmsScreen {
    }
 
    private void upload() {
+      this.uploadStarted = true;
       (new Thread() {
             public void run() {
                File archive = null;
@@ -211,7 +229,27 @@ public class RealmsUploadScreen extends RealmsScreen {
                try {
                   if (RealmsUploadScreen.uploadLock.tryLock(1L, TimeUnit.SECONDS)) {
                      RealmsUploadScreen.this.status = RealmsScreen.getLocalizedString("mco.upload.preparing");
-                     UploadInfo uploadInfo = client.upload(wid, UploadTokenCache.get(wid));
+                     UploadInfo uploadInfo = null;
+   
+                     for(int i = 0; i < 20; ++i) {
+                        try {
+                           if (RealmsUploadScreen.this.cancelled) {
+                              RealmsUploadScreen.this.uploadCancelled(wid);
+                              return;
+                           }
+   
+                           uploadInfo = client.upload(wid, UploadTokenCache.get(wid));
+                           break;
+                        } catch (RetryCallException var32) {
+                           Thread.sleep((long)(var32.delaySeconds * 1000));
+                        }
+                     }
+   
+                     if (uploadInfo == null) {
+                        RealmsUploadScreen.this.status = RealmsScreen.getLocalizedString("mco.upload.close.failure");
+                        return;
+                     }
+   
                      UploadTokenCache.put(wid, uploadInfo.getToken());
                      if (!uploadInfo.isWorldClosed()) {
                         RealmsUploadScreen.this.status = RealmsScreen.getLocalizedString("mco.upload.close.failure");
@@ -261,7 +299,7 @@ public class RealmsUploadScreen extends RealmsScreen {
    
                         try {
                            Thread.sleep(500L);
-                        } catch (InterruptedException var28) {
+                        } catch (InterruptedException var31) {
                            RealmsUploadScreen.LOGGER.error("Failed to check Realms file upload status");
                         }
                      }
@@ -284,16 +322,17 @@ public class RealmsUploadScreen extends RealmsScreen {
                         return;
                      }
                   }
-               } catch (IOException var29) {
-                  RealmsUploadScreen.this.errorMessage = RealmsScreen.getLocalizedString("mco.upload.failed", new Object[]{var29.getMessage()});
+               } catch (IOException var33) {
+                  RealmsUploadScreen.this.errorMessage = RealmsScreen.getLocalizedString("mco.upload.failed", new Object[]{var33.getMessage()});
                   return;
-               } catch (RealmsServiceException var30) {
-                  RealmsUploadScreen.this.errorMessage = RealmsScreen.getLocalizedString("mco.upload.failed", new Object[]{var30.toString()});
+               } catch (RealmsServiceException var34) {
+                  RealmsUploadScreen.this.errorMessage = RealmsScreen.getLocalizedString("mco.upload.failed", new Object[]{var34.toString()});
                   return;
-               } catch (InterruptedException var31) {
+               } catch (InterruptedException var35) {
                   RealmsUploadScreen.LOGGER.error("Could not acquire upload lock");
                   return;
                } finally {
+                  RealmsUploadScreen.this.uploadFinished = true;
                   if (RealmsUploadScreen.uploadLock.isHeldByCurrentThread()) {
                      RealmsUploadScreen.uploadLock.unlock();
                      RealmsUploadScreen.this.showDots = false;
@@ -304,10 +343,14 @@ public class RealmsUploadScreen extends RealmsScreen {
                         archive.delete();
                      }
    
+                     if (RealmsUploadScreen.this.cancelled) {
+                        return;
+                     }
+   
                      try {
                         client.uploadFinished(wid);
-                     } catch (RealmsServiceException var27) {
-                        RealmsUploadScreen.LOGGER.error("Failed to request upload-finished to Realms", new Object[]{var27.toString()});
+                     } catch (RealmsServiceException var30) {
+                        RealmsUploadScreen.LOGGER.error("Failed to request upload-finished to Realms", new Object[]{var30.toString()});
                      }
    
                   }
@@ -322,11 +365,20 @@ public class RealmsUploadScreen extends RealmsScreen {
 
    private void uploadCancelled(long worldId) {
       this.status = getLocalizedString("mco.upload.cancelled");
+      String oldToken = UploadTokenCache.get(worldId);
       UploadTokenCache.invalidate(worldId);
+
+      try {
+         RealmsClient client = RealmsClient.createRealmsClient();
+         client.uploadCancelled(worldId, oldToken);
+      } catch (RealmsServiceException var5) {
+         LOGGER.error("Failed to cancel upload", var5);
+      }
+
    }
 
    private boolean verify(File archive) {
-      return archive.length() < 524288000L;
+      return archive.length() < 1048576000L;
    }
 
    private File tarGzipArchive(File pathToDirectoryFile) throws IOException {

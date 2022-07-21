@@ -10,17 +10,17 @@ import com.mojang.realmsclient.dto.RegionPingResult;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.exception.RetryCallException;
 import com.mojang.realmsclient.gui.ChatFormatting;
-import com.mojang.realmsclient.gui.RealmsConnectTask;
 import com.mojang.realmsclient.gui.RealmsDataFetcher;
 import com.mojang.realmsclient.gui.screens.RealmsBuyRealmsScreen;
 import com.mojang.realmsclient.gui.screens.RealmsClientOutdatedScreen;
 import com.mojang.realmsclient.gui.screens.RealmsConfigureWorldScreen;
-import com.mojang.realmsclient.gui.screens.RealmsCreateRealmsWorldScreen;
+import com.mojang.realmsclient.gui.screens.RealmsCreateRealmScreen;
 import com.mojang.realmsclient.gui.screens.RealmsGenericErrorScreen;
 import com.mojang.realmsclient.gui.screens.RealmsLongConfirmationScreen;
 import com.mojang.realmsclient.gui.screens.RealmsLongRunningMcoTaskScreen;
 import com.mojang.realmsclient.gui.screens.RealmsParentalConsentScreen;
 import com.mojang.realmsclient.gui.screens.RealmsPendingInvitesScreen;
+import com.mojang.realmsclient.util.RealmsTasks;
 import com.mojang.realmsclient.util.RealmsUtil;
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -463,27 +463,30 @@ public class RealmsMainScreen extends RealmsScreen {
    }
 
    public void confirmResult(boolean result, int id) {
-      if (id == 3 && result) {
-         (new Thread("Realms-leave-server") {
-            public void run() {
-               try {
-                  RealmsServer server = RealmsMainScreen.this.findServer(RealmsMainScreen.this.selectedServerId);
-                  if (server != null) {
-                     RealmsClient client = RealmsClient.createRealmsClient();
-                     RealmsMainScreen.realmsDataFetcher.removeItem(server);
-                     RealmsMainScreen.this.realmsServers.remove(server);
-                     client.uninviteMyselfFrom(server.id);
-                     RealmsMainScreen.realmsDataFetcher.removeItem(server);
-                     RealmsMainScreen.this.realmsServers.remove(server);
-                     RealmsMainScreen.this.updateSelectedItemPointer();
+      if (id == 3) {
+         if (result) {
+            (new Thread("Realms-leave-server") {
+               public void run() {
+                  try {
+                     RealmsServer server = RealmsMainScreen.this.findServer(RealmsMainScreen.this.selectedServerId);
+                     if (server != null) {
+                        RealmsClient client = RealmsClient.createRealmsClient();
+                        RealmsMainScreen.realmsDataFetcher.removeItem(server);
+                        RealmsMainScreen.this.realmsServers.remove(server);
+                        client.uninviteMyselfFrom(server.id);
+                        RealmsMainScreen.realmsDataFetcher.removeItem(server);
+                        RealmsMainScreen.this.realmsServers.remove(server);
+                        RealmsMainScreen.this.updateSelectedItemPointer();
+                     }
+                  } catch (RealmsServiceException var3) {
+                     RealmsMainScreen.LOGGER.error("Couldn't configure world");
+                     Realms.setScreen(new RealmsGenericErrorScreen(var3, RealmsMainScreen.this));
                   }
-               } catch (RealmsServiceException var3) {
-                  RealmsMainScreen.LOGGER.error("Couldn't configure world");
-                  Realms.setScreen(new RealmsGenericErrorScreen(var3, RealmsMainScreen.this));
-               }
 
-            }
-         }).start();
+               }
+            }).start();
+         }
+
          Realms.setScreen(this);
       } else if (id == 100) {
          if (!result) {
@@ -587,7 +590,7 @@ public class RealmsMainScreen extends RealmsScreen {
    }
 
    public void mouseClicked(int x, int y, int buttonNum) {
-      if (this.inPendingInvitationArea(x, y) && this.numberOfPendingInvites != 0) {
+      if (this.inPendingInvitationArea(x, y)) {
          this.stopRealmsFetcherAndPinger();
          RealmsPendingInvitesScreen pendingInvitationScreen = new RealmsPendingInvitesScreen(this.lastScreen);
          Realms.setScreen(pendingInvitationScreen);
@@ -603,22 +606,22 @@ public class RealmsMainScreen extends RealmsScreen {
       int pendingInvitesCount = this.numberOfPendingInvites;
       boolean hovering = this.inPendingInvitationArea(xm, ym);
       int baseX = this.width() / 2 + 50;
-      int baseY = 12;
+      int baseY = 8;
       if (pendingInvitesCount != 0) {
          float scale = 0.25F + (1.0F + RealmsMth.sin((float)this.animTick * 0.5F)) * 0.25F;
          int color = 0xFF000000 | (int)(scale * 64.0F) << 16 | (int)(scale * 64.0F) << 8 | (int)(scale * 64.0F) << 0;
-         this.fillGradient(baseX - 2, 10, baseX + 18, 30, color, color);
+         this.fillGradient(baseX - 2, 6, baseX + 18, 26, color, color);
          color = 0xFF000000 | (int)(scale * 255.0F) << 16 | (int)(scale * 255.0F) << 8 | (int)(scale * 255.0F) << 0;
-         this.fillGradient(baseX - 2, 10, baseX + 18, 11, color, color);
-         this.fillGradient(baseX - 2, 10, baseX - 1, 30, color, color);
-         this.fillGradient(baseX + 17, 10, baseX + 18, 30, color, color);
-         this.fillGradient(baseX - 2, 29, baseX + 18, 30, color, color);
+         this.fillGradient(baseX - 2, 6, baseX + 18, 7, color, color);
+         this.fillGradient(baseX - 2, 6, baseX - 1, 26, color, color);
+         this.fillGradient(baseX + 17, 6, baseX + 18, 26, color, color);
+         this.fillGradient(baseX - 2, 25, baseX + 18, 26, color, color);
       }
 
       RealmsScreen.bind("realms:textures/gui/realms/invite_icon.png");
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glPushMatrix();
-      RealmsScreen.blit(baseX, 6, hovering ? 16.0F : 0.0F, 0.0F, 15, 25, 31.0F, 25.0F);
+      RealmsScreen.blit(baseX, 2, hovering ? 16.0F : 0.0F, 0.0F, 15, 25, 31.0F, 25.0F);
       GL11.glPopMatrix();
       if (pendingInvitesCount != 0) {
          int spritePos = (Math.min(pendingInvitesCount, 6) - 1) * 8;
@@ -626,26 +629,14 @@ public class RealmsMainScreen extends RealmsScreen {
          RealmsScreen.bind("realms:textures/gui/realms/invitation_icons.png");
          GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
          GL11.glPushMatrix();
-         RealmsScreen.blit(baseX + 4, 16 + yOff, (float)spritePos, 0.0F, 8, 8, 48.0F, 8.0F);
+         RealmsScreen.blit(baseX + 4, 12 + yOff, (float)spritePos, hovering ? 8.0F : 0.0F, 8, 8, 48.0F, 16.0F);
          GL11.glPopMatrix();
       }
 
-      boolean renderToolTip = hovering || pendingInvitesCount != 0;
-      if (renderToolTip) {
+      if (hovering) {
          int rx = xm + 12;
          int ry = ym - 12;
-         if (!hovering) {
-            rx = baseX + 22;
-            ry = 12;
-         }
-
-         String message;
-         if (pendingInvitesCount != 0) {
-            message = getLocalizedString("mco.invites.pending");
-         } else {
-            message = getLocalizedString("mco.invites.nopending");
-         }
-
+         String message = pendingInvitesCount == 0 ? getLocalizedString("mco.invites.nopending") : getLocalizedString("mco.invites.pending");
          int width = this.fontWidth(message);
          this.fillGradient(rx - 3, ry - 3, rx + width + 3, ry + 8 + 3, -1073741824, -1073741824);
          this.fontDrawShadow(message, rx, ry, -1);
@@ -679,7 +670,7 @@ public class RealmsMainScreen extends RealmsScreen {
    }
 
    private void connectToServer(RealmsServer server) {
-      RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(this, new RealmsConnectTask(this, server));
+      RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(this, new RealmsTasks.RealmsConnectTask(this, server));
       longRunningMcoTaskScreen.start();
       Realms.setScreen(longRunningMcoTaskScreen);
    }
@@ -821,6 +812,10 @@ public class RealmsMainScreen extends RealmsScreen {
       GL11.glPopMatrix();
    }
 
+   public RealmsScreen newScreen() {
+      return new RealmsMainScreen(this.lastScreen);
+   }
+
    static {
       String version = RealmsVersion.getVersion();
       if (version != null) {
@@ -835,7 +830,7 @@ public class RealmsMainScreen extends RealmsScreen {
       }
 
       public int getItemCount() {
-         return RealmsMainScreen.trialsAvailable ? RealmsMainScreen.this.realmsServers.size() + 2 : RealmsMainScreen.this.realmsServers.size() + 1;
+         return RealmsMainScreen.trialsAvailable ? RealmsMainScreen.this.realmsServers.size() + 1 : RealmsMainScreen.this.realmsServers.size();
       }
 
       public void selectItem(int item, boolean doubleClick, int xMouse, int yMouse) {
@@ -853,7 +848,7 @@ public class RealmsMainScreen extends RealmsScreen {
             if (server.state == RealmsServer.State.UNINITIALIZED) {
                RealmsMainScreen.this.selectedServerId = -1L;
                RealmsMainScreen.this.stopRealmsFetcherAndPinger();
-               Realms.setScreen(new RealmsCreateRealmsWorldScreen(server.id, RealmsMainScreen.this));
+               Realms.setScreen(new RealmsCreateRealmScreen(server, RealmsMainScreen.this));
             } else {
                RealmsMainScreen.this.selectedServerId = server.id;
             }

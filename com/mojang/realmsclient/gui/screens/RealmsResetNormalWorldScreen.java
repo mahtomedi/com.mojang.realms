@@ -40,7 +40,7 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
       };
       Keyboard.enableRepeatEvents(true);
       this.buttonsClear();
-      this.buttonsAdd(newButton(0, this.width() / 2 + 8, RealmsConstants.row(12), 97, 20, getLocalizedString("gui.cancel")));
+      this.buttonsAdd(newButton(0, this.width() / 2 + 8, RealmsConstants.row(12), 97, 20, getLocalizedString("gui.back")));
       this.buttonsAdd(this.resetButton = newButton(1, this.width() / 2 - 102, RealmsConstants.row(12), 97, 20, getLocalizedString("mco.backup.button.reset")));
       this.seedEdit = this.newEditBox(4, this.width() / 2 - 100, RealmsConstants.row(2), 200, 20);
       this.seedEdit.setFocus(true);
@@ -73,7 +73,7 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
                Realms.setScreen(this.lastScreen);
                break;
             case 1:
-               this.lastScreen.resetWorld(this.seedEdit.getValue(), this.levelTypeIndex, this.generateStructures);
+               this.lastScreen.resetWorld(new RealmsResetWorldScreen.ResetWorldInfo(this.seedEdit.getValue(), this.levelTypeIndex, this.generateStructures));
                break;
             case 2:
                this.levelTypeIndex = (this.levelTypeIndex + 1) % this.levelTypes.length;
@@ -97,7 +97,7 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
 
    public void render(int xm, int ym, float a) {
       this.renderBackground();
-      this.drawCenteredString(getLocalizedString("mco.reset.world.generate.title"), this.width() / 2, 17, 16777215);
+      this.drawCenteredString(getLocalizedString("mco.reset.world.generate"), this.width() / 2, 17, 16777215);
       this.drawString(getLocalizedString("mco.reset.world.seed"), this.width() / 2 - 100, RealmsConstants.row(1), 10526880);
       this.seedEdit.render();
       super.render(xm, ym, a);

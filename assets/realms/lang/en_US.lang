@@ -25,8 +25,8 @@ mco.selectServer.open=Open Realm
 mco.selectServer.closed=Closed Realm
 mco.selectServer.locked=Locked Realm
 
-mco.selectServer.openserver=Open Server
-mco.selectServer.closeserver=Close Server
+mco.selectServer.openserver=Open Realm
+mco.selectServer.closeserver=Close Realm
 
 mco.selectServer.minigame=Mini Game:
 mco.selectServer.uninitialized=Click to Create Realm!
@@ -59,6 +59,9 @@ mco.configure.world.status=Status
 mco.configure.world.invites.ops.tooltip=Operator
 mco.configure.world.invites.normal.tooltip=Normal user
 mco.configure.world.invites.remove.tooltip=Remove
+
+mco.configure.world.closing=Closing the realm...
+mco.configure.world.opening=Opening the realm...
 
 mco.configure.world.buttons.open=Open Realm
 mco.configure.world.buttons.close=Close Realm
@@ -97,16 +100,26 @@ mco.configure.world.forceGameMode=Force Game Mode
 mco.configure.world.on=On
 mco.configure.world.off=Off
 
+mco.configure.world.slot=World %s
+mco.configure.world.slot.empty=Empty
+
 mco.create.world.location.title=Locations
 mco.create.world.location.warning=You may not get the exact location you select
 mco.create.world.wait=Creating the realm...
 mco.create.world.seed=Seed (Optional)
+mco.create.world.error=You must enter a name!
+mco.create.world.subtitle=Optionally, select what world to put on your new Realm
+mco.create.world.skip=Skip
 
 mco.reset.world.title=Reset World
 mco.reset.world.warning=This will delete your Realm's current world!
 mco.reset.world.seed=Seed (Optional)
 mco.reset.world.resetting.screen.title=Resetting World...
-mco.reset.world.generate.title=Generate World
+mco.reset.world.generate=New world
+mco.reset.world.upload=Upload world
+mco.reset.world.adventure=Adventure maps
+mco.reset.world.template=Survival spawns
+
 
 mco.minigame.world.title=Switch Realm to Mini Game
 mco.minigame.world.info1=This will temporarily replace your world with a mini game!
@@ -150,6 +163,9 @@ mco.configure.world.restore.download.question.line2=Do you want to continue?
 mco.configure.world.slot.switch.question.line1=Your Realm will be switched to another world
 mco.configure.world.slot.switch.question.line2=Are you sure you want to do this?
 
+mco.configure.world.switch.slot=Create World
+mco.configure.world.switch.slot.subtitle=This world is empty, please choose what to do
+
 mco.minigame.world.slot.screen.title=Switching world...
 
 mco.configure.world.edit.subscreen.adventuremap=Some settings are disabled since your current world is an adventure map
@@ -162,11 +178,12 @@ mco.configure.world.delete.button=Delete Realm
 mco.configure.world.delete.question.line1=Your Realm will be permanently deleted
 mco.configure.world.delete.question.line2=Are you sure you want to do this?
 
-mco.connect.connecting=Connecting to the online server...
+mco.connect.connecting=Connecting to the realm...
 mco.connect.authorizing=Logging in...
-mco.connect.failed=Failed to connect to the online server
+mco.connect.failed=Failed to connect to the realm
 
 mco.create.world=Create
+mco.create.world.reset.title=Creating world...
 
 mco.client.outdated.title=Client Outdated!
 mco.client.outdated.msg=Your client is outdated and not compatible with Realms, please consider updating it
@@ -199,18 +216,21 @@ mco.template.button.select=Select
 mco.template.default.name=World template
 mco.template.name=Template
 mco.template.info.tooltip=Publisher website
+mco.template.trailer.tooltip=Map trailer
 
 mco.invites.button.accept=Accept
 mco.invites.button.reject=Reject
-mco.invites.title=Pending Invitations
-mco.invites.pending=New invitations!
-mco.invites.nopending=No pending invitations!
+mco.invites.title=Pending Invites
+mco.invites.pending=New invites!
+mco.invites.nopending=No pending invites!
 
 mco.upload.select.world.title=Upload world
+mco.upload.select.world.subtitle=Please select a singleplayer world to upload
+mco.upload.select.world.none=No singleplayer worlds found!
 mco.upload.button.name=Upload
 mco.upload.verifying=Verifying your world
 mco.upload.preparing=Preparing your world data
-mco.upload.close.failure=Could not close your server, please try again later
+mco.upload.close.failure=Could not close your realm, please try again later
 mco.upload.size.failure=Selected world '%s' is too big!
 mco.upload.uploading=Uploading '%s'
 mco.upload.done=Upload done

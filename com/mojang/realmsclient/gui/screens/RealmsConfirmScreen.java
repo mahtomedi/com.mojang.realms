@@ -1,12 +1,11 @@
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.realmsclient.gui.RealmsConfirmResultListener;
 import com.mojang.realmsclient.gui.RealmsConstants;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsScreen;
 
 public class RealmsConfirmScreen extends RealmsScreen {
-   protected RealmsConfirmResultListener parent;
+   protected RealmsScreen parent;
    protected String title1;
    private String title2;
    protected String yesButton;
@@ -14,7 +13,7 @@ public class RealmsConfirmScreen extends RealmsScreen {
    protected int id;
    private int delayTicker;
 
-   public RealmsConfirmScreen(RealmsConfirmResultListener parent, String title1, String title2, int id) {
+   public RealmsConfirmScreen(RealmsScreen parent, String title1, String title2, int id) {
       this.parent = parent;
       this.title1 = title1;
       this.title2 = title2;
@@ -23,7 +22,7 @@ public class RealmsConfirmScreen extends RealmsScreen {
       this.noButton = getLocalizedString("gui.no");
    }
 
-   public RealmsConfirmScreen(RealmsConfirmResultListener parent, String title1, String title2, String yesButton, String noButton, int id) {
+   public RealmsConfirmScreen(RealmsScreen parent, String title1, String title2, String yesButton, String noButton, int id) {
       this.parent = parent;
       this.title1 = title1;
       this.title2 = title2;

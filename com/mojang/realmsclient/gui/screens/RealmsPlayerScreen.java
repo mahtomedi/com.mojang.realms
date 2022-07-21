@@ -5,7 +5,6 @@ import com.mojang.realmsclient.dto.Ops;
 import com.mojang.realmsclient.dto.PlayerInfo;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.exception.RealmsServiceException;
-import com.mojang.realmsclient.gui.RealmsConfirmResultListener;
 import com.mojang.realmsclient.gui.RealmsConstants;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
@@ -19,7 +18,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
-public class RealmsPlayerScreen extends RealmsScreen implements RealmsConfirmResultListener {
+public class RealmsPlayerScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
    private static final String OP_ICON_LOCATION = "realms:textures/gui/realms/op_icon.png";
    private static final String USER_ICON_LOCATION = "realms:textures/gui/realms/user_icon.png";
@@ -99,7 +98,7 @@ public class RealmsPlayerScreen extends RealmsScreen implements RealmsConfirmRes
             default:
                return;
             case 3:
-               Realms.setScreen(new RealmsActivityScreen(this, this.serverData.id));
+               Realms.setScreen(new RealmsActivityScreen(this, this.serverData));
          }
 
       }
@@ -165,7 +164,6 @@ public class RealmsPlayerScreen extends RealmsScreen implements RealmsConfirmRes
 
    }
 
-   @Override
    public void confirmResult(boolean result, int id) {
       if (id == 2) {
          if (result) {
@@ -216,12 +214,9 @@ public class RealmsPlayerScreen extends RealmsScreen implements RealmsConfirmRes
       this.drawCenteredString(getLocalizedString("mco.configure.world.players.title"), this.width() / 2, 17, 16777215);
       if (this.serverData != null && this.serverData.players != null) {
          this.drawString(
-            getLocalizedString("mco.configure.world.invited") + " (" + this.serverData.players.size() + "/20)",
-            this.column1_x,
-            RealmsConstants.row(0),
-            10526880
+            getLocalizedString("mco.configure.world.invited") + " (" + this.serverData.players.size() + ")", this.column1_x, RealmsConstants.row(0), 10526880
          );
-         this.inviteButton.active(this.serverData.players.size() < 20);
+         this.inviteButton.active(this.serverData.players.size() < 200);
       } else {
          this.drawString(getLocalizedString("mco.configure.world.invited"), this.column1_x, RealmsConstants.row(0), 10526880);
          this.inviteButton.active(false);
@@ -247,36 +242,39 @@ public class RealmsPlayerScreen extends RealmsScreen implements RealmsConfirmRes
    }
 
    private void drawRemoveIcon(int x, int y, int xm, int ym) {
+      boolean hovered = xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9 && ym < this.height() - 25 && ym > RealmsConstants.row(1);
       bind("realms:textures/gui/realms/cross_icon.png");
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glPushMatrix();
-      RealmsScreen.blit(x, y, 0.0F, 0.0F, 8, 7, 8.0F, 7.0F);
+      RealmsScreen.blit(x, y, 0.0F, hovered ? 7.0F : 0.0F, 8, 7, 8.0F, 14.0F);
       GL11.glPopMatrix();
-      if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9 && ym < this.height() - 25 && ym > RealmsConstants.row(1)) {
+      if (hovered) {
          this.toolTip = getLocalizedString("mco.configure.world.invites.remove.tooltip");
       }
 
    }
 
    private void drawOpped(int x, int y, int xm, int ym) {
+      boolean hovered = xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9 && ym < this.height() - 25 && ym > RealmsConstants.row(1);
       bind("realms:textures/gui/realms/op_icon.png");
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glPushMatrix();
-      RealmsScreen.blit(x, y, 0.0F, 0.0F, 8, 8, 8.0F, 8.0F);
+      RealmsScreen.blit(x, y, 0.0F, hovered ? 8.0F : 0.0F, 8, 8, 8.0F, 16.0F);
       GL11.glPopMatrix();
-      if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9 && ym < this.height() - 25 && ym > RealmsConstants.row(1)) {
+      if (hovered) {
          this.toolTip = getLocalizedString("mco.configure.world.invites.ops.tooltip");
       }
 
    }
 
    private void drawNormal(int x, int y, int xm, int ym) {
+      boolean hovered = xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9;
       bind("realms:textures/gui/realms/user_icon.png");
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glPushMatrix();
-      RealmsScreen.blit(x, y, 0.0F, 0.0F, 8, 8, 8.0F, 8.0F);
+      RealmsScreen.blit(x, y, 0.0F, hovered ? 8.0F : 0.0F, 8, 8, 8.0F, 16.0F);
       GL11.glPopMatrix();
-      if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9) {
+      if (hovered) {
          this.toolTip = getLocalizedString("mco.configure.world.invites.normal.tooltip");
       }
 
@@ -343,7 +341,7 @@ public class RealmsPlayerScreen extends RealmsScreen implements RealmsConfirmRes
 
       private void renderInvitedItem(int i, int x, int y, int h) {
          PlayerInfo invited = (PlayerInfo)RealmsPlayerScreen.this.serverData.players.get(i);
-         RealmsPlayerScreen.this.drawString(invited.getName(), RealmsPlayerScreen.this.column1_x + 3 + 12, y + 1, 16777215);
+         RealmsPlayerScreen.this.drawString(invited.getName(), RealmsPlayerScreen.this.column1_x + 3 + 12, y + 1, invited.getAccepted() ? 16777215 : 10526880);
          if (invited.isOperator()) {
             RealmsPlayerScreen.this.drawOpped(RealmsPlayerScreen.this.column1_x + RealmsPlayerScreen.this.column_width - 10, y + 1, this.xm(), this.ym());
          } else {

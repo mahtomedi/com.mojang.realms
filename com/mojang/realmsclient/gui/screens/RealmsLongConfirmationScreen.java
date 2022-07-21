@@ -43,7 +43,7 @@ public class RealmsLongConfirmationScreen extends RealmsScreen {
 
    public void keyPressed(char eventCharacter, int eventKey) {
       if (eventKey == 1) {
-         this.parent.confirmResult(false, 1);
+         this.parent.confirmResult(false, this.id);
       }
 
    }

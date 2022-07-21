@@ -69,6 +69,7 @@ public class RealmsClient {
    private static final String PATH_WORLD_DOWNLOAD = "/$WORLD_ID/backups/download";
    private static final String PATH_WORLD_UPLOAD = "/$WORLD_ID/backups/upload";
    private static final String PATH_WORLD_UPLOAD_FINISHED = "/$WORLD_ID/backups/upload/finished";
+   private static final String PATH_WORLD_UPLOAD_CANCELLED = "/$WORLD_ID/backups/upload/cancelled";
    private static final String PATH_CLIENT_COMPATIBLE = "/client/compatible";
    private static final String PATH_TOS_AGREED = "/tos/agreed";
    private static final String PATH_MCO_BUY = "/buy";
@@ -119,8 +120,8 @@ public class RealmsClient {
       return RealmsServerAddress.parse(json);
    }
 
-   public void initializeWorld(long worldId, String name, String worldTemplateId) throws RealmsServiceException, IOException {
-      String queryString = QueryBuilder.of("name", name).with("template", worldTemplateId).toQueryString();
+   public void initializeWorld(long worldId, String name, String motd) throws RealmsServiceException, IOException {
+      String queryString = QueryBuilder.of("name", name).with("motd", motd).toQueryString();
       String asciiUrl = this.url("worlds" + "/$WORLD_ID/initialize".replace("$WORLD_ID", String.valueOf(worldId)), queryString);
       this.execute(Request.put(asciiUrl, "", 5000, 10000));
    }
@@ -310,6 +311,14 @@ public class RealmsClient {
 
       String content = gson.toJson(oldUploadInfo);
       return UploadInfo.parse(this.execute(Request.put(asciiUrl, content)));
+   }
+
+   public void uploadCancelled(long worldId, String uploadToken) throws RealmsServiceException {
+      String asciiUrl = this.url("worlds" + "/$WORLD_ID/backups/upload/cancelled".replace("$WORLD_ID", String.valueOf(worldId)));
+      UploadInfo oldUploadInfo = new UploadInfo();
+      oldUploadInfo.setToken(uploadToken);
+      String content = gson.toJson(oldUploadInfo);
+      this.execute(Request.put(asciiUrl, content));
    }
 
    public void uploadFinished(long worldId) throws RealmsServiceException {

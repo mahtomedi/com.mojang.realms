@@ -14,12 +14,16 @@ import org.lwjgl.opengl.GL11;
 public class RealmsNotificationsScreen extends RealmsScreen {
    private static final String INVITE_ICON_LOCATION = "realms:textures/gui/realms/invite_icon.png";
    private static final String TRIAL_ICON_LOCATION = "realms:textures/gui/realms/trial_icon.png";
+   private static final String NEWS_ICON_LOCATION = "realms:textures/gui/realms/news_notification_mainscreen.png";
    private static final RealmsDataFetcher realmsDataFetcher = new RealmsDataFetcher();
    private volatile int numberOfPendingInvites;
    private static boolean checkedMcoAvailability;
    private static boolean trialAvailable;
    private static boolean validClient;
-   private static final List<RealmsDataFetcher.Task> tasks = Arrays.asList(RealmsDataFetcher.Task.PENDING_INVITE, RealmsDataFetcher.Task.TRIAL_AVAILABLE);
+   private static boolean hasUnreadNews;
+   private static final List<RealmsDataFetcher.Task> tasks = Arrays.asList(
+      RealmsDataFetcher.Task.PENDING_INVITE, RealmsDataFetcher.Task.TRIAL_AVAILABLE, RealmsDataFetcher.Task.UNREAD_NEWS
+   );
 
    public RealmsNotificationsScreen(RealmsScreen lastScreen) {
    }
@@ -41,6 +45,10 @@ public class RealmsNotificationsScreen extends RealmsScreen {
 
          if (realmsDataFetcher.isFetchedSinceLastTry(RealmsDataFetcher.Task.TRIAL_AVAILABLE)) {
             trialAvailable = realmsDataFetcher.isTrialAvailable();
+         }
+
+         if (realmsDataFetcher.isFetchedSinceLastTry(RealmsDataFetcher.Task.UNREAD_NEWS)) {
+            hasUnreadNews = realmsDataFetcher.hasUnreadNews();
          }
 
          realmsDataFetcher.markClean();
@@ -94,12 +102,24 @@ public class RealmsNotificationsScreen extends RealmsScreen {
       int topPos = this.height() / 4 + 48;
       int baseX = this.width() / 2 + 80;
       int baseY = topPos + 48 + 2;
+      int iconOffset = 0;
+      if (hasUnreadNews) {
+         RealmsScreen.bind("realms:textures/gui/realms/news_notification_mainscreen.png");
+         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+         GL11.glPushMatrix();
+         GL11.glScalef(0.4F, 0.4F, 0.4F);
+         RealmsScreen.blit((int)((double)(baseX + 2 - iconOffset) * 2.5), (int)((double)baseY * 2.5), 0.0F, 0.0F, 40, 40, 40.0F, 40.0F);
+         GL11.glPopMatrix();
+         iconOffset += 14;
+      }
+
       if (pendingInvitesCount != 0) {
          RealmsScreen.bind("realms:textures/gui/realms/invite_icon.png");
          GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
          GL11.glPushMatrix();
-         RealmsScreen.blit(baseX, baseY - 6, 0.0F, 0.0F, 15, 25, 31.0F, 25.0F);
+         RealmsScreen.blit(baseX - iconOffset, baseY - 6, 0.0F, 0.0F, 15, 25, 31.0F, 25.0F);
          GL11.glPopMatrix();
+         iconOffset += 16;
       }
 
       if (trialAvailable) {
@@ -111,7 +131,7 @@ public class RealmsNotificationsScreen extends RealmsScreen {
             ySprite = 8;
          }
 
-         RealmsScreen.blit(baseX + 4 - (pendingInvitesCount != 0 ? 16 : 0), baseY + 4, 0.0F, (float)ySprite, 8, 8, 8.0F, 16.0F);
+         RealmsScreen.blit(baseX + 4 - iconOffset, baseY + 4, 0.0F, (float)ySprite, 8, 8, 8.0F, 16.0F);
          GL11.glPopMatrix();
       }
 

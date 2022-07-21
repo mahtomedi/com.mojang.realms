@@ -6,6 +6,7 @@ import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.ServerActivity;
 import com.mojang.realmsclient.dto.ServerActivityList;
 import com.mojang.realmsclient.exception.RealmsServiceException;
+import com.mojang.realmsclient.util.RealmsTextureManager;
 import com.mojang.realmsclient.util.RealmsUtil;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -54,6 +55,7 @@ public class RealmsActivityScreen extends RealmsScreen {
    private double hourWidth;
    private double minuteWidth;
    private final int BUTTON_BACK_ID = 0;
+   private static final String USER_ICON_LOCATION = "realms:textures/gui/realms/user_icon.png";
 
    public RealmsActivityScreen(RealmsScreen lastScreen, RealmsServer serverData) {
       this.lastScreen = lastScreen;
@@ -137,7 +139,7 @@ public class RealmsActivityScreen extends RealmsScreen {
             String name = "";
 
             try {
-               name = (String)RealmsUtil.nameCache.get(sa.profileUuid);
+               name = RealmsUtil.uuidToName(sa.profileUuid);
             } catch (Exception var13) {
                LOGGER.error("Could not get name for " + sa.profileUuid, var13);
                continue;
@@ -195,7 +197,7 @@ public class RealmsActivityScreen extends RealmsScreen {
       this.renderBackground();
 
       for(RealmsActivityScreen.ActivityRow row : this.activityMap) {
-         int keyWidth = this.fontWidth(row.name);
+         int keyWidth = this.fontWidth(row.name) + 2;
          if (keyWidth > this.maxKeyWidth) {
             this.maxKeyWidth = keyWidth + 10;
          }
@@ -208,7 +210,10 @@ public class RealmsActivityScreen extends RealmsScreen {
       this.dayWidth = spaceLeft / days;
       this.hourWidth = (double)this.dayWidth / 24.0;
       this.minuteWidth = this.hourWidth / 60.0;
-      this.list.render(xm, ym, a);
+      if (this.list != null) {
+         this.list.render(xm, ym, a);
+      }
+
       if (this.activityMap != null && this.activityMap.size() > 0) {
          Tezzelator t = Tezzelator.instance;
          GL11.glDisable(3553);
@@ -419,13 +424,6 @@ public class RealmsActivityScreen extends RealmsScreen {
             t.vertex((double)(RealmsActivityScreen.this.activityPoint - 8), (double)y + 1.5, 0.0).color(r, g, b, 255).endVertex();
             t.end();
             GL11.glEnable(3553);
-            RealmsScreen.bindFace(
-               ((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).uuid,
-               ((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).name
-            );
-            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-            RealmsScreen.blit(10, y, 8.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);
-            RealmsScreen.blit(10, y, 40.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);
             List<RealmsActivityScreen.ActivityRender> toRender = new ArrayList();
 
             for(RealmsActivityScreen.Activity activity : row.activities) {
@@ -485,6 +483,12 @@ public class RealmsActivityScreen extends RealmsScreen {
                   RealmsActivityScreen.this.toolTip = render.tooltip.trim();
                }
             }
+
+            RealmsScreen.bind("realms:textures/gui/realms/user_icon.png");
+            RealmsTextureManager.bindFace(((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).uuid);
+            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+            RealmsScreen.blit(10, y, 8.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);
+            RealmsScreen.blit(10, y, 40.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);
          }
 
       }

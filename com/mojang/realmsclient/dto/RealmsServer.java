@@ -71,7 +71,7 @@ public class RealmsServer extends ValueObject {
             String name = "";
 
             try {
-               name = (String)RealmsUtil.nameCache.get(uuid);
+               name = RealmsUtil.uuidToName(uuid);
             } catch (Exception var8) {
                LOGGER.error("Could not get name for " + uuid, var8);
                continue;
@@ -326,6 +326,8 @@ public class RealmsServer extends ValueObject {
    public static enum WorldType {
       NORMAL,
       MINIGAME,
-      ADVENTUREMAP;
+      ADVENTUREMAP,
+      EXPERIENCE,
+      INSPIRATION;
    }
 }

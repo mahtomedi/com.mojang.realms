@@ -276,16 +276,17 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
       this.drawString(slotName, this.column1_x + this.column_width / 2 - this.fontWidth(slotName) / 2, RealmsConstants.row(0) - 5, 16777215);
       this.drawCenteredString(getLocalizedString("mco.configure.world.buttons.options"), this.width() / 2, 17, 16777215);
       if (this.notNormal) {
-         this.drawCenteredString(getLocalizedString("mco.configure.world.edit.subscreen.adventuremap"), this.width() / 2, 30, 16711680);
+         if (this.worldType.equals(RealmsServer.WorldType.ADVENTUREMAP)) {
+            this.drawCenteredString(getLocalizedString("mco.configure.world.edit.subscreen.adventuremap"), this.width() / 2, 26, 16711680);
+         } else if (this.worldType.equals(RealmsServer.WorldType.INSPIRATION)) {
+            this.drawCenteredString(getLocalizedString("mco.configure.world.edit.subscreen.inspiration"), this.width() / 2, 26, 16711680);
+         } else {
+            this.drawCenteredString(getLocalizedString("mco.configure.world.edit.subscreen.experience"), this.width() / 2, 26, 16711680);
+         }
       }
 
       this.nameEdit.render();
       super.render(xm, ym, a);
-   }
-
-   public void renderHints() {
-      this.drawString(this.gameModeHints[this.gameModeIndex][0], this.column2_x + 2, RealmsConstants.row(0), 10526880);
-      this.drawString(this.gameModeHints[this.gameModeIndex][1], this.column2_x + 2, RealmsConstants.row(0) + this.fontLineHeight() + 2, 10526880);
    }
 
    public void mouseReleased(int x, int y, int buttonNum) {
@@ -311,23 +312,9 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
    }
 
    private void saveSettings() {
-      if (this.worldType.equals(RealmsServer.WorldType.ADVENTUREMAP)) {
-         this.parent
-            .saveSlotSettings(
-               new RealmsWorldOptions(
-                  this.options.pvp,
-                  this.options.spawnAnimals,
-                  this.options.spawnMonsters,
-                  this.options.spawnNPCs,
-                  this.options.spawnProtection,
-                  this.options.commandBlocks,
-                  this.difficultyIndex,
-                  this.gameModeIndex,
-                  this.options.forceGameMode,
-                  this.getSlotName()
-               )
-            );
-      } else {
+      if (!this.worldType.equals(RealmsServer.WorldType.ADVENTUREMAP)
+         && !this.worldType.equals(RealmsServer.WorldType.EXPERIENCE)
+         && !this.worldType.equals(RealmsServer.WorldType.INSPIRATION)) {
          this.parent
             .saveSlotSettings(
                new RealmsWorldOptions(
@@ -340,6 +327,22 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
                   this.difficultyIndex,
                   this.gameModeIndex,
                   this.forceGameMode,
+                  this.getSlotName()
+               )
+            );
+      } else {
+         this.parent
+            .saveSlotSettings(
+               new RealmsWorldOptions(
+                  this.options.pvp,
+                  this.options.spawnAnimals,
+                  this.options.spawnMonsters,
+                  this.options.spawnNPCs,
+                  this.options.spawnProtection,
+                  this.options.commandBlocks,
+                  this.difficultyIndex,
+                  this.gameModeIndex,
+                  this.options.forceGameMode,
                   this.getSlotName()
                )
             );

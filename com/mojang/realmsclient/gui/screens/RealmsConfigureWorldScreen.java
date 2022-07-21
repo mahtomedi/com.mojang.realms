@@ -618,7 +618,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
 
    void callback(WorldTemplate worldTemplate) {
       if (worldTemplate != null) {
-         if (worldTemplate.minigame) {
+         if (WorldTemplate.WorldTemplateType.MINIGAME.equals(worldTemplate.type)) {
             this.switchMinigame(worldTemplate);
          }
 

@@ -3,22 +3,35 @@ package com.mojang.realmsclient.util;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.minecraft.MinecraftProfileTexture;
+import com.mojang.authlib.minecraft.MinecraftSessionService;
+import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
+import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+import com.mojang.util.UUIDTypeAdapter;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import net.minecraft.realms.Realms;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class RealmsUtil {
-   public static LoadingCache<String, String> nameCache = CacheBuilder.newBuilder()
+   private static final YggdrasilAuthenticationService authenticationService = new YggdrasilAuthenticationService(
+      Realms.getProxy(), UUID.randomUUID().toString()
+   );
+   private static final MinecraftSessionService sessionService = authenticationService.createMinecraftSessionService();
+   public static LoadingCache<String, GameProfile> gameProfileCache = CacheBuilder.newBuilder()
       .expireAfterWrite(60L, TimeUnit.MINUTES)
-      .build(new CacheLoader<String, String>() {
-         public String load(String uuid) throws Exception {
-            String name = Realms.uuidToName(uuid);
-            if (name == null) {
-               throw new Exception("Couldn't get username");
+      .build(new CacheLoader<String, GameProfile>() {
+         public GameProfile load(String uuid) throws Exception {
+            GameProfile profile = RealmsUtil.sessionService.fillProfileProperties(new GameProfile(UUIDTypeAdapter.fromString(uuid), null), false);
+            if (profile == null) {
+               throw new Exception("Couldn't get profile");
             } else {
-               return name;
+               return profile;
             }
          }
       });
@@ -26,6 +39,20 @@ public class RealmsUtil {
    private static final int MINUTES = 60;
    private static final int HOURS = 3600;
    private static final int DAYS = 86400;
+
+   public static String uuidToName(String uuid) throws Exception {
+      GameProfile gameProfile = (GameProfile)gameProfileCache.get(uuid);
+      return gameProfile.getName();
+   }
+
+   public static Map<Type, MinecraftProfileTexture> getTextures(String uuid) {
+      try {
+         GameProfile gameProfile = (GameProfile)gameProfileCache.get(uuid);
+         return sessionService.getTextures(gameProfile, false);
+      } catch (Exception var2) {
+         return new HashMap();
+      }
+   }
 
    public static void browseTo(String uri) {
       try {

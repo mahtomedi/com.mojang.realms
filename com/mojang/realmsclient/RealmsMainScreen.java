@@ -20,7 +20,9 @@ import com.mojang.realmsclient.gui.screens.RealmsLongConfirmationScreen;
 import com.mojang.realmsclient.gui.screens.RealmsLongRunningMcoTaskScreen;
 import com.mojang.realmsclient.gui.screens.RealmsParentalConsentScreen;
 import com.mojang.realmsclient.gui.screens.RealmsPendingInvitesScreen;
+import com.mojang.realmsclient.util.RealmsPersistence;
 import com.mojang.realmsclient.util.RealmsTasks;
+import com.mojang.realmsclient.util.RealmsTextureManager;
 import com.mojang.realmsclient.util.RealmsUtil;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -103,6 +105,8 @@ public class RealmsMainScreen extends RealmsScreen {
    private volatile boolean trialsAvailable;
    private volatile boolean createdTrial;
    private volatile boolean showingPopup;
+   private volatile boolean hasUnreadNews;
+   private volatile String newsLink;
    private int carouselIndex;
    private int carouselTick;
    boolean hasSwitchedCarouselImage;
@@ -168,6 +172,7 @@ public class RealmsMainScreen extends RealmsScreen {
          }
 
          this.checkClientCompatability();
+         this.checkUnreadNews();
          if (!this.dontSetConnectedToRealms) {
             Realms.setConnectedToRealms(false);
          }
@@ -270,6 +275,11 @@ public class RealmsMainScreen extends RealmsScreen {
                   }
                }
             }
+         }
+
+         if (realmsDataFetcher.isFetchedSinceLastTry(RealmsDataFetcher.Task.UNREAD_NEWS)) {
+            this.hasUnreadNews = realmsDataFetcher.hasUnreadNews();
+            this.newsLink = realmsDataFetcher.newsLink();
          }
 
          realmsDataFetcher.markClean();
@@ -395,6 +405,9 @@ public class RealmsMainScreen extends RealmsScreen {
             .start();
       }
 
+   }
+
+   private void checkUnreadNews() {
    }
 
    private void checkParentalConsent() {
@@ -722,7 +735,7 @@ public class RealmsMainScreen extends RealmsScreen {
          this.renderMoreInfo(xm, ym);
       }
 
-      this.renderNews(xm, ym);
+      this.renderNews(xm, ym, this.hasUnreadNews);
       this.drawInvitationPendingIcon(xm, ym);
       if (RealmsClient.currentEnvironment.equals(RealmsClient.Environment.STAGE)) {
          this.renderStage();
@@ -786,7 +799,17 @@ public class RealmsMainScreen extends RealmsScreen {
       } else if (this.toolTip != null && this.toolTip.equals(getLocalizedString("mco.selectServer.close"))) {
          this.popupOpenedByUser = false;
       } else if (this.toolTip != null && this.toolTip.equals(getLocalizedString("mco.news"))) {
-         RealmsUtil.browseTo("https://mojang.com/category/realms");
+         if (this.newsLink == null) {
+            return;
+         }
+
+         RealmsUtil.browseTo(this.newsLink);
+         if (this.hasUnreadNews) {
+            RealmsPersistence.RealmsPersistenceData data = RealmsPersistence.readFile();
+            data.hasUnreadNews = false;
+            this.hasUnreadNews = false;
+            RealmsPersistence.writeFile(data);
+         }
       } else if (this.isOutsidePopup(x, y) && this.popupOpenedByUser) {
          this.popupOpenedByUser = false;
          this.justClosedPopup = true;
@@ -1121,7 +1144,7 @@ public class RealmsMainScreen extends RealmsScreen {
 
    }
 
-   private void renderNews(int xm, int ym) {
+   private void renderNews(int xm, int ym, boolean unread) {
       int x = this.width() - 17 - 20 - 25;
       int y = 6;
       boolean hovered = false;
@@ -1136,6 +1159,17 @@ public class RealmsMainScreen extends RealmsScreen {
       GL11.glPopMatrix();
       if (hovered) {
          this.toolTip = getLocalizedString("mco.news");
+      }
+
+      if (unread) {
+         int yOff = hovered
+            ? 0
+            : (int)(Math.max(0.0F, Math.max(RealmsMth.sin((float)(10 + this.animTick) * 0.57F), RealmsMth.cos((float)this.animTick * 0.35F))) * -6.0F);
+         RealmsScreen.bind("realms:textures/gui/realms/invitation_icons.png");
+         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+         GL11.glPushMatrix();
+         RealmsScreen.blit(x + 10, 8 + yOff, 40.0F, 0.0F, 8, 8, 48.0F, 16.0F);
+         GL11.glPopMatrix();
       }
 
    }
@@ -1448,7 +1482,7 @@ public class RealmsMainScreen extends RealmsScreen {
             }
 
             RealmsMainScreen.this.drawString(serverData.getName(), x + 2, y + 1, 16777215);
-            RealmsScreen.bindFace(serverData.ownerUUID, serverData.owner);
+            RealmsTextureManager.bindFace(serverData.ownerUUID);
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
             RealmsScreen.blit(x - 36, y, 8.0F, 8.0F, 8, 8, 32, 32, 64.0F, 64.0F);
             RealmsScreen.blit(x - 36, y, 40.0F, 8.0F, 8, 8, 32, 32, 64.0F, 64.0F);

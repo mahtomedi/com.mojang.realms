@@ -12,10 +12,10 @@ public class WorldTemplate extends ValueObject {
    public String version;
    public String author;
    public String link;
-   public boolean minigame;
    public String image;
    public String trailer;
    public String recommendedPlayers;
+   public WorldTemplate.WorldTemplateType type;
 
    public static WorldTemplate parse(JsonObject node) {
       WorldTemplate template = new WorldTemplate();
@@ -29,6 +29,7 @@ public class WorldTemplate extends ValueObject {
          template.image = JsonUtils.getStringOr("image", node, null);
          template.trailer = JsonUtils.getStringOr("trailer", node, "");
          template.recommendedPlayers = JsonUtils.getStringOr("recommendedPlayers", node, "");
+         template.type = WorldTemplate.WorldTemplateType.valueOf(JsonUtils.getStringOr("type", node, WorldTemplate.WorldTemplateType.WORLD_TEMPLATE.name()));
       } catch (Exception var3) {
          LOGGER.error("Could not parse WorldTemplate: " + var3.getMessage());
       }
@@ -36,7 +37,11 @@ public class WorldTemplate extends ValueObject {
       return template;
    }
 
-   public void setMinigame(boolean minigame) {
-      this.minigame = minigame;
+   public static enum WorldTemplateType {
+      WORLD_TEMPLATE,
+      MINIGAME,
+      ADVENTUREMAP,
+      EXPERIENCE,
+      INSPIRATION;
    }
 }

@@ -30,9 +30,13 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTempla
    private static final String ADVENTURE_MAP_LOCATION = "realms:textures/gui/realms/adventure.png";
    private static final String SURVIVAL_SPAWN_LOCATION = "realms:textures/gui/realms/survival_spawn.png";
    private static final String NEW_WORLD_LOCATION = "realms:textures/gui/realms/new_world.png";
+   private static final String EXPERIENCE_LOCATION = "realms:textures/gui/realms/experience.png";
+   private static final String INSPIRATION_LOCATION = "realms:textures/gui/realms/inspiration.png";
    private final int BUTTON_CANCEL_ID = 0;
    private final WorldTemplatePaginatedList templates = new WorldTemplatePaginatedList();
    private final WorldTemplatePaginatedList adventuremaps = new WorldTemplatePaginatedList();
+   private final WorldTemplatePaginatedList experiences = new WorldTemplatePaginatedList();
+   private final WorldTemplatePaginatedList inspirations = new WorldTemplatePaginatedList();
    private RealmsResetWorldScreen.ResetType selectedType = RealmsResetWorldScreen.ResetType.NONE;
    public int slot = -1;
    private RealmsResetWorldScreen.ResetType typeToReset = RealmsResetWorldScreen.ResetType.NONE;
@@ -79,6 +83,8 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTempla
             try {
                RealmsResetWorldScreen.this.templates.set(client.fetchWorldTemplates(1, 10, RealmsServer.WorldType.NORMAL));
                RealmsResetWorldScreen.this.adventuremaps.set(client.fetchWorldTemplates(1, 10, RealmsServer.WorldType.ADVENTUREMAP));
+               RealmsResetWorldScreen.this.experiences.set(client.fetchWorldTemplates(1, 10, RealmsServer.WorldType.EXPERIENCE));
+               RealmsResetWorldScreen.this.inspirations.set(client.fetchWorldTemplates(1, 10, RealmsServer.WorldType.INSPIRATION));
             } catch (RealmsServiceException var3) {
                RealmsResetWorldScreen.LOGGER.error("Couldn't fetch templates in reset world", var3);
             }
@@ -131,6 +137,20 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTempla
             templateScreen.setTitle(getLocalizedString("mco.reset.world.template"));
             Realms.setScreen(templateScreen);
             break;
+         case EXPERIENCE:
+            RealmsSelectWorldTemplateScreen experienceScreen = new RealmsSelectWorldTemplateScreen(
+               this, null, RealmsServer.WorldType.EXPERIENCE, new WorldTemplatePaginatedList(this.experiences)
+            );
+            experienceScreen.setTitle(getLocalizedString("mco.reset.world.experience"));
+            Realms.setScreen(experienceScreen);
+            break;
+         case INSPIRATION:
+            RealmsSelectWorldTemplateScreen inspirationScreen = new RealmsSelectWorldTemplateScreen(
+               this, null, RealmsServer.WorldType.INSPIRATION, new WorldTemplatePaginatedList(this.inspirations)
+            );
+            inspirationScreen.setTitle(getLocalizedString("mco.reset.world.inspiration"));
+            Realms.setScreen(inspirationScreen);
+            break;
          default:
             return;
       }
@@ -138,7 +158,7 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTempla
    }
 
    private int frame(int i) {
-      return this.width() / 2 - 80 + (i - 1) * 100;
+      return this.width() / 2 - 130 + (i - 1) * 100;
    }
 
    public void render(int xm, int ym, float a) {
@@ -167,6 +187,16 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTempla
          RealmsResetWorldScreen.ResetType.UPLOAD
       );
       this.drawFrame(
+         this.frame(3),
+         RealmsConstants.row(0) + 10,
+         xm,
+         ym,
+         getLocalizedString("mco.reset.world.template"),
+         -1L,
+         "realms:textures/gui/realms/survival_spawn.png",
+         RealmsResetWorldScreen.ResetType.SURVIVAL_SPAWN
+      );
+      this.drawFrame(
          this.frame(1),
          RealmsConstants.row(6) + 20,
          xm,
@@ -181,10 +211,20 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTempla
          RealmsConstants.row(6) + 20,
          xm,
          ym,
-         getLocalizedString("mco.reset.world.template"),
+         getLocalizedString("mco.reset.world.experience"),
          -1L,
-         "realms:textures/gui/realms/survival_spawn.png",
-         RealmsResetWorldScreen.ResetType.SURVIVAL_SPAWN
+         "realms:textures/gui/realms/experience.png",
+         RealmsResetWorldScreen.ResetType.EXPERIENCE
+      );
+      this.drawFrame(
+         this.frame(3),
+         RealmsConstants.row(6) + 20,
+         xm,
+         ym,
+         getLocalizedString("mco.reset.world.inspiration"),
+         -1L,
+         "realms:textures/gui/realms/inspiration.png",
+         RealmsResetWorldScreen.ResetType.INSPIRATION
       );
       super.render(xm, ym, a);
    }
@@ -225,9 +265,20 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTempla
          if (this.slot == -1) {
             this.resetWorldWithTemplate(worldTemplate);
          } else {
-            this.typeToReset = worldTemplate.recommendedPlayers != null && worldTemplate.recommendedPlayers.isEmpty()
-               ? RealmsResetWorldScreen.ResetType.SURVIVAL_SPAWN
-               : RealmsResetWorldScreen.ResetType.ADVENTURE;
+            switch(worldTemplate.type) {
+               case WORLD_TEMPLATE:
+                  this.typeToReset = RealmsResetWorldScreen.ResetType.SURVIVAL_SPAWN;
+                  break;
+               case ADVENTUREMAP:
+                  this.typeToReset = RealmsResetWorldScreen.ResetType.ADVENTURE;
+                  break;
+               case EXPERIENCE:
+                  this.typeToReset = RealmsResetWorldScreen.ResetType.EXPERIENCE;
+                  break;
+               case INSPIRATION:
+                  this.typeToReset = RealmsResetWorldScreen.ResetType.INSPIRATION;
+            }
+
             this.worldTemplateToReset = worldTemplate;
             this.switchSlot();
          }
@@ -259,6 +310,8 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTempla
                return;
             case ADVENTURE:
             case SURVIVAL_SPAWN:
+            case EXPERIENCE:
+            case INSPIRATION:
                if (this.worldTemplateToReset != null) {
                   this.resetWorldWithTemplate(this.worldTemplateToReset);
                }
@@ -323,7 +376,9 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTempla
       GENERATE,
       UPLOAD,
       ADVENTURE,
-      SURVIVAL_SPAWN;
+      SURVIVAL_SPAWN,
+      EXPERIENCE,
+      INSPIRATION;
    }
 
    public static class ResetWorldInfo {

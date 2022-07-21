@@ -123,8 +123,10 @@ mco.reset.world.seed=Seed (Optional)
 mco.reset.world.resetting.screen.title=Resetting world...
 mco.reset.world.generate=New world
 mco.reset.world.upload=Upload world
-mco.reset.world.adventure=Adventure maps
+mco.reset.world.adventure=Adventures
 mco.reset.world.template=World templates
+mco.reset.world.experience=Experiences
+mco.reset.world.inspiration=Inspiration
 
 mco.minigame.world.title=Switch realm to minigame
 mco.minigame.world.info.line1=This will temporarily replace your world with a minigame!
@@ -173,7 +175,9 @@ mco.configure.world.switch.slot.subtitle=This world is empty, choose how to crea
 
 mco.minigame.world.slot.screen.title=Switching world...
 
-mco.configure.world.edit.subscreen.adventuremap=Some settings are disabled since your current world is an adventure map
+mco.configure.world.edit.subscreen.adventuremap=Some settings are disabled since your current world is an adventure
+mco.configure.world.edit.subscreen.experience=Some settings are disabled since your current world is an experience
+mco.configure.world.edit.subscreen.inspiration=Some settings are disabled since your current world is an inspiration
 mco.configure.world.edit.slot.name=World name
 
 mco.configure.world.players.title=Players

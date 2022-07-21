@@ -5,6 +5,7 @@ import com.mojang.realmsclient.RealmsMainScreen;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.PendingInvite;
 import com.mojang.realmsclient.exception.RealmsServiceException;
+import com.mojang.realmsclient.util.RealmsTextureManager;
 import com.mojang.realmsclient.util.RealmsUtil;
 import java.util.List;
 import net.minecraft.realms.Realms;
@@ -198,7 +199,7 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
          int dx = this.getScrollbarPosition() - 50;
          this.drawAccept(dx, y, this.xm(), this.ym());
          this.drawReject(dx + 20, y, this.xm(), this.ym());
-         RealmsScreen.bindFace(invite.worldOwnerUuid, invite.worldOwnerName);
+         RealmsTextureManager.bindFace(invite.worldOwnerUuid);
          GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
          RealmsScreen.blit(x - 36, y, 8.0F, 8.0F, 8, 8, 32, 32, 64.0F, 64.0F);
          RealmsScreen.blit(x - 36, y, 40.0F, 8.0F, 8, 8, 32, 32, 64.0F, 64.0F);

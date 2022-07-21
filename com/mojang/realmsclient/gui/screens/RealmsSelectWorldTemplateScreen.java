@@ -251,7 +251,6 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
    private void selectTemplate() {
       if (this.selectedTemplate >= 0 && this.selectedTemplate < this.templates.size()) {
          WorldTemplate template = (WorldTemplate)this.templates.get(this.selectedTemplate);
-         template.setMinigame(this.worldType == RealmsServer.WorldType.MINIGAME);
          this.lastScreen.callback(template);
       }
 
@@ -275,6 +274,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
                      }
                   } catch (RealmsServiceException var5) {
                      RealmsSelectWorldTemplateScreen.LOGGER.error("Couldn't fetch templates");
+                     RealmsSelectWorldTemplateScreen.this.stopLoadingTemplates = true;
                   } finally {
                      RealmsSelectWorldTemplateScreen.this.loading = false;
                   }

@@ -9,6 +9,7 @@ import com.mojang.realmsclient.dto.PendingInvitesList;
 import com.mojang.realmsclient.dto.PingResult;
 import com.mojang.realmsclient.dto.PlayerInfo;
 import com.mojang.realmsclient.dto.RealmsDescriptionDto;
+import com.mojang.realmsclient.dto.RealmsNews;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.RealmsServerAddress;
 import com.mojang.realmsclient.dto.RealmsServerList;
@@ -19,7 +20,6 @@ import com.mojang.realmsclient.dto.ServerActivityList;
 import com.mojang.realmsclient.dto.Subscription;
 import com.mojang.realmsclient.dto.UploadInfo;
 import com.mojang.realmsclient.dto.WorldDownload;
-import com.mojang.realmsclient.dto.WorldTemplateList;
 import com.mojang.realmsclient.dto.WorldTemplatePaginatedList;
 import com.mojang.realmsclient.exception.RealmsHttpException;
 import com.mojang.realmsclient.exception.RealmsServiceException;
@@ -52,7 +52,6 @@ public class RealmsClient {
    private static final String PATH_GET_ACTIVTIES = "/$WORLD_ID";
    private static final String PATH_GET_LIVESTATS = "/liveplayerlist";
    private static final String PATH_GET_SUBSCRIPTION = "/$WORLD_ID";
-   private static final String PATH_GET_MINIGAMES = "/minigames";
    private static final String PATH_OP = "/$WORLD_ID/$PROFILE_UUID";
    private static final String PATH_PUT_INTO_MINIGAMES_MODE = "/minigames/$MINIGAME_ID/$WORLD_ID";
    private static final String PATH_AVAILABLE = "/available";
@@ -77,6 +76,7 @@ public class RealmsClient {
    private static final String PATH_WORLD_UPLOAD = "/$WORLD_ID/backups/upload";
    private static final String PATH_CLIENT_COMPATIBLE = "/client/compatible";
    private static final String PATH_TOS_AGREED = "/tos/agreed";
+   private static final String PATH_NEWS = "/v1/news";
    private static final String PATH_STAGE_AVAILABLE = "/stageAvailable";
    private static final Gson gson = new Gson();
 
@@ -239,12 +239,6 @@ public class RealmsClient {
       return WorldTemplatePaginatedList.parse(json);
    }
 
-   public WorldTemplateList fetchMinigames() throws RealmsServiceException {
-      String asciiUrl = this.url("worlds/minigames");
-      String json = this.execute(Request.get(asciiUrl));
-      return WorldTemplateList.parse(json);
-   }
-
    public Boolean putIntoMinigameMode(long worldId, String minigameId) throws RealmsServiceException {
       String path = "/minigames/$MINIGAME_ID/$WORLD_ID".replace("$MINIGAME_ID", minigameId).replace("$WORLD_ID", String.valueOf(worldId));
       String asciiUrl = this.url("worlds" + path);
@@ -342,6 +336,12 @@ public class RealmsClient {
    public void agreeToTos() throws RealmsServiceException {
       String asciiUrl = this.url("mco/tos/agreed");
       this.execute(Request.post(asciiUrl, ""));
+   }
+
+   public RealmsNews getNews() throws RealmsServiceException, IOException {
+      String asciiUrl = this.url("mco/v1/news");
+      String returnJson = this.execute(Request.get(asciiUrl, 5000, 10000));
+      return RealmsNews.parse(returnJson);
    }
 
    public void sendPingResults(PingResult pingResult) throws RealmsServiceException {

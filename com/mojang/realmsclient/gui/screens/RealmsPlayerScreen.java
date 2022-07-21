@@ -205,13 +205,13 @@ public class RealmsPlayerScreen extends RealmsScreen implements RealmsConfirmRes
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       float s = 32.0F;
       t.begin(7, RealmsDefaultVertexFormat.POSITION_TEX_COLOR);
-      t.vertex(0.0, (double)this.height(), 0.0).tex(0.0, (double)((float)(this.height() - bottom_border) / 32.0F + 0.0F)).color(64, 64, 64, 0).endVertex();
+      t.vertex(0.0, (double)this.height(), 0.0).tex(0.0, (double)((float)(this.height() - bottom_border) / 32.0F + 0.0F)).color(64, 64, 64, 255).endVertex();
       t.vertex((double)this.width(), (double)this.height(), 0.0)
          .tex((double)((float)this.width() / 32.0F), (double)((float)(this.height() - bottom_border) / 32.0F + 0.0F))
-         .color(64, 64, 64, 0)
+         .color(64, 64, 64, 255)
          .endVertex();
-      t.vertex((double)this.width(), (double)bottom_border, 0.0).tex((double)((float)this.width() / 32.0F), 0.0).color(64, 64, 64, 0).endVertex();
-      t.vertex(0.0, (double)bottom_border, 0.0).tex(0.0, 0.0).color(64, 64, 64, 0).endVertex();
+      t.vertex((double)this.width(), (double)bottom_border, 0.0).tex((double)((float)this.width() / 32.0F), 0.0).color(64, 64, 64, 255).endVertex();
+      t.vertex(0.0, (double)bottom_border, 0.0).tex(0.0, 0.0).color(64, 64, 64, 255).endVertex();
       t.end();
       this.drawCenteredString(getLocalizedString("mco.configure.world.players.title"), this.width() / 2, 17, 16777215);
       if (this.serverData != null && this.serverData.players != null) {
@@ -252,7 +252,7 @@ public class RealmsPlayerScreen extends RealmsScreen implements RealmsConfirmRes
       GL11.glPushMatrix();
       RealmsScreen.blit(x, y, 0.0F, 0.0F, 8, 7, 8.0F, 7.0F);
       GL11.glPopMatrix();
-      if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9) {
+      if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9 && ym < this.height() - 25 && ym > RealmsConstants.row(1)) {
          this.toolTip = getLocalizedString("mco.configure.world.invites.remove.tooltip");
       }
 
@@ -264,7 +264,7 @@ public class RealmsPlayerScreen extends RealmsScreen implements RealmsConfirmRes
       GL11.glPushMatrix();
       RealmsScreen.blit(x, y, 0.0F, 0.0F, 8, 8, 8.0F, 8.0F);
       GL11.glPopMatrix();
-      if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9) {
+      if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9 && ym < this.height() - 25 && ym > RealmsConstants.row(1)) {
          this.toolTip = getLocalizedString("mco.configure.world.invites.ops.tooltip");
       }
 

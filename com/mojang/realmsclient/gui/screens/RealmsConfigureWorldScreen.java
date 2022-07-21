@@ -577,21 +577,41 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
       this.switchMinigameButton.setVisible(true);
    }
 
+   public void saveSlotSettings() {
+      RealmsClient client = RealmsClient.createRealmsClient();
+
+      try {
+         client.updateSlot(this.serverData.id, this.serverData.activeSlot, (RealmsWorldOptions)this.serverData.slots.get(this.serverData.activeSlot));
+      } catch (RealmsServiceException var3) {
+         LOGGER.error("Couldn't save slot settings");
+         Realms.setScreen(new RealmsGenericErrorScreen(var3, this));
+         return;
+      } catch (UnsupportedEncodingException var4) {
+         LOGGER.error("Couldn't save slot settings");
+      }
+
+      Realms.setScreen(this);
+   }
+
    public void saveSlotSettings(RealmsWorldOptions options) {
       RealmsWorldOptions oldOptions = (RealmsWorldOptions)this.serverData.slots.get(this.serverData.activeSlot);
       options.templateId = oldOptions.templateId;
       options.templateImage = oldOptions.templateImage;
+      this.serverData.slots.put(this.serverData.activeSlot, options);
+      this.saveSlotSettings();
+   }
+
+   public void saveServerData() {
       RealmsClient client = RealmsClient.createRealmsClient();
 
       try {
-         client.updateSlot(this.serverData.id, this.serverData.activeSlot, options);
-         this.serverData.slots.put(this.serverData.activeSlot, options);
-      } catch (RealmsServiceException var5) {
-         LOGGER.error("Couldn't save slot settings");
-         Realms.setScreen(new RealmsGenericErrorScreen(var5, this));
+         client.update(this.serverData.id, this.serverData.getName(), this.serverData.getDescription());
+      } catch (RealmsServiceException var3) {
+         LOGGER.error("Couldn't save settings");
+         Realms.setScreen(new RealmsGenericErrorScreen(var3, this));
          return;
-      } catch (UnsupportedEncodingException var6) {
-         LOGGER.error("Couldn't save slot settings");
+      } catch (UnsupportedEncodingException var4) {
+         LOGGER.error("Couldn't save settings");
       }
 
       Realms.setScreen(this);
@@ -599,21 +619,9 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
 
    public void saveSettings(String name, String desc) {
       String description = desc != null && !desc.trim().equals("") ? desc : null;
-      RealmsClient client = RealmsClient.createRealmsClient();
-
-      try {
-         client.update(this.serverData.id, name, description);
-         this.serverData.setName(name);
-         this.serverData.setDescription(description);
-      } catch (RealmsServiceException var6) {
-         LOGGER.error("Couldn't save settings");
-         Realms.setScreen(new RealmsGenericErrorScreen(var6, this));
-         return;
-      } catch (UnsupportedEncodingException var7) {
-         LOGGER.error("Couldn't save settings");
-      }
-
-      Realms.setScreen(this);
+      this.serverData.setName(name);
+      this.serverData.setDescription(description);
+      this.saveServerData();
    }
 
    public void openTheWorld(boolean join, RealmsScreen screenInCaseOfCancel) {

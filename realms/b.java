@@ -220,13 +220,14 @@ public class b extends RealmsScreen {
       this.m.setVisible(this.c(server));
       this.n.setVisible(this.d(server));
       this.o.setVisible(this.e(server));
-      this.Q.setVisible(this.b() && this.z && !this.A);
+      boolean trialButton = this.b() && this.z && !this.A;
+      this.Q.setVisible(trialButton);
+      this.Q.active(trialButton);
       this.R.setVisible(this.b());
       this.S.setVisible(this.b() && this.x);
       this.m.active(!this.b());
       this.n.active(!this.b());
       this.o.active(!this.b());
-      this.Q.active(!this.b());
       this.P.active(true);
       this.O.active(true);
       this.l.active(true);
@@ -259,7 +260,6 @@ public class b extends RealmsScreen {
       }
 
       this.i = new realms.b.d();
-      this.i.setLeftPos(-15);
       if (g != -1) {
          this.i.scroll(g);
       }
@@ -282,6 +282,11 @@ public class b extends RealmsScreen {
          if (f.a(v.d.a)) {
             List<RealmsServer> newServers = f.e();
             this.i.clear();
+            boolean firstFetchCompleted = !this.w;
+            if (firstFetchCompleted) {
+               this.w = true;
+            }
+
             if (newServers != null) {
                boolean ownsNonExpiredRealmServer = false;
 
@@ -291,11 +296,10 @@ public class b extends RealmsScreen {
                   }
                }
 
+               this.q = newServers;
                if (this.a()) {
                   this.i.addEntry(new realms.b.f());
                }
-
-               this.q = newServers;
 
                for(RealmsServer server : this.q) {
                   this.i.addEntry(new realms.b.e(server));
@@ -307,8 +311,7 @@ public class b extends RealmsScreen {
                }
             }
 
-            if (!this.w) {
-               this.w = true;
+            if (firstFetchCompleted) {
                this.c();
             }
          }
@@ -705,14 +708,14 @@ public class b extends RealmsScreen {
          RealmsScreen.bind("realms:textures/gui/realms/trial_icon.png");
          GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
          GlStateManager.pushMatrix();
-         int ySprite = 0;
+         int diamondWidth = 8;
+         int diamondHeight = 8;
+         int vSprite = 0;
          if ((System.currentTimeMillis() / 800L & 1L) == 1L) {
-            ySprite = 8;
+            vSprite = 8;
          }
 
-         int yo = this.height() / 2 - 83 - 3;
-         int buttonHeight = yo + 147 - 20;
-         RealmsScreen.blit(this.width() / 2 + 52 + 83, buttonHeight - 4, 0.0F, (float)ySprite, 8, 8, 8, 16);
+         RealmsScreen.blit(this.Q.x() + this.Q.getWidth() - 8 - 4, this.Q.y() + this.Q.getHeight() / 2 - 4, 0.0F, (float)vSprite, 8, 8, 8, 16);
          GlStateManager.popMatrix();
       }
 
@@ -897,32 +900,6 @@ public class b extends RealmsScreen {
       al longRunningMcoTaskScreen = new al(cancelScreen, new bi.e(this, cancelScreen, server, this.L));
       longRunningMcoTaskScreen.a();
       Realms.setScreen(longRunningMcoTaskScreen);
-   }
-
-   public void a(int item) {
-      if (this.a()) {
-         if (item == 0) {
-            this.a(null);
-            return;
-         }
-
-         --item;
-      }
-
-      if (item < this.q.size()) {
-         RealmsServer server = (RealmsServer)this.q.get(item);
-         if (server.state == RealmsServer.b.c) {
-            this.a(null);
-            this.j = -1L;
-         } else {
-            this.j = server.id;
-            this.a(server);
-            if (this.K >= 10 && this.k.active()) {
-               this.a(this.a(this.j), this);
-            }
-
-         }
-      }
    }
 
    private boolean h(RealmsServer serverData) {
@@ -1266,52 +1243,33 @@ public class b extends RealmsScreen {
       public void selectItem(int item) {
          this.setSelected(item);
          if (item != -1) {
+            RealmsServer server;
             if (b.this.a()) {
                if (item == 0) {
-                  String msg = RealmsScreen.getLocalizedString("mco.trial.message.line1") + RealmsScreen.getLocalizedString("mco.trial.message.line2");
-                  Realms.narrateNow(msg);
-                  b.this.a(item);
+                  Realms.narrateNow(
+                     new String[]{RealmsScreen.getLocalizedString("mco.trial.message.line1"), RealmsScreen.getLocalizedString("mco.trial.message.line2")}
+                  );
+                  server = null;
                } else {
-                  --item;
+                  server = (RealmsServer)b.this.q.get(item - 1);
                }
-            }
-
-            if (item >= b.this.q.size()) {
-               return;
-            }
-
-            RealmsServer server = (RealmsServer)b.this.q.get(item);
-            if (server == null) {
-               return;
-            }
-
-            if (server.state == RealmsServer.b.c) {
-               Realms.narrateNow(RealmsScreen.getLocalizedString("mco.selectServer.uninitialized") + RealmsScreen.getLocalizedString("mco.gui.button"));
             } else {
-               Realms.narrateNow(RealmsScreen.getLocalizedString("narrator.select", new Object[]{((RealmsServer)b.this.q.get(item)).name}));
-            }
-         }
-
-         b.this.a(item);
-         int newIndex = item;
-         if (b.this.a()) {
-            if (item == 0) {
-               b.this.a(null);
-               return;
+               server = (RealmsServer)b.this.q.get(item);
             }
 
-            newIndex = item - 1;
-         }
-
-         if (newIndex < b.this.q.size()) {
-            RealmsServer server = (RealmsServer)b.this.q.get(newIndex);
-            if (server != null) {
-               if (server.state == RealmsServer.b.c) {
-                  b.this.a(null);
-               } else {
-                  b.this.a((RealmsServer)b.this.q.get(newIndex));
+            b.this.a(server);
+            if (server == null) {
+               b.this.j = -1L;
+            } else if (server.state == RealmsServer.b.c) {
+               Realms.narrateNow(RealmsScreen.getLocalizedString("mco.selectServer.uninitialized") + RealmsScreen.getLocalizedString("mco.gui.button"));
+               b.this.j = -1L;
+            } else {
+               b.this.j = server.id;
+               if (b.this.K >= 10 && b.this.k.active()) {
+                  b.this.a(b.this.a(b.this.j), b.this);
                }
 
+               Realms.narrateNow(RealmsScreen.getLocalizedString("narrator.select", new Object[]{server.name}));
             }
          }
       }
@@ -1355,7 +1313,7 @@ public class b extends RealmsScreen {
       }
 
       public int getRowWidth() {
-         return Math.max(300, super.getRowWidth());
+         return 300;
       }
    }
 

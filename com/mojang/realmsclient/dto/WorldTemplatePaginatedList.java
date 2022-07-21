@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import net.minecraft.obfuscate.DontObfuscateOrShrink;
@@ -24,19 +24,11 @@ public class WorldTemplatePaginatedList extends l {
    public WorldTemplatePaginatedList() {
    }
 
-   public WorldTemplatePaginatedList(WorldTemplatePaginatedList src) {
-      this.set(src);
-   }
-
    public WorldTemplatePaginatedList(int size) {
+      this.templates = Collections.emptyList();
+      this.page = 0;
       this.size = size;
-   }
-
-   public void set(WorldTemplatePaginatedList src) {
-      this.templates = new ArrayList((Collection)(src.templates == null ? new ArrayList() : src.templates));
-      this.page = src.page;
-      this.size = src.size;
-      this.total = src.total;
+      this.total = -1;
    }
 
    public boolean isLastPage() {

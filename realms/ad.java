@@ -69,7 +69,7 @@ public class ad extends at<WorldTemplate> implements w.b {
 
       this.buttonsAdd(this.p = new RealmsButton(8, this.b(0), u.a(13) - 5, 100, 20, getLocalizedString("mco.configure.world.buttons.switchminigame")) {
          public void onPress() {
-            av minigameScreen = new av(ad.this, null, RealmsServer.c.b);
+            av minigameScreen = new av(ad.this, RealmsServer.c.b);
             minigameScreen.a(RealmsScreen.getLocalizedString("mco.template.title.minigame"));
             Realms.setScreen(minigameScreen);
          }
@@ -264,7 +264,7 @@ public class ad extends at<WorldTemplate> implements w.b {
    }
 
    private void f() {
-      av screen = new av(this, null, RealmsServer.c.b);
+      av screen = new av(this, RealmsServer.c.b);
       screen.a(getLocalizedString("mco.template.title.minigame"));
       screen.b(getLocalizedString("mco.minigame.world.info.line1") + "\\n" + getLocalizedString("mco.minigame.world.info.line2"));
       Realms.setScreen(screen);

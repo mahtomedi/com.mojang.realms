@@ -185,7 +185,10 @@ public class ax extends RealmsScreen {
       });
       this.addWidget(this.e);
       this.addWidget(this.B = new RealmsLabel(getLocalizedString("mco.configure.world.buttons.options"), this.width() / 2, 17, 16777215));
-      this.addWidget(this.C);
+      if (this.C != null) {
+         this.addWidget(this.C);
+      }
+
       this.narrateLabels();
    }
 
@@ -255,27 +258,6 @@ public class ax extends RealmsScreen {
 
       this.e.render(xm, ym, a);
       super.render(xm, ym, a);
-   }
-
-   public boolean mouseReleased(double x, double y, int buttonNum) {
-      if (!this.y.active()) {
-         return super.mouseReleased(x, y, buttonNum);
-      } else {
-         this.y.onRelease(x, y);
-         return true;
-      }
-   }
-
-   public boolean mouseDragged(double x, double y, int buttonNum, double dx, double dy) {
-      if (!this.y.active()) {
-         return super.mouseDragged(x, y, buttonNum, dx, dy);
-      } else {
-         if (x < (double)(this.f + this.y.getWidth()) && x > (double)this.f && y < (double)(this.y.y() + 20) && y > (double)this.y.y()) {
-            this.y.onClick(x, y);
-         }
-
-         return true;
-      }
    }
 
    private String j() {

@@ -162,6 +162,10 @@ public class ao extends RealmsScreen {
       return invite != -1;
    }
 
+   public static String a(PendingInvite invite) {
+      return bk.a(System.currentTimeMillis() - invite.date.getTime());
+   }
+
    class a extends RealmsObjectSelectionList<ao.b> {
       public a() {
          super(ao.this.width(), ao.this.height(), 32, ao.this.height() - 40, 36);
@@ -175,6 +179,10 @@ public class ao extends RealmsScreen {
          return this.getItemCount() * 36;
       }
 
+      public int getRowWidth() {
+         return 260;
+      }
+
       public boolean isFocused() {
          return ao.this.isFocused(this);
       }
@@ -186,7 +194,11 @@ public class ao extends RealmsScreen {
       public void selectItem(int item) {
          this.setSelected(item);
          if (item != -1) {
-            Realms.narrateNow(RealmsScreen.getLocalizedString("narrator.select", new Object[]{((ao.b)ao.this.e.children().get(item)).a.worldName}));
+            List<ao.b> children = ao.this.e.children();
+            PendingInvite pendingInvite = ((ao.b)children.get(item)).a;
+            String positionInList = RealmsScreen.getLocalizedString("narrator.select.list.position", new Object[]{item + 1, children.size()});
+            String narration = Realms.joinNarrations(Arrays.asList(pendingInvite.worldName, pendingInvite.worldOwnerName, ao.a(pendingInvite), positionInList));
+            Realms.narrateNow(RealmsScreen.getLocalizedString("narrator.select", new Object[]{narration}));
          }
 
          this.b(item);
@@ -219,7 +231,7 @@ public class ao extends RealmsScreen {
       private void a(PendingInvite invite, int x, int y, int mouseX, int mouseY) {
          ao.this.drawString(invite.worldName, x + 38, y + 1, 16777215);
          ao.this.drawString(invite.worldOwnerName, x + 38, y + 12, 7105644);
-         ao.this.drawString(bk.a(System.currentTimeMillis() - invite.date.getTime()), x + 38, y + 24, 7105644);
+         ao.this.drawString(ao.a(invite), x + 38, y + 24, 7105644);
          x.a(this.c, ao.this.e, x, y, mouseX, mouseY);
          bj.a(invite.worldOwnerUuid, (Runnable)(() -> {
             GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);

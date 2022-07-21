@@ -24,10 +24,10 @@ public class ar extends at<WorldTemplate> {
    private int k = 16711680;
    private final int l = 0;
    private final int m = 100;
-   private final WorldTemplatePaginatedList n = new WorldTemplatePaginatedList();
-   private final WorldTemplatePaginatedList o = new WorldTemplatePaginatedList();
-   private final WorldTemplatePaginatedList p = new WorldTemplatePaginatedList();
-   private final WorldTemplatePaginatedList q = new WorldTemplatePaginatedList();
+   private WorldTemplatePaginatedList n = null;
+   private WorldTemplatePaginatedList o = null;
+   private WorldTemplatePaginatedList p = null;
+   private WorldTemplatePaginatedList q = null;
    public int a = -1;
    private ar.b r = ar.b.a;
    private ar.c s = null;
@@ -72,12 +72,18 @@ public class ar extends at<WorldTemplate> {
             g client = realms.g.a();
 
             try {
-               ar.this.n.set(client.a(1, 10, RealmsServer.c.a));
-               ar.this.o.set(client.a(1, 10, RealmsServer.c.c));
-               ar.this.p.set(client.a(1, 10, RealmsServer.c.d));
-               ar.this.q.set(client.a(1, 10, RealmsServer.c.e));
-            } catch (o var3) {
-               ar.b.error("Couldn't fetch templates in reset world", var3);
+               WorldTemplatePaginatedList templates = client.a(1, 10, RealmsServer.c.a);
+               WorldTemplatePaginatedList adventuremaps = client.a(1, 10, RealmsServer.c.c);
+               WorldTemplatePaginatedList experiences = client.a(1, 10, RealmsServer.c.d);
+               WorldTemplatePaginatedList inspirations = client.a(1, 10, RealmsServer.c.e);
+               Realms.execute(() -> {
+                  ar.this.n = templates;
+                  ar.this.o = adventuremaps;
+                  ar.this.p = experiences;
+                  ar.this.q = inspirations;
+               });
+            } catch (o var6) {
+               ar.b.error("Couldn't fetch templates in reset world", var6);
             }
 
          }
@@ -101,7 +107,7 @@ public class ar extends at<WorldTemplate> {
       this.buttonsAdd(
          new ar.a(this.c(3), realms.u.a(0) + 10, getLocalizedString("mco.reset.world.template"), -1L, "realms:textures/gui/realms/survival_spawn.png", ar.b.e) {
             public void onPress() {
-               av templateScreen = new av(ar.this, null, RealmsServer.c.a, new WorldTemplatePaginatedList(ar.this.n));
+               av templateScreen = new av(ar.this, RealmsServer.c.a, ar.this.n);
                templateScreen.a(RealmsScreen.getLocalizedString("mco.reset.world.template"));
                Realms.setScreen(templateScreen);
             }
@@ -110,7 +116,7 @@ public class ar extends at<WorldTemplate> {
       this.buttonsAdd(
          new ar.a(this.c(1), realms.u.a(6) + 20, getLocalizedString("mco.reset.world.adventure"), -1L, "realms:textures/gui/realms/adventure.png", ar.b.d) {
             public void onPress() {
-               av screen = new av(ar.this, null, RealmsServer.c.c, new WorldTemplatePaginatedList(ar.this.o));
+               av screen = new av(ar.this, RealmsServer.c.c, ar.this.o);
                screen.a(RealmsScreen.getLocalizedString("mco.reset.world.adventure"));
                Realms.setScreen(screen);
             }
@@ -119,7 +125,7 @@ public class ar extends at<WorldTemplate> {
       this.buttonsAdd(
          new ar.a(this.c(2), realms.u.a(6) + 20, getLocalizedString("mco.reset.world.experience"), -1L, "realms:textures/gui/realms/experience.png", ar.b.f) {
             public void onPress() {
-               av experienceScreen = new av(ar.this, null, RealmsServer.c.d, new WorldTemplatePaginatedList(ar.this.p));
+               av experienceScreen = new av(ar.this, RealmsServer.c.d, ar.this.p);
                experienceScreen.a(RealmsScreen.getLocalizedString("mco.reset.world.experience"));
                Realms.setScreen(experienceScreen);
             }
@@ -128,7 +134,7 @@ public class ar extends at<WorldTemplate> {
       this.buttonsAdd(
          new ar.a(this.c(3), realms.u.a(6) + 20, getLocalizedString("mco.reset.world.inspiration"), -1L, "realms:textures/gui/realms/inspiration.png", ar.b.g) {
             public void onPress() {
-               av inspirationScreen = new av(ar.this, null, RealmsServer.c.e, new WorldTemplatePaginatedList(ar.this.q));
+               av inspirationScreen = new av(ar.this, RealmsServer.c.e, ar.this.q);
                inspirationScreen.a(RealmsScreen.getLocalizedString("mco.reset.world.inspiration"));
                Realms.setScreen(inspirationScreen);
             }

@@ -14,7 +14,7 @@ public class ac extends RealmsScreen {
    }
 
    public void init() {
-      this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 100, u.a(12), "Back") {
+      this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 100, u.a(12), getLocalizedString("gui.back")) {
          public void onPress() {
             Realms.setScreen(ac.this.a);
          }

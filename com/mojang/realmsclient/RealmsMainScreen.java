@@ -383,7 +383,7 @@ public class RealmsMainScreen extends RealmsScreen {
                      }
                   } catch (RealmsServiceException var3) {
                      RealmsMainScreen.checkedClientCompatability = false;
-                     RealmsMainScreen.LOGGER.error("Couldn't connect to realms: ", new Object[]{var3.toString()});
+                     RealmsMainScreen.LOGGER.error("Couldn't connect to realms: ", var3.toString());
                      if (var3.httpResultCode == 401) {
                         Realms.setScreen(
                            RealmsMainScreen.realmsGenericErrorScreen = new RealmsGenericErrorScreen(
@@ -397,7 +397,7 @@ public class RealmsMainScreen extends RealmsScreen {
                      }
                   } catch (IOException var4) {
                      RealmsMainScreen.checkedClientCompatability = false;
-                     RealmsMainScreen.LOGGER.error("Couldn't connect to realms: ", new Object[]{var4.getMessage()});
+                     RealmsMainScreen.LOGGER.error("Couldn't connect to realms: ", var4.getMessage());
                      Realms.setScreen(new RealmsGenericErrorScreen(var4.getMessage(), RealmsMainScreen.this.lastScreen));
                   }
                }
@@ -428,10 +428,10 @@ public class RealmsMainScreen extends RealmsScreen {
 
                RealmsMainScreen.checkedParentalConsent = true;
             } catch (RealmsServiceException var3) {
-               RealmsMainScreen.LOGGER.error("Couldn't connect to realms: ", new Object[]{var3.toString()});
+               RealmsMainScreen.LOGGER.error("Couldn't connect to realms: ", var3.toString());
                Realms.setScreen(new RealmsGenericErrorScreen(var3, RealmsMainScreen.this.lastScreen));
             } catch (IOException var4) {
-               RealmsMainScreen.LOGGER.error("Couldn't connect to realms: ", new Object[]{var4.getMessage()});
+               RealmsMainScreen.LOGGER.error("Couldn't connect to realms: ", var4.getMessage());
                Realms.setScreen(new RealmsGenericErrorScreen(var4.getMessage(), RealmsMainScreen.this.lastScreen));
             }
 

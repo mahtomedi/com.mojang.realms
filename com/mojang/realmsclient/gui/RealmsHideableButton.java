@@ -9,9 +9,9 @@ public class RealmsHideableButton extends RealmsButton {
       super(id, x, y, width, height, msg);
    }
 
-   public void render(int xm, int ym) {
+   public void render(int xm, int ym, float a) {
       if (this.visible) {
-         super.render(xm, ym);
+         super.render(xm, ym, a);
       }
    }
 

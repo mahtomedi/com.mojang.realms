@@ -80,7 +80,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
          RealmsWorldOptions slot = (RealmsWorldOptions)entry.getValue();
          boolean canPlay = entry.getKey() != this.serverData.activeSlot || this.serverData.worldType.equals(RealmsServer.WorldType.MINIGAME);
          RealmsButton downloadButton = newButton(
-            canPlay ? (Integer)playButtonIds.get(entry.getKey() - 1) : (Integer)downloadButtonIds.get(entry.getKey() - 1),
+            canPlay ? playButtonIds.get(entry.getKey() - 1) : downloadButtonIds.get(entry.getKey() - 1),
             this.getFramePositionX(entry.getKey()),
             RealmsConstants.row(8),
             80,

@@ -77,7 +77,7 @@ public class RealmsTextureManager {
                   MinecraftProfileTexture textureInfo = (MinecraftProfileTexture)fetchedTextures.get(Type.SKIN);
                   String url = textureInfo.getUrl();
                   HttpURLConnection connection = null;
-                  RealmsTextureManager.LOGGER.debug("Downloading http texture from {}", new Object[]{url});
+                  RealmsTextureManager.LOGGER.debug("Downloading http texture from {}", url);
 
                   try {
                      connection = (HttpURLConnection)new URL(url).openConnection(Realms.getProxy());

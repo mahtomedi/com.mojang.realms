@@ -41,9 +41,9 @@ mco.selectServer.expires.soon=Expires soon
 
 mco.selectServer.note=Note:
 mco.selectServer.mapOnlySupportedForVersion=This map is unsupported in %s
-mco.selectServer.minigameNotSupportedInVersion=Can't play this mini-game in %s
+mco.selectServer.minigameNotSupportedInVersion=Can't play this minigame in %s
 
-mco.selectServer.popup=Realms is a safe, simple way to enjoy an online Minecraft world with up to ten friends at a time.   It supports loads of minigames and plenty of custom worlds! Only the owner of the Realm needs to pay.
+mco.selectServer.popup=Realms is a safe, simple way to enjoy an online Minecraft world with up to ten friends at a time.   It supports loads of minigames and plenty of custom worlds! Only the owner of the realm needs to pay.
 
 mco.configure.world.settings.title=Settings
 

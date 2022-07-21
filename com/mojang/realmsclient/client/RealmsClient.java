@@ -277,9 +277,15 @@ public class RealmsClient {
       return this.execute(Request.get(asciiUrl));
    }
 
-   public UploadInfo upload(long worldId) throws RealmsServiceException {
+   public UploadInfo upload(long worldId, String uploadToken) throws RealmsServiceException {
       String asciiUrl = this.url("worlds" + "/$WORLD_ID/backups/upload".replace("$WORLD_ID", String.valueOf(worldId)));
-      return UploadInfo.parse(this.execute(Request.get(asciiUrl)));
+      UploadInfo oldUploadInfo = new UploadInfo();
+      if (uploadToken != null) {
+         oldUploadInfo.setToken(uploadToken);
+      }
+
+      String content = gson.toJson(oldUploadInfo);
+      return UploadInfo.parse(this.execute(Request.put(asciiUrl, content)));
    }
 
    public void uploadFinished(long worldId) throws RealmsServiceException {

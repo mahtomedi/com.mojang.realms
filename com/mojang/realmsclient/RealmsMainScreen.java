@@ -498,8 +498,8 @@ public class RealmsMainScreen extends RealmsScreen {
    }
 
    private boolean inPendingInvitationArea(int xm, int ym) {
-      int x1 = this.width() / 2 + 56;
-      int x2 = this.width() / 2 + 78;
+      int x1 = this.width() / 2 + 50;
+      int x2 = this.width() / 2 + 66;
       int y1 = 13;
       int y2 = 27;
       return x1 <= xm && xm <= x2 && y1 <= ym && ym <= y2;

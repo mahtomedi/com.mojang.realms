@@ -134,8 +134,8 @@ mco.connect.failed=Failed to connect to the online server
 
 mco.create.world=Create
 
-mco.client.outdated.title=Client Outdated!
-mco.client.outdated.msg=Your client is outdated, please consider updating it to use Realms
+mco.client.outdated.title=Client Incompatible!
+mco.client.outdated.msg=Your client is not compatible with Realms, please consider updating it
 
 mco.backup.title=Edit World
 mco.backup.backup=Backups

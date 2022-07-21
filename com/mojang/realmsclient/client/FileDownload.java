@@ -57,7 +57,7 @@ public class FileDownload {
                   if (response.getStatusLine().getStatusCode() == 200) {
                      OutputStream os = new FileOutputStream(FileDownload.this.tempFile);
                      FileDownload.ProgressListener progressListener = FileDownload.this.new ProgressListener(
-                        worldName, FileDownload.this.tempFile, levelStorageSource, downloadStatus
+                        worldName.trim(), FileDownload.this.tempFile, levelStorageSource, downloadStatus
                      );
                      FileDownload.DownloadCountingOutputStream dcount = FileDownload.this.new DownloadCountingOutputStream(os);
                      dcount.setListener(progressListener);
@@ -140,7 +140,7 @@ public class FileDownload {
          tarIn = new TarArchiveInputStream(new GzipCompressorInputStream(new BufferedInputStream(new FileInputStream(file))));
 
          for(TarArchiveEntry tarEntry = tarIn.getNextTarEntry(); tarEntry != null; tarEntry = tarIn.getNextTarEntry()) {
-            File destPath = new File(saves, tarEntry.getName().replace("world" + File.separator, name + File.separator));
+            File destPath = new File(saves, tarEntry.getName().replace("world", name));
             if (tarEntry.isDirectory()) {
                destPath.mkdirs();
             } else {

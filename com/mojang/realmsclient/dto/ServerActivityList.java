@@ -6,7 +6,7 @@ import com.google.gson.JsonParser;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.obfuscate.DontObfuscateOrShrink;
-import realms.bd;
+import realms.be;
 import realms.l;
 
 @DontObfuscateOrShrink
@@ -21,7 +21,7 @@ public class ServerActivityList extends l {
       try {
          JsonElement jsonElement = parser.parse(json);
          JsonObject object = jsonElement.getAsJsonObject();
-         activityList.periodInMillis = bd.a("periodInMillis", object, -1L);
+         activityList.periodInMillis = be.a("periodInMillis", object, -1L);
          JsonElement activityArray = object.get("playerActivityDto");
          if (activityArray != null && activityArray.isJsonArray()) {
             for(JsonElement element : activityArray.getAsJsonArray()) {

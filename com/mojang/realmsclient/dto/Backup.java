@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 import net.minecraft.obfuscate.DontObfuscateOrShrink;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import realms.bd;
+import realms.be;
 import realms.l;
 
 @DontObfuscateOrShrink
@@ -27,9 +27,9 @@ public class Backup extends l {
       Backup backup = new Backup();
 
       try {
-         backup.backupId = bd.a("backupId", object, "");
-         backup.lastModifiedDate = bd.a("lastModifiedDate", object);
-         backup.size = bd.a("size", object, 0L);
+         backup.backupId = be.a("backupId", object, "");
+         backup.lastModifiedDate = be.a("lastModifiedDate", object);
+         backup.size = be.a("size", object, 0L);
          if (object.has("metadata")) {
             JsonObject metadataObject = object.getAsJsonObject("metadata");
 

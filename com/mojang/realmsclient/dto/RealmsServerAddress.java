@@ -5,7 +5,7 @@ import com.google.gson.JsonParser;
 import net.minecraft.obfuscate.DontObfuscateOrShrink;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import realms.bd;
+import realms.be;
 import realms.l;
 
 @DontObfuscateOrShrink
@@ -21,9 +21,9 @@ public class RealmsServerAddress extends l {
 
       try {
          JsonObject object = parser.parse(json).getAsJsonObject();
-         serverAddress.address = bd.a("address", object, null);
-         serverAddress.resourcePackUrl = bd.a("resourcePackUrl", object, null);
-         serverAddress.resourcePackHash = bd.a("resourcePackHash", object, null);
+         serverAddress.address = be.a("address", object, null);
+         serverAddress.resourcePackUrl = be.a("resourcePackUrl", object, null);
+         serverAddress.resourcePackHash = be.a("resourcePackHash", object, null);
       } catch (Exception var4) {
          LOGGER.error("Could not parse RealmsServerAddress: " + var4.getMessage());
       }

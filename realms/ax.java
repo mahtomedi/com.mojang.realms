@@ -1,181 +1,325 @@
 package realms;
 
 import com.mojang.realmsclient.dto.RealmsServer;
-import com.mojang.realmsclient.dto.Subscription;
-import java.io.IOException;
-import java.text.DateFormat;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Locale;
-import java.util.TimeZone;
+import com.mojang.realmsclient.dto.RealmsWorldOptions;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
+import net.minecraft.realms.RealmsEditBox;
+import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsScreen;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import net.minecraft.realms.RealmsSliderButton;
 
 public class ax extends RealmsScreen {
-   private static final Logger a = LogManager.getLogger();
-   private final RealmsScreen b;
-   private final RealmsServer c;
-   private final RealmsScreen d;
-   private final int e = 0;
-   private final int f = 1;
-   private final int g = 2;
-   private final String h;
-   private final String i;
-   private final String j;
-   private final String k;
+   private RealmsEditBox e;
+   protected final ad a;
+   private int f;
+   private int g;
+   private int h;
+   private final RealmsWorldOptions i;
+   private final RealmsServer.c j;
+   private final int k;
    private int l;
-   private String m;
-   private Subscription.a n;
-   private final String o = "https://account.mojang.com/buy/realms";
+   private int m;
+   private Boolean n;
+   private Boolean o;
+   private Boolean p;
+   private Boolean q;
+   private Integer r;
+   private Boolean s;
+   private Boolean t;
+   private RealmsButton u;
+   private RealmsButton v;
+   private RealmsButton w;
+   private RealmsButton x;
+   private RealmsSliderButton y;
+   private RealmsButton z;
+   private RealmsButton A;
+   String[] b;
+   String[] c;
+   String[][] d;
+   private RealmsLabel B;
+   private RealmsLabel C = null;
 
-   public ax(RealmsScreen lastScreen, RealmsServer serverData, RealmsScreen mainScreen) {
-      this.b = lastScreen;
-      this.c = serverData;
-      this.d = mainScreen;
-      this.h = getLocalizedString("mco.configure.world.subscription.title");
-      this.i = getLocalizedString("mco.configure.world.subscription.start");
-      this.j = getLocalizedString("mco.configure.world.subscription.timeleft");
-      this.k = getLocalizedString("mco.configure.world.subscription.recurring.daysleft");
-   }
-
-   public void init() {
-      this.a(this.c.id);
-      Realms.narrateNow(new String[]{this.h, this.i, this.m, this.j, this.a(this.l)});
-      this.setKeyboardHandlerSendRepeatsToGui(true);
-      this.buttonsAdd(new RealmsButton(2, this.width() / 2 - 100, u.a(6), getLocalizedString("mco.configure.world.subscription.extend")) {
-         public void onPress() {
-            String extensionUrl = "https://account.mojang.com/buy/realms?sid=" + ax.this.c.remoteSubscriptionId + "&pid=" + Realms.getUUID();
-            Realms.setClipboard(extensionUrl);
-            bj.c(extensionUrl);
-         }
-      });
-      this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 100, u.a(12), getLocalizedString("gui.back")) {
-         public void onPress() {
-            Realms.setScreen(ax.this.b);
-         }
-      });
-      if (this.c.expired) {
-         this.buttonsAdd(new RealmsButton(1, this.width() / 2 - 100, u.a(10), getLocalizedString("mco.configure.world.delete.button")) {
-            public void onPress() {
-               String line2 = RealmsScreen.getLocalizedString("mco.configure.world.delete.question.line1");
-               String line3 = RealmsScreen.getLocalizedString("mco.configure.world.delete.question.line2");
-               Realms.setScreen(new aj(ax.this, aj.a.a, line2, line3, true, 1));
-            }
-         });
-      }
-
-   }
-
-   private void a(long worldId) {
-      g client = realms.g.a();
-
-      try {
-         Subscription subscription = client.h(worldId);
-         this.l = subscription.daysLeft;
-         this.m = this.b(subscription.startDate);
-         this.n = subscription.type;
-      } catch (o var5) {
-         a.error("Couldn't get subscription");
-         Realms.setScreen(new ah(var5, this.b));
-      } catch (IOException var6) {
-         a.error("Couldn't parse response subscribing");
-      }
-
-   }
-
-   public void confirmResult(boolean result, int id) {
-      if (id == 1 && result) {
-         (new Thread("Realms-delete-realm") {
-            public void run() {
-               try {
-                  g client = realms.g.a();
-                  client.i(ax.this.c.id);
-               } catch (o var2) {
-                  ax.a.error("Couldn't delete world");
-                  ax.a.error(var2);
-               } catch (IOException var3) {
-                  ax.a.error("Couldn't delete world");
-                  var3.printStackTrace();
-               }
-
-               Realms.setScreen(ax.this.d);
-            }
-         }).start();
-      }
-
-      Realms.setScreen(this);
-   }
-
-   private String b(long cetTime) {
-      Calendar cal = new GregorianCalendar(TimeZone.getDefault());
-      cal.setTimeInMillis(cetTime);
-      return DateFormat.getDateTimeInstance().format(cal.getTime());
+   public ax(ad configureWorldScreen, RealmsWorldOptions options, RealmsServer.c worldType, int activeSlot) {
+      this.a = configureWorldScreen;
+      this.i = options;
+      this.j = worldType;
+      this.k = activeSlot;
    }
 
    public void removed() {
       this.setKeyboardHandlerSendRepeatsToGui(false);
    }
 
+   public void tick() {
+      this.e.tick();
+   }
+
    public boolean keyPressed(int eventKey, int scancode, int mods) {
-      if (eventKey == 256) {
-         Realms.setScreen(this.b);
-         return true;
-      } else {
-         return super.keyPressed(eventKey, scancode, mods);
+      switch(eventKey) {
+         case 256:
+            Realms.setScreen(this.a);
+            return true;
+         default:
+            return super.keyPressed(eventKey, scancode, mods);
       }
+   }
+
+   public void init() {
+      this.g = 170;
+      this.f = this.width() / 2 - this.g * 2 / 2;
+      this.h = this.width() / 2 + 10;
+      this.a();
+      this.l = this.i.difficulty;
+      this.m = this.i.gameMode;
+      if (this.j.equals(RealmsServer.c.a)) {
+         this.n = this.i.pvp;
+         this.r = this.i.spawnProtection;
+         this.t = this.i.forceGameMode;
+         this.p = this.i.spawnAnimals;
+         this.q = this.i.spawnMonsters;
+         this.o = this.i.spawnNPCs;
+         this.s = this.i.commandBlocks;
+      } else {
+         String warning;
+         if (this.j.equals(RealmsServer.c.c)) {
+            warning = getLocalizedString("mco.configure.world.edit.subscreen.adventuremap");
+         } else if (this.j.equals(RealmsServer.c.e)) {
+            warning = getLocalizedString("mco.configure.world.edit.subscreen.inspiration");
+         } else {
+            warning = getLocalizedString("mco.configure.world.edit.subscreen.experience");
+         }
+
+         this.C = new RealmsLabel(warning, this.width() / 2, 26, 16711680);
+         this.n = true;
+         this.r = 0;
+         this.t = false;
+         this.p = true;
+         this.q = true;
+         this.o = true;
+         this.s = true;
+      }
+
+      this.e = this.newEditBox(11, this.f + 2, realms.u.a(1), this.g - 4, 20, getLocalizedString("mco.configure.world.edit.slot.name"));
+      this.e.setMaxLength(10);
+      this.e.setValue(this.i.getSlotName(this.k));
+      this.focusOn(this.e);
+      this.buttonsAdd(this.u = new RealmsButton(4, this.h, realms.u.a(1), this.g, 20, this.d()) {
+         public void onPress() {
+            ax.this.n = !ax.this.n;
+            this.setMessage(ax.this.d());
+         }
+      });
+      this.buttonsAdd(new RealmsButton(3, this.f, realms.u.a(3), this.g, 20, this.c()) {
+         public void onPress() {
+            ax.this.m = (ax.this.m + 1) % ax.this.c.length;
+            this.setMessage(ax.this.c());
+         }
+      });
+      this.buttonsAdd(this.v = new RealmsButton(5, this.h, realms.u.a(3), this.g, 20, this.e()) {
+         public void onPress() {
+            ax.this.p = !ax.this.p;
+            this.setMessage(ax.this.e());
+         }
+      });
+      this.buttonsAdd(new RealmsButton(2, this.f, realms.u.a(5), this.g, 20, this.b()) {
+         public void onPress() {
+            ax.this.l = (ax.this.l + 1) % ax.this.b.length;
+            this.setMessage(ax.this.b());
+            if (ax.this.j.equals(RealmsServer.c.a)) {
+               ax.this.w.active(ax.this.l != 0);
+               ax.this.w.setMessage(ax.this.f());
+            }
+
+         }
+      });
+      this.buttonsAdd(this.w = new RealmsButton(6, this.h, realms.u.a(5), this.g, 20, this.f()) {
+         public void onPress() {
+            ax.this.q = !ax.this.q;
+            this.setMessage(ax.this.f());
+         }
+      });
+      this.buttonsAdd(this.y = new ax.a(8, this.f, realms.u.a(7), this.g, this.r, 0.0F, 16.0F));
+      this.buttonsAdd(this.x = new RealmsButton(7, this.h, realms.u.a(7), this.g, 20, this.g()) {
+         public void onPress() {
+            ax.this.o = !ax.this.o;
+            this.setMessage(ax.this.g());
+         }
+      });
+      this.buttonsAdd(this.A = new RealmsButton(10, this.f, realms.u.a(9), this.g, 20, this.i()) {
+         public void onPress() {
+            ax.this.t = !ax.this.t;
+            this.setMessage(ax.this.i());
+         }
+      });
+      this.buttonsAdd(this.z = new RealmsButton(9, this.h, realms.u.a(9), this.g, 20, this.h()) {
+         public void onPress() {
+            ax.this.s = !ax.this.s;
+            this.setMessage(ax.this.h());
+         }
+      });
+      if (!this.j.equals(RealmsServer.c.a)) {
+         this.u.active(false);
+         this.v.active(false);
+         this.x.active(false);
+         this.w.active(false);
+         this.y.active(false);
+         this.z.active(false);
+         this.y.active(false);
+         this.A.active(false);
+      }
+
+      if (this.l == 0) {
+         this.w.active(false);
+      }
+
+      this.buttonsAdd(new RealmsButton(1, this.f, realms.u.a(13), this.g, 20, getLocalizedString("mco.configure.world.buttons.done")) {
+         public void onPress() {
+            ax.this.k();
+         }
+      });
+      this.buttonsAdd(new RealmsButton(0, this.h, realms.u.a(13), this.g, 20, getLocalizedString("gui.cancel")) {
+         public void onPress() {
+            Realms.setScreen(ax.this.a);
+         }
+      });
+      this.addWidget(this.e);
+      this.addWidget(this.B = new RealmsLabel(getLocalizedString("mco.configure.world.buttons.options"), this.width() / 2, 17, 16777215));
+      this.addWidget(this.C);
+      this.narrateLabels();
+   }
+
+   private void a() {
+      this.b = new String[]{
+         getLocalizedString("options.difficulty.peaceful"),
+         getLocalizedString("options.difficulty.easy"),
+         getLocalizedString("options.difficulty.normal"),
+         getLocalizedString("options.difficulty.hard")
+      };
+      this.c = new String[]{
+         getLocalizedString("selectWorld.gameMode.survival"),
+         getLocalizedString("selectWorld.gameMode.creative"),
+         getLocalizedString("selectWorld.gameMode.adventure")
+      };
+      this.d = new String[][]{
+         {getLocalizedString("selectWorld.gameMode.survival.line1"), getLocalizedString("selectWorld.gameMode.survival.line2")},
+         {getLocalizedString("selectWorld.gameMode.creative.line1"), getLocalizedString("selectWorld.gameMode.creative.line2")},
+         {getLocalizedString("selectWorld.gameMode.adventure.line1"), getLocalizedString("selectWorld.gameMode.adventure.line2")}
+      };
+   }
+
+   private String b() {
+      String difficulty = getLocalizedString("options.difficulty");
+      return difficulty + ": " + this.b[this.l];
+   }
+
+   private String c() {
+      String gameMode = getLocalizedString("selectWorld.gameMode");
+      return gameMode + ": " + this.c[this.m];
+   }
+
+   private String d() {
+      return getLocalizedString("mco.configure.world.pvp") + ": " + getLocalizedString(this.n ? "mco.configure.world.on" : "mco.configure.world.off");
+   }
+
+   private String e() {
+      return getLocalizedString("mco.configure.world.spawnAnimals") + ": " + getLocalizedString(this.p ? "mco.configure.world.on" : "mco.configure.world.off");
+   }
+
+   private String f() {
+      return this.l == 0
+         ? getLocalizedString("mco.configure.world.spawnMonsters") + ": " + getLocalizedString("mco.configure.world.off")
+         : getLocalizedString("mco.configure.world.spawnMonsters") + ": " + getLocalizedString(this.q ? "mco.configure.world.on" : "mco.configure.world.off");
+   }
+
+   private String g() {
+      return getLocalizedString("mco.configure.world.spawnNPCs") + ": " + getLocalizedString(this.o ? "mco.configure.world.on" : "mco.configure.world.off");
+   }
+
+   private String h() {
+      return getLocalizedString("mco.configure.world.commandBlocks") + ": " + getLocalizedString(this.s ? "mco.configure.world.on" : "mco.configure.world.off");
+   }
+
+   private String i() {
+      return getLocalizedString("mco.configure.world.forceGameMode") + ": " + getLocalizedString(this.t ? "mco.configure.world.on" : "mco.configure.world.off");
    }
 
    public void render(int xm, int ym, float a) {
       this.renderBackground();
-      int center = this.width() / 2 - 100;
-      this.drawCenteredString(this.h, this.width() / 2, 17, 16777215);
-      this.drawString(this.i, center, u.a(0), 10526880);
-      this.drawString(this.m, center, u.a(1), 16777215);
-      if (this.n == Subscription.a.a) {
-         this.drawString(this.j, center, u.a(3), 10526880);
-      } else if (this.n == Subscription.a.b) {
-         this.drawString(this.k, center, u.a(3), 10526880);
+      String slotName = getLocalizedString("mco.configure.world.edit.slot.name");
+      this.drawString(slotName, this.f + this.g / 2 - this.fontWidth(slotName) / 2, realms.u.a(0) - 5, 16777215);
+      this.B.render(this);
+      if (this.C != null) {
+         this.C.render(this);
       }
 
-      this.drawString(this.a(this.l), center, u.a(4), 16777215);
+      this.e.render(xm, ym, a);
       super.render(xm, ym, a);
    }
 
-   private String a(int daysLeft) {
-      if (daysLeft == -1 && this.c.expired) {
-         return getLocalizedString("mco.configure.world.subscription.expired");
-      } else if (daysLeft <= 1) {
-         return getLocalizedString("mco.configure.world.subscription.less_than_a_day");
+   public boolean mouseReleased(double x, double y, int buttonNum) {
+      if (!this.y.active()) {
+         return super.mouseReleased(x, y, buttonNum);
       } else {
-         int months = daysLeft / 30;
-         int days = daysLeft % 30;
-         StringBuilder sb = new StringBuilder();
-         if (months > 0) {
-            sb.append(months).append(" ");
-            if (months == 1) {
-               sb.append(getLocalizedString("mco.configure.world.subscription.month").toLowerCase(Locale.ROOT));
-            } else {
-               sb.append(getLocalizedString("mco.configure.world.subscription.months").toLowerCase(Locale.ROOT));
-            }
+         this.y.onRelease(x, y);
+         return true;
+      }
+   }
+
+   public boolean mouseDragged(double x, double y, int buttonNum, double dx, double dy) {
+      if (!this.y.active()) {
+         return super.mouseDragged(x, y, buttonNum, dx, dy);
+      } else {
+         if (x < (double)(this.f + this.y.getWidth()) && x > (double)this.f && y < (double)(this.y.y() + 20) && y > (double)this.y.y()) {
+            this.y.onClick(x, y);
          }
 
-         if (days > 0) {
-            if (sb.length() > 0) {
-               sb.append(", ");
-            }
+         return true;
+      }
+   }
 
-            sb.append(days).append(" ");
-            if (days == 1) {
-               sb.append(getLocalizedString("mco.configure.world.subscription.day").toLowerCase(Locale.ROOT));
-            } else {
-               sb.append(getLocalizedString("mco.configure.world.subscription.days").toLowerCase(Locale.ROOT));
-            }
+   private String j() {
+      return this.e.getValue().equals(this.i.getDefaultSlotName(this.k)) ? "" : this.e.getValue();
+   }
+
+   private void k() {
+      if (!this.j.equals(RealmsServer.c.c) && !this.j.equals(RealmsServer.c.d) && !this.j.equals(RealmsServer.c.e)) {
+         this.a.a(new RealmsWorldOptions(this.n, this.p, this.q, this.o, this.r, this.s, this.l, this.m, this.t, this.j()));
+      } else {
+         this.a
+            .a(
+               new RealmsWorldOptions(
+                  this.i.pvp,
+                  this.i.spawnAnimals,
+                  this.i.spawnMonsters,
+                  this.i.spawnNPCs,
+                  this.i.spawnProtection,
+                  this.i.commandBlocks,
+                  this.l,
+                  this.m,
+                  this.i.forceGameMode,
+                  this.j()
+               )
+            );
+      }
+
+   }
+
+   class a extends RealmsSliderButton {
+      public a(int id, int x, int y, int width, int currentValue, float minValue, float maxValue) {
+         super(id, x, y, width, currentValue, (double)minValue, (double)maxValue);
+      }
+
+      public void applyValue() {
+         if (ax.this.y.active()) {
+            ax.this.r = (int)this.toValue(this.getValue());
          }
+      }
 
-         return sb.toString();
+      public String getMessage() {
+         return RealmsScreen.getLocalizedString("mco.configure.world.spawnProtection")
+            + ": "
+            + (ax.this.r == 0 ? RealmsScreen.getLocalizedString("mco.configure.world.off") : ax.this.r);
       }
    }
 }

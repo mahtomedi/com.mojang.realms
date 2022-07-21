@@ -166,17 +166,17 @@ public class b extends RealmsScreen {
    }
 
    public void c() {
-      this.buttonsAdd(this.m = new RealmsButton(1, this.width() / 2 - 202, this.height() - 32, 98, 20, getLocalizedString("mco.selectServer.configure")) {
+      this.buttonsAdd(this.m = new RealmsButton(1, this.width() / 2 - 190, this.height() - 32, 90, 20, getLocalizedString("mco.selectServer.configure")) {
          public void onPress() {
             b.this.f(b.this.a(b.this.i));
          }
       });
-      this.buttonsAdd(this.j = new RealmsButton(3, this.width() / 2 - 98, this.height() - 32, 98, 20, getLocalizedString("mco.selectServer.play")) {
+      this.buttonsAdd(this.j = new RealmsButton(3, this.width() / 2 - 93, this.height() - 32, 90, 20, getLocalizedString("mco.selectServer.play")) {
          public void onPress() {
             b.this.p();
          }
       });
-      this.buttonsAdd(this.k = new RealmsButton(2, this.width() / 2 + 6, this.height() - 32, 98, 20, getLocalizedString("gui.back")) {
+      this.buttonsAdd(this.k = new RealmsButton(2, this.width() / 2 + 4, this.height() - 32, 90, 20, getLocalizedString("gui.back")) {
          public void onPress() {
             if (!b.this.x) {
                Realms.setScreen(b.this.g);
@@ -184,12 +184,12 @@ public class b extends RealmsScreen {
 
          }
       });
-      this.buttonsAdd(this.l = new RealmsButton(0, this.width() / 2 + 110, this.height() - 32, 98, 20, getLocalizedString("mco.selectServer.expiredRenew")) {
+      this.buttonsAdd(this.l = new RealmsButton(0, this.width() / 2 + 100, this.height() - 32, 90, 20, getLocalizedString("mco.selectServer.expiredRenew")) {
          public void onPress() {
             b.this.q();
          }
       });
-      this.buttonsAdd(this.n = new RealmsButton(7, this.width() / 2 - 202, this.height() - 32, 98, 20, getLocalizedString("mco.selectServer.leave")) {
+      this.buttonsAdd(this.n = new RealmsButton(7, this.width() / 2 - 202, this.height() - 32, 90, 20, getLocalizedString("mco.selectServer.leave")) {
          public void onPress() {
             b.this.g(b.this.a(b.this.i));
          }
@@ -205,7 +205,7 @@ public class b extends RealmsScreen {
       });
       this.buttonsAdd(this.Q = new RealmsButton(5, this.width() / 2 + 52, this.C() + 160 - 20, 98, 20, getLocalizedString("mco.selectServer.buy")) {
          public void onPress() {
-            bj.c("https://minecraft.net/realms");
+            bk.c("https://minecraft.net/realms");
          }
       });
       RealmsServer server = this.a(this.i);
@@ -356,7 +356,7 @@ public class b extends RealmsScreen {
 
    private void a(String url) {
       Realms.setClipboard(url);
-      bj.c(url);
+      bk.c(url);
    }
 
    private void n() {
@@ -421,7 +421,7 @@ public class b extends RealmsScreen {
 
    private void r() {
       if (this.y && !this.z) {
-         Realms.setScreen(new af(this));
+         Realms.setScreen(new ag(this));
       }
    }
 
@@ -435,10 +435,10 @@ public class b extends RealmsScreen {
                   try {
                      realms.g.a versionResponse = client.i();
                      if (versionResponse.equals(realms.g.a.b)) {
-                        realms.b.G = new ab(b.this.g, true);
+                        realms.b.G = new ac(b.this.g, true);
                         Realms.setScreen(realms.b.G);
                      } else if (versionResponse.equals(realms.g.a.c)) {
-                        realms.b.G = new ab(b.this.g, false);
+                        realms.b.G = new ac(b.this.g, false);
                         Realms.setScreen(realms.b.G);
                      } else {
                         b.this.u();
@@ -447,19 +447,19 @@ public class b extends RealmsScreen {
                      realms.b.u = false;
                      realms.b.a.error("Couldn't connect to realms: ", var3.toString());
                      if (var3.a == 401) {
-                        realms.b.G = new ah(
+                        realms.b.G = new ai(
                            RealmsScreen.getLocalizedString("mco.error.invalid.session.title"),
                            RealmsScreen.getLocalizedString("mco.error.invalid.session.message"),
                            b.this.g
                         );
                         Realms.setScreen(realms.b.G);
                      } else {
-                        Realms.setScreen(new ah(var3, b.this.g));
+                        Realms.setScreen(new ai(var3, b.this.g));
                      }
                   } catch (IOException var4) {
                      realms.b.u = false;
                      realms.b.a.error("Couldn't connect to realms: ", var4.getMessage());
-                     Realms.setScreen(new ah(var4.getMessage(), b.this.g));
+                     Realms.setScreen(new ai(var4.getMessage(), b.this.g));
                   }
                }
             })
@@ -484,16 +484,16 @@ public class b extends RealmsScreen {
                } else {
                   realms.b.a.info("Realms is not available for this user");
                   realms.b.s = false;
-                  Realms.setScreen(new am(b.this.g));
+                  Realms.setScreen(new an(b.this.g));
                }
 
                realms.b.t = true;
             } catch (o var3) {
                realms.b.a.error("Couldn't connect to realms: ", var3.toString());
-               Realms.setScreen(new ah(var3, b.this.g));
+               Realms.setScreen(new ai(var3, b.this.g));
             } catch (IOException var4) {
                realms.b.a.error("Couldn't connect to realms: ", var4.getMessage());
-               Realms.setScreen(new ah(var4.getMessage(), b.this.g));
+               Realms.setScreen(new ai(var4.getMessage(), b.this.g));
             }
 
          }
@@ -562,8 +562,8 @@ public class b extends RealmsScreen {
    private void f(RealmsServer selectedServer) {
       if (Realms.getUUID().equals(selectedServer.ownerUUID) || b) {
          this.z();
-         cve minecraft = cve.v();
-         minecraft.execute(() -> minecraft.a(new ac(this, selectedServer.id).getProxy()));
+         cvg minecraft = cvg.v();
+         minecraft.execute(() -> minecraft.a(new ad(this, selectedServer.id).getProxy()));
       }
 
    }
@@ -573,7 +573,7 @@ public class b extends RealmsScreen {
          this.z();
          String line2 = getLocalizedString("mco.configure.world.leave.question.line1");
          String line3 = getLocalizedString("mco.configure.world.leave.question.line2");
-         Realms.setScreen(new aj(this, aj.a.b, line2, line3, true, 4));
+         Realms.setScreen(new ak(this, ak.a.b, line2, line3, true, 4));
       }
 
    }
@@ -619,7 +619,7 @@ public class b extends RealmsScreen {
                      }
                   } catch (o var3) {
                      realms.b.a.error("Couldn't configure world");
-                     Realms.setScreen(new ah(var3, b.this));
+                     Realms.setScreen(new ai(var3, b.this));
                   }
 
                }
@@ -888,7 +888,7 @@ public class b extends RealmsScreen {
    }
 
    private void b(RealmsServer server, RealmsScreen cancelScreen) {
-      ak longRunningMcoTaskScreen = new ak(cancelScreen, new bh.e(this, cancelScreen, server, this.K));
+      al longRunningMcoTaskScreen = new al(cancelScreen, new bi.e(this, cancelScreen, server, this.K));
       longRunningMcoTaskScreen.a();
       Realms.setScreen(longRunningMcoTaskScreen);
    }
@@ -1130,7 +1130,7 @@ public class b extends RealmsScreen {
    }
 
    static {
-      String version = bc.a();
+      String version = bd.a();
       if (version != null) {
          a.info("Realms library version == " + version);
       }
@@ -1182,12 +1182,12 @@ public class b extends RealmsScreen {
 
       public void onPress() {
          if (b.this.C != null) {
-            bj.c(b.this.C);
+            bk.c(b.this.C);
             if (b.this.B) {
-               bg.a data = bg.a();
+               bh.a data = bh.a();
                data.b = false;
                b.this.B = false;
-               bg.a(data);
+               bh.a(data);
             }
 
          }
@@ -1212,7 +1212,7 @@ public class b extends RealmsScreen {
       }
 
       public void onPress() {
-         an pendingInvitationScreen = new an(b.this.g);
+         ao pendingInvitationScreen = new ao(b.this.g);
          Realms.setScreen(pendingInvitationScreen);
       }
 
@@ -1223,11 +1223,7 @@ public class b extends RealmsScreen {
 
    class d extends RealmsObjectSelectionList {
       public d() {
-         super(b.this.width() + 15, b.this.height(), 32, b.this.height() - 40, 36);
-      }
-
-      public int getRowWidth() {
-         return (int)((double)this.width() * 0.6);
+         super(b.this.width(), b.this.height(), 32, b.this.height() - 40, 36);
       }
 
       public boolean isFocused() {
@@ -1245,7 +1241,7 @@ public class b extends RealmsScreen {
 
       public boolean mouseClicked(double xm, double ym, int buttonNum) {
          if (buttonNum == 0 && xm < (double)this.getScrollbarPosition() && ym >= (double)this.y0() && ym <= (double)this.y1()) {
-            int x0 = this.width() / 2 - 160;
+            int x0 = b.this.h.getRowLeft();
             int x1 = this.getScrollbarPosition();
             int clickSlotPos = (int)Math.floor(ym - (double)this.y0()) - this.headerHeight() + this.getScroll() - 4;
             int slot = clickSlotPos / this.itemHeight();
@@ -1329,7 +1325,7 @@ public class b extends RealmsScreen {
             if (server != null) {
                if (server.state == RealmsServer.b.c) {
                   b.this.i = -1L;
-                  Realms.setScreen(new ae(server, b.this));
+                  Realms.setScreen(new af(server, b.this));
                } else {
                   b.this.i = server.id;
                }
@@ -1351,6 +1347,10 @@ public class b extends RealmsScreen {
       public int getMaxPosition() {
          return this.getItemCount() * 36;
       }
+
+      public int getRowWidth() {
+         return Math.max(300, super.getRowWidth());
+      }
    }
 
    class e extends RealmListEntry {
@@ -1367,7 +1367,7 @@ public class b extends RealmsScreen {
       public boolean mouseClicked(double x, double y, int buttonNum) {
          if (this.a.state == RealmsServer.b.c) {
             b.this.i = -1L;
-            Realms.setScreen(new ae(this.a, b.this));
+            Realms.setScreen(new af(this.a, b.this));
          } else {
             b.this.i = this.a.id;
          }
@@ -1376,6 +1376,10 @@ public class b extends RealmsScreen {
       }
 
       private void a(RealmsServer serverData, int x, int y, int mouseX, int mouseY) {
+         this.b(serverData, x + 36, y, mouseX, mouseY);
+      }
+
+      private void b(RealmsServer serverData, int x, int y, int mouseX, int mouseY) {
          if (serverData.state == RealmsServer.b.c) {
             RealmsScreen.bind("realms:textures/gui/realms/world_icon.png");
             GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -1477,7 +1481,7 @@ public class b extends RealmsScreen {
             }
 
             b.this.drawString(serverData.getName(), x + 2, y + 1, 16777215);
-            bi.a(serverData.ownerUUID, (Runnable)(() -> {
+            bj.a(serverData.ownerUUID, (Runnable)(() -> {
                GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                RealmsScreen.blit(x - 36, y, 8.0F, 8.0F, 8, 8, 32, 32, 64, 64);
                RealmsScreen.blit(x - 36, y, 40.0F, 8.0F, 8, 8, 32, 32, 64, 64);

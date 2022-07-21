@@ -14,8 +14,8 @@ public class i {
       try {
          JsonParser parser = new JsonParser();
          JsonObject object = parser.parse(error).getAsJsonObject();
-         this.b = bd.a("errorMsg", object, "");
-         this.c = bd.a("errorCode", object, -1);
+         this.b = be.a("errorMsg", object, "");
+         this.c = be.a("errorCode", object, -1);
       } catch (Exception var4) {
          a.error("Could not parse RealmsError: " + var4.getMessage());
          a.error("The error was: " + error);

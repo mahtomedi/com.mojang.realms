@@ -1,59 +1,85 @@
 package realms;
 
+import com.mojang.realmsclient.dto.RealmsServer;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
-import net.minecraft.realms.RealmsConfirmResultListener;
+import net.minecraft.realms.RealmsEditBox;
 import net.minecraft.realms.RealmsScreen;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class aj extends RealmsScreen {
-   private final aj.a e;
-   private final String f;
-   private final String g;
-   protected final RealmsConfirmResultListener a;
-   protected final String b;
-   protected final String c;
-   private final String h;
-   protected final int d;
-   private final boolean i;
+   private static final Logger a = LogManager.getLogger();
+   private RealmsEditBox b;
+   private final RealmsServer c;
+   private final ad d;
+   private final RealmsScreen e;
+   private final int f = 0;
+   private final int g = 1;
+   private RealmsButton h;
+   private final int i = 2;
+   private String j;
+   private boolean k;
 
-   public aj(RealmsConfirmResultListener listener, aj.a type, String line2, String line3, boolean yesNoQuestion, int id) {
-      this.a = listener;
-      this.d = id;
-      this.e = type;
-      this.f = line2;
-      this.g = line3;
-      this.i = yesNoQuestion;
-      this.b = getLocalizedString("gui.yes");
-      this.c = getLocalizedString("gui.no");
-      this.h = getLocalizedString("mco.gui.ok");
+   public aj(ad configureScreen, RealmsScreen lastScreen, RealmsServer serverData) {
+      this.d = configureScreen;
+      this.e = lastScreen;
+      this.c = serverData;
+   }
+
+   public void tick() {
+      this.b.tick();
    }
 
    public void init() {
-      Realms.narrateNow(new String[]{this.e.d, this.f, this.g});
-      if (this.i) {
-         this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 105, u.a(8), 100, 20, this.b) {
-            public void onPress() {
-               aj.this.a.confirmResult(true, aj.this.d);
-            }
-         });
-         this.buttonsAdd(new RealmsButton(1, this.width() / 2 + 5, u.a(8), 100, 20, this.c) {
-            public void onPress() {
-               aj.this.a.confirmResult(false, aj.this.d);
-            }
-         });
-      } else {
-         this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 50, u.a(8), 100, 20, this.h) {
-            public void onPress() {
-               aj.this.a.confirmResult(true, aj.this.d);
-            }
-         });
-      }
+      this.setKeyboardHandlerSendRepeatsToGui(true);
+      this.buttonsAdd(this.h = new RealmsButton(0, this.width() / 2 - 100, u.a(10), getLocalizedString("mco.configure.world.buttons.invite")) {
+         public void onPress() {
+            aj.this.a();
+         }
+      });
+      this.buttonsAdd(new RealmsButton(1, this.width() / 2 - 100, u.a(12), getLocalizedString("gui.cancel")) {
+         public void onPress() {
+            Realms.setScreen(aj.this.e);
+         }
+      });
+      this.b = this.newEditBox(2, this.width() / 2 - 100, u.a(2), 200, 20, getLocalizedString("mco.configure.world.invite.profile.name"));
+      this.focusOn(this.b);
+      this.addWidget(this.b);
+   }
 
+   public void removed() {
+      this.setKeyboardHandlerSendRepeatsToGui(false);
+   }
+
+   private void a() {
+      g client = realms.g.a();
+      if (this.b.getValue() != null && !this.b.getValue().isEmpty()) {
+         try {
+            RealmsServer realmsServer = client.b(this.c.id, this.b.getValue().trim());
+            if (realmsServer != null) {
+               this.c.players = realmsServer.players;
+               Realms.setScreen(new ap(this.d, this.c));
+            } else {
+               this.a(getLocalizedString("mco.configure.world.players.error"));
+            }
+         } catch (Exception var3) {
+            a.error("Couldn't invite user");
+            this.a(getLocalizedString("mco.configure.world.players.error"));
+         }
+
+      }
+   }
+
+   private void a(String errorMsg) {
+      this.k = true;
+      this.j = errorMsg;
+      Realms.narrateNow(errorMsg);
    }
 
    public boolean keyPressed(int eventKey, int scancode, int mods) {
       if (eventKey == 256) {
-         this.a.confirmResult(false, this.d);
+         Realms.setScreen(this.e);
          return true;
       } else {
          return super.keyPressed(eventKey, scancode, mods);
@@ -62,22 +88,12 @@ public class aj extends RealmsScreen {
 
    public void render(int xm, int ym, float a) {
       this.renderBackground();
-      this.drawCenteredString(this.e.d, this.width() / 2, u.a(2), this.e.c);
-      this.drawCenteredString(this.f, this.width() / 2, u.a(4), 16777215);
-      this.drawCenteredString(this.g, this.width() / 2, u.a(6), 16777215);
-      super.render(xm, ym, a);
-   }
-
-   public static enum a {
-      a("Warning!", 16711680),
-      b("Info!", 8226750);
-
-      public final int c;
-      public final String d;
-
-      private a(String text, int colorCode) {
-         this.d = text;
-         this.c = colorCode;
+      this.drawString(getLocalizedString("mco.configure.world.invite.profile.name"), this.width() / 2 - 100, u.a(1), 10526880);
+      if (this.k) {
+         this.drawCenteredString(this.j, this.width() / 2, u.a(5), 16711680);
       }
+
+      this.b.render(xm, ym, a);
+      super.render(xm, ym, a);
    }
 }

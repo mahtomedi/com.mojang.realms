@@ -3,7 +3,7 @@ package com.mojang.realmsclient.dto;
 import com.google.gson.JsonObject;
 import net.minecraft.obfuscate.DontObfuscateOrShrink;
 import net.minecraft.realms.RealmsScreen;
-import realms.bd;
+import realms.be;
 import realms.l;
 
 @DontObfuscateOrShrink
@@ -76,20 +76,20 @@ public class RealmsWorldOptions extends l {
 
    public static RealmsWorldOptions parse(JsonObject jsonObject) {
       RealmsWorldOptions newOptions = new RealmsWorldOptions(
-         bd.a("pvp", jsonObject, true),
-         bd.a("spawnAnimals", jsonObject, true),
-         bd.a("spawnMonsters", jsonObject, true),
-         bd.a("spawnNPCs", jsonObject, true),
-         bd.a("spawnProtection", jsonObject, 0),
-         bd.a("commandBlocks", jsonObject, false),
-         bd.a("difficulty", jsonObject, 2),
-         bd.a("gameMode", jsonObject, 0),
-         bd.a("forceGameMode", jsonObject, false),
-         bd.a("slotName", jsonObject, "")
+         be.a("pvp", jsonObject, true),
+         be.a("spawnAnimals", jsonObject, true),
+         be.a("spawnMonsters", jsonObject, true),
+         be.a("spawnNPCs", jsonObject, true),
+         be.a("spawnProtection", jsonObject, 0),
+         be.a("commandBlocks", jsonObject, false),
+         be.a("difficulty", jsonObject, 2),
+         be.a("gameMode", jsonObject, 0),
+         be.a("forceGameMode", jsonObject, false),
+         be.a("slotName", jsonObject, "")
       );
-      newOptions.templateId = bd.a("worldTemplateId", jsonObject, -1L);
-      newOptions.templateImage = bd.a("worldTemplateImage", jsonObject, templateImageDefault);
-      newOptions.adventureMap = bd.a("adventureMap", jsonObject, false);
+      newOptions.templateId = be.a("worldTemplateId", jsonObject, -1L);
+      newOptions.templateImage = be.a("worldTemplateImage", jsonObject, templateImageDefault);
+      newOptions.adventureMap = be.a("adventureMap", jsonObject, false);
       return newOptions;
    }
 

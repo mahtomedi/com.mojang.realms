@@ -5,7 +5,7 @@ import com.google.gson.JsonParser;
 import net.minecraft.obfuscate.DontObfuscateOrShrink;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import realms.bd;
+import realms.be;
 import realms.l;
 
 @DontObfuscateOrShrink
@@ -21,9 +21,9 @@ public class Subscription extends l {
       try {
          JsonParser parser = new JsonParser();
          JsonObject jsonObject = parser.parse(json).getAsJsonObject();
-         sub.startDate = bd.a("startDate", jsonObject, 0L);
-         sub.daysLeft = bd.a("daysLeft", jsonObject, 0);
-         sub.type = typeFrom(bd.a("subscriptionType", jsonObject, Subscription.a.a.name()));
+         sub.startDate = be.a("startDate", jsonObject, 0L);
+         sub.daysLeft = be.a("daysLeft", jsonObject, 0);
+         sub.type = typeFrom(be.a("subscriptionType", jsonObject, Subscription.a.a.name()));
       } catch (Exception var4) {
          LOGGER.error("Could not parse Subscription: " + var4.getMessage());
       }

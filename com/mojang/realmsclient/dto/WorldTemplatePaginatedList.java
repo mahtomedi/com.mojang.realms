@@ -10,7 +10,7 @@ import java.util.List;
 import net.minecraft.obfuscate.DontObfuscateOrShrink;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import realms.bd;
+import realms.be;
 import realms.l;
 
 @DontObfuscateOrShrink
@@ -58,9 +58,9 @@ public class WorldTemplatePaginatedList extends l {
             }
          }
 
-         list.page = bd.a("page", object, 0);
-         list.size = bd.a("size", object, 0);
-         list.total = bd.a("total", object, 0);
+         list.page = be.a("page", object, 0);
+         list.size = be.a("size", object, 0);
+         list.total = be.a("total", object, 0);
       } catch (Exception var5) {
          LOGGER.error("Could not parse WorldTemplatePaginatedList: " + var5.getMessage());
       }

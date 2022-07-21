@@ -5,7 +5,7 @@ import com.google.gson.JsonParser;
 import net.minecraft.obfuscate.DontObfuscateOrShrink;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import realms.bd;
+import realms.be;
 import realms.l;
 
 @DontObfuscateOrShrink
@@ -19,7 +19,7 @@ public class RealmsNews extends l {
       try {
          JsonParser parser = new JsonParser();
          JsonObject object = parser.parse(json).getAsJsonObject();
-         news.newsLink = bd.a("newsLink", object, null);
+         news.newsLink = be.a("newsLink", object, null);
       } catch (Exception var4) {
          LOGGER.error("Could not parse RealmsNews: " + var4.getMessage());
       }

@@ -1,99 +1,69 @@
 package realms;
 
-import com.mojang.realmsclient.dto.RealmsServer;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
-import net.minecraft.realms.RealmsEditBox;
 import net.minecraft.realms.RealmsScreen;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class ai extends RealmsScreen {
-   private static final Logger a = LogManager.getLogger();
-   private RealmsEditBox b;
-   private final RealmsServer c;
-   private final ac d;
-   private final RealmsScreen e;
-   private final int f = 0;
-   private final int g = 1;
-   private RealmsButton h;
-   private final int i = 2;
-   private String j;
-   private boolean k;
+   private final RealmsScreen a;
+   private String b;
+   private String c;
 
-   public ai(ac configureScreen, RealmsScreen lastScreen, RealmsServer serverData) {
-      this.d = configureScreen;
-      this.e = lastScreen;
-      this.c = serverData;
+   public ai(o realmsServiceException, RealmsScreen nextScreen) {
+      this.a = nextScreen;
+      this.a(realmsServiceException);
    }
 
-   public void tick() {
-      this.b.tick();
+   public ai(String message, RealmsScreen nextScreen) {
+      this.a = nextScreen;
+      this.a(message);
+   }
+
+   public ai(String title, String message, RealmsScreen nextScreen) {
+      this.a = nextScreen;
+      this.a(title, message);
+   }
+
+   private void a(o realmsServiceException) {
+      if (realmsServiceException.c == -1) {
+         this.b = "An error occurred (" + realmsServiceException.a + "):";
+         this.c = realmsServiceException.b;
+      } else {
+         this.b = "Realms (" + realmsServiceException.c + "):";
+         String translationKey = "mco.errorMessage." + realmsServiceException.c;
+         String translated = getLocalizedString(translationKey);
+         this.c = translated.equals(translationKey) ? realmsServiceException.d : translated;
+      }
+
+   }
+
+   private void a(String message) {
+      this.b = "An error occurred: ";
+      this.c = message;
+   }
+
+   private void a(String title, String message) {
+      this.b = title;
+      this.c = message;
    }
 
    public void init() {
-      this.setKeyboardHandlerSendRepeatsToGui(true);
-      this.buttonsAdd(this.h = new RealmsButton(0, this.width() / 2 - 100, u.a(10), getLocalizedString("mco.configure.world.buttons.invite")) {
+      Realms.narrateNow(this.b + ": " + this.c);
+      this.buttonsAdd(new RealmsButton(10, this.width() / 2 - 100, this.height() - 52, 200, 20, "Ok") {
          public void onPress() {
-            ai.this.a();
+            Realms.setScreen(ai.this.a);
          }
       });
-      this.buttonsAdd(new RealmsButton(1, this.width() / 2 - 100, u.a(12), getLocalizedString("gui.cancel")) {
-         public void onPress() {
-            Realms.setScreen(ai.this.e);
-         }
-      });
-      this.b = this.newEditBox(2, this.width() / 2 - 100, u.a(2), 200, 20, getLocalizedString("mco.configure.world.invite.profile.name"));
-      this.focusOn(this.b);
-      this.addWidget(this.b);
    }
 
-   public void removed() {
-      this.setKeyboardHandlerSendRepeatsToGui(false);
-   }
-
-   private void a() {
-      g client = realms.g.a();
-      if (this.b.getValue() != null && !this.b.getValue().isEmpty()) {
-         try {
-            RealmsServer realmsServer = client.b(this.c.id, this.b.getValue().trim());
-            if (realmsServer != null) {
-               this.c.players = realmsServer.players;
-               Realms.setScreen(new ao(this.d, this.c));
-            } else {
-               this.a(getLocalizedString("mco.configure.world.players.error"));
-            }
-         } catch (Exception var3) {
-            a.error("Couldn't invite user");
-            this.a(getLocalizedString("mco.configure.world.players.error"));
-         }
-
-      }
-   }
-
-   private void a(String errorMsg) {
-      this.k = true;
-      this.j = errorMsg;
-      Realms.narrateNow(errorMsg);
-   }
-
-   public boolean keyPressed(int eventKey, int scancode, int mods) {
-      if (eventKey == 256) {
-         Realms.setScreen(this.e);
-         return true;
-      } else {
-         return super.keyPressed(eventKey, scancode, mods);
-      }
+   public void tick() {
+      super.tick();
    }
 
    public void render(int xm, int ym, float a) {
       this.renderBackground();
-      this.drawString(getLocalizedString("mco.configure.world.invite.profile.name"), this.width() / 2 - 100, u.a(1), 10526880);
-      if (this.k) {
-         this.drawCenteredString(this.j, this.width() / 2, u.a(5), 16711680);
-      }
-
-      this.b.render(xm, ym, a);
+      this.drawCenteredString(this.b, this.width() / 2, 80, 16777215);
+      this.drawCenteredString(this.c, this.width() / 2, 100, 16711680);
       super.render(xm, ym, a);
    }
 }

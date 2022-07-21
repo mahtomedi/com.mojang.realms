@@ -1,27 +1,37 @@
 package realms;
 
-public class bf<A, B> {
-   private final A a;
-   private final B b;
+public abstract class bf<A> {
+   public abstract A a();
 
-   protected bf(A first, B second) {
-      this.a = first;
-      this.b = second;
+   public static <A> bf.b<A> a(A a) {
+      return new bf.b<>(a);
    }
 
-   public static <A, B> bf<A, B> a(A a, B b) {
-      return new bf<>(a, b);
+   public static <A> bf.a<A> b() {
+      return new bf.a<>();
    }
 
-   public A a() {
-      return this.a;
+   public static final class a<A> extends bf<A> {
+      @Override
+      public A a() {
+         throw new RuntimeException("None has no value");
+      }
    }
 
-   public B b() {
-      return this.b;
-   }
+   public static final class b<A> extends bf<A> {
+      private final A a;
 
-   public String a(String separator) {
-      return String.format("%s%s%s", this.a, separator, this.b);
+      public b(A a) {
+         this.a = a;
+      }
+
+      @Override
+      public A a() {
+         return this.a;
+      }
+
+      public static <A> bf<A> b(A value) {
+         return new bf.b<>(value);
+      }
    }
 }

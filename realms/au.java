@@ -1,460 +1,206 @@
 package realms;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.realmsclient.dto.RealmsServer;
-import com.mojang.realmsclient.dto.WorldTemplate;
-import com.mojang.realmsclient.dto.WorldTemplatePaginatedList;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import net.minecraft.realms.RealmListEntry;
 import net.minecraft.realms.Realms;
+import net.minecraft.realms.RealmsAnvilLevelStorageSource;
 import net.minecraft.realms.RealmsButton;
+import net.minecraft.realms.RealmsLabel;
+import net.minecraft.realms.RealmsLevelSummary;
 import net.minecraft.realms.RealmsObjectSelectionList;
 import net.minecraft.realms.RealmsScreen;
+import net.minecraft.realms.Tezzelator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class au extends RealmsScreen {
    private static final Logger a = LogManager.getLogger();
-   private final as<WorldTemplate> b;
-   private WorldTemplate c;
-   private final List<WorldTemplate> d = new ArrayList();
-   private au.a e;
-   private int f = -1;
-   private String g;
-   private RealmsButton h;
-   private RealmsButton i;
-   private RealmsButton j;
+   private final ar b;
+   private final long c;
+   private final int d;
+   private RealmsButton e;
+   private final DateFormat f = new SimpleDateFormat();
+   private List<RealmsLevelSummary> g = new ArrayList();
+   private int h = -1;
+   private au.b i;
+   private String j;
    private String k;
-   private String l;
-   private final RealmsServer.c m;
-   private int n;
-   private String o;
-   private String p;
-   private boolean q;
-   private boolean r;
-   private WorldTemplatePaginatedList s;
-   private List<bl.a> t;
-   private boolean u;
-   private boolean v;
+   private final String[] l = new String[4];
+   private RealmsLabel m;
+   private RealmsLabel n;
 
-   public au(as<WorldTemplate> lastScreen, WorldTemplate selectedWorldTemplate, RealmsServer.c worldType) {
+   public au(long worldId, int slotId, ar lastScreen) {
       this.b = lastScreen;
-      this.c = selectedWorldTemplate;
-      this.m = worldType;
-      this.g = getLocalizedString("mco.template.title");
-      this.s = new WorldTemplatePaginatedList(10);
+      this.c = worldId;
+      this.d = slotId;
    }
 
-   public au(as<WorldTemplate> lastScreen, WorldTemplate selectedWorldTemplate, RealmsServer.c worldType, WorldTemplatePaginatedList list) {
-      this(lastScreen, selectedWorldTemplate, worldType);
-      this.d.addAll((Collection)(list == null ? new ArrayList() : list.templates));
-      this.s = list;
-      if (this.s.size == 0) {
-         this.s.size = 10;
+   private void a() throws Exception {
+      RealmsAnvilLevelStorageSource levelSource = this.getLevelStorageSource();
+      this.g = levelSource.getLevelList();
+      Collections.sort(this.g);
+
+      for(RealmsLevelSummary summary : this.g) {
+         this.i.a(summary);
       }
 
-   }
-
-   public void a(String title) {
-      this.g = title;
-   }
-
-   public void b(String string) {
-      this.o = string;
-      this.q = true;
-   }
-
-   public boolean mouseClicked(double x, double y, int buttonNum) {
-      if (this.r && this.p != null) {
-         bj.c("https://beta.minecraft.net/realms/adventure-maps-in-1-9");
-         return true;
-      } else {
-         return super.mouseClicked(x, y, buttonNum);
-      }
    }
 
    public void init() {
       this.setKeyboardHandlerSendRepeatsToGui(true);
-      this.e = new au.a();
-      if (this.d.isEmpty()) {
-         this.s.page = 0;
-         this.s.size = 10;
-         this.j();
-      } else {
-         for(WorldTemplate template : this.d) {
-            this.e.a(template);
-         }
+      this.i = new au.b();
+
+      try {
+         this.a();
+      } catch (Exception var2) {
+         a.error("Couldn't load level list", var2);
+         Realms.setScreen(new ai("Unable to load worlds", var2.getMessage(), this.b));
+         return;
       }
 
-      this.buttonsAdd(this.i = new RealmsButton(2, this.width() / 2 - 206, this.height() - 32, 100, 20, getLocalizedString("mco.template.button.trailer")) {
+      this.j = getLocalizedString("selectWorld.world");
+      this.k = getLocalizedString("selectWorld.conversion");
+      this.l[Realms.survivalId()] = getLocalizedString("gameMode.survival");
+      this.l[Realms.creativeId()] = getLocalizedString("gameMode.creative");
+      this.l[Realms.adventureId()] = getLocalizedString("gameMode.adventure");
+      this.l[Realms.spectatorId()] = getLocalizedString("gameMode.spectator");
+      this.addWidget(this.i);
+      this.buttonsAdd(new RealmsButton(1, this.width() / 2 + 6, this.height() - 32, 153, 20, getLocalizedString("gui.back")) {
          public void onPress() {
-            au.this.h();
+            Realms.setScreen(au.this.b);
          }
       });
-      this.buttonsAdd(this.h = new RealmsButton(1, this.width() / 2 - 100, this.height() - 32, 100, 20, getLocalizedString("mco.template.button.select")) {
+      this.buttonsAdd(this.e = new RealmsButton(2, this.width() / 2 - 154, this.height() - 32, 153, 20, getLocalizedString("mco.upload.button.name")) {
          public void onPress() {
-            au.this.g();
+            au.this.b();
          }
       });
-      this.buttonsAdd(
-         new RealmsButton(0, this.width() / 2 + 6, this.height() - 32, 100, 20, getLocalizedString(this.m == RealmsServer.c.b ? "gui.cancel" : "gui.back")) {
-            public void onPress() {
-               au.this.f();
-            }
-         }
-      );
-      this.buttonsAdd(this.j = new RealmsButton(1, this.width() / 2 + 112, this.height() - 32, 100, 20, getLocalizedString("mco.template.button.publisher")) {
-         public void onPress() {
-            au.this.i();
-         }
-      });
-      this.h.active(false);
-      this.i.setVisible(false);
-      this.j.setVisible(false);
-      this.addWidget(this.e);
-      this.focusOn(this.e);
-      Realms.narrateNow((Iterable)Stream.of(this.g, this.o).filter(Objects::nonNull).collect(Collectors.toList()));
+      this.e.active(this.h >= 0 && this.h < this.g.size());
+      this.addWidget(this.m = new RealmsLabel(getLocalizedString("mco.upload.select.world.title"), this.width() / 2, 13, 16777215));
+      this.addWidget(this.n = new RealmsLabel(getLocalizedString("mco.upload.select.world.subtitle"), this.width() / 2, u.a(-1), 10526880));
+      this.narrateLabels();
+   }
+
+   public void removed() {
+      this.setKeyboardHandlerSendRepeatsToGui(false);
    }
 
    private void b() {
-      this.j.setVisible(this.d());
-      this.i.setVisible(this.e());
-      this.h.active(this.c());
-   }
-
-   private boolean c() {
-      return this.f != -1;
-   }
-
-   private boolean d() {
-      return this.f != -1 && !((WorldTemplate)this.d.get(this.f)).link.isEmpty();
-   }
-
-   private boolean e() {
-      return this.f != -1 && !((WorldTemplate)this.d.get(this.f)).trailer.isEmpty();
-   }
-
-   public void tick() {
-      super.tick();
-      --this.n;
-      if (this.n < 0) {
-         this.n = 0;
-      }
-
-   }
-
-   public boolean keyPressed(int eventKey, int scancode, int mods) {
-      switch(eventKey) {
-         case 256:
-            this.f();
-            return true;
-         default:
-            return super.keyPressed(eventKey, scancode, mods);
-      }
-   }
-
-   private void f() {
-      this.b.a(null);
-      Realms.setScreen(this.b);
-   }
-
-   private void g() {
-      if (this.f >= 0 && this.f < this.d.size()) {
-         WorldTemplate template = (WorldTemplate)this.d.get(this.f);
-         this.b.a(template);
-      }
-
-   }
-
-   private void h() {
-      if (this.f >= 0 && this.f < this.d.size()) {
-         WorldTemplate template = (WorldTemplate)this.d.get(this.f);
-         if (!"".equals(template.trailer)) {
-            bj.c(template.trailer);
-         }
-      }
-
-   }
-
-   private void i() {
-      if (this.f >= 0 && this.f < this.d.size()) {
-         WorldTemplate template = (WorldTemplate)this.d.get(this.f);
-         if (!"".equals(template.link)) {
-            bj.c(template.link);
-         }
-      }
-
-   }
-
-   private void j() {
-      if (!this.u && !this.v) {
-         this.u = true;
-         (new Thread("realms-template-fetcher") {
-            public void run() {
-               try {
-                  g client = realms.g.a();
-                  au.this.s = client.a(au.this.s.page + 1, au.this.s.size, au.this.m);
-                  au.this.d.addAll(au.this.s.templates);
-
-                  for(WorldTemplate template : au.this.d) {
-                     au.this.e.a(template);
-                  }
-
-                  if (au.this.s.templates.isEmpty()) {
-                     au.this.v = true;
-                     String withoutLink = RealmsScreen.getLocalizedString("mco.template.select.none", new Object[]{"%link"});
-                     bl.b link = bl.b.a(RealmsScreen.getLocalizedString("mco.template.select.none.linkTitle"), "https://minecraft.net/realms/content-creator/");
-                     au.this.t = bl.a(withoutLink, link);
-                  }
-               } catch (o var7) {
-                  au.a.error("Couldn't fetch templates");
-                  au.this.v = true;
-                  if (au.this.s.templates.isEmpty()) {
-                     au.this.t = bl.a(RealmsScreen.getLocalizedString("mco.template.select.failure"));
-                  }
-               } finally {
-                  au.this.u = false;
-               }
-
-            }
-         }).start();
+      if (this.h != -1 && !((RealmsLevelSummary)this.g.get(this.h)).isHardcore()) {
+         RealmsLevelSummary selectedLevel = (RealmsLevelSummary)this.g.get(this.h);
+         Realms.setScreen(new ba(this.c, this.d, this.b, selectedLevel));
       }
 
    }
 
    public void render(int xm, int ym, float a) {
-      this.k = null;
-      this.l = null;
-      this.r = false;
-      if (!this.s.isLastPage()) {
-         this.e.clear();
-         this.j();
-      }
-
       this.renderBackground();
-      this.e.render(xm, ym, a);
-      if (this.v && this.s.templates.isEmpty() && this.t != null) {
-         for(int i = 0; i < this.t.size(); ++i) {
-            bl.a line = (bl.a)this.t.get(i);
-            int lineY = realms.u.a(4 + i);
-            int lineWidth = line.a.stream().mapToInt(s -> this.fontWidth(s.a())).sum();
-            int startX = this.width() / 2 - lineWidth / 2;
-
-            for(bl.b segment : line.a) {
-               int color = segment.b() ? 3368635 : 16777215;
-               int endX = this.draw(segment.a(), startX, lineY, color, true);
-               if (segment.b() && xm > startX && xm < endX && ym > lineY - 3 && ym < lineY + 8) {
-                  this.k = segment.c();
-                  this.l = segment.c();
-               }
-
-               startX = endX;
-            }
-         }
-      }
-
-      this.drawCenteredString(this.g, this.width() / 2, 13, 16777215);
-      if (this.q) {
-         String[] lines = this.o.split("\\\\n");
-
-         for(int index = 0; index < lines.length; ++index) {
-            int fontWidth = this.fontWidth(lines[index]);
-            int offsetX = this.width() / 2 - fontWidth / 2;
-            int offsetY = realms.u.a(-1 + index);
-            if (xm >= offsetX && xm <= offsetX + fontWidth && ym >= offsetY && ym <= offsetY + this.fontLineHeight()) {
-               this.r = true;
-            }
-         }
-
-         for(int index = 0; index < lines.length; ++index) {
-            String line = lines[index];
-            int warningColor = 10526880;
-            if (this.p != null) {
-               if (this.r) {
-                  warningColor = 7107012;
-                  line = "§n" + line;
-               } else {
-                  warningColor = 3368635;
-               }
-            }
-
-            this.drawCenteredString(line, this.width() / 2, realms.u.a(-1 + index), warningColor);
-         }
+      this.i.render(xm, ym, a);
+      this.m.render(this);
+      this.n.render(this);
+      if (this.g.size() == 0) {
+         this.drawCenteredString(getLocalizedString("mco.upload.select.world.none"), this.width() / 2, this.height() / 2 - 20, 16777215);
       }
 
       super.render(xm, ym, a);
-      if (this.k != null) {
-         this.a(this.k, xm, ym);
-      }
-
    }
 
-   protected void a(String msg, int x, int y) {
-      if (msg != null) {
-         int rx = x + 12;
-         int ry = y - 12;
-         int width = this.fontWidth(msg);
-         this.fillGradient(rx - 3, ry - 3, rx + width + 3, ry + 8 + 3, -1073741824, -1073741824);
-         this.fontDrawShadow(msg, rx, ry, 16777215);
+   public boolean keyPressed(int eventKey, int scancode, int mods) {
+      if (eventKey == 256) {
+         Realms.setScreen(this.b);
+         return true;
+      } else {
+         return super.keyPressed(eventKey, scancode, mods);
       }
    }
 
-   class a extends RealmsObjectSelectionList {
-      public a() {
-         super(au.this.width(), au.this.height(), au.this.q ? realms.u.a(1) : 32, au.this.height() - 40, 46);
+   public void tick() {
+      super.tick();
+   }
+
+   class a extends RealmListEntry {
+      final RealmsLevelSummary a;
+
+      public a(RealmsLevelSummary levelSummary) {
+         this.a = levelSummary;
       }
 
-      public void a(WorldTemplate template) {
-         this.addEntry(au.this.new b(template));
+      public void render(int index, int rowTop, int rowLeft, int rowWidth, int rowHeight, int mouseX, int mouseY, boolean hovered, float a) {
+         this.a(this.a, index, rowLeft, rowTop, rowHeight, Tezzelator.instance, mouseX, mouseY);
       }
 
-      public boolean mouseClicked(double xm, double ym, int buttonNum) {
-         if (buttonNum == 0 && ym >= (double)this.y0() && ym <= (double)this.y1()) {
-            int x0 = this.width() / 2 - 150;
-            if (au.this.l != null) {
-               bj.c(au.this.l);
+      public boolean mouseClicked(double x, double y, int buttonNum) {
+         au.this.i.selectItem(au.this.g.indexOf(this.a));
+         return true;
+      }
+
+      protected void a(RealmsLevelSummary levelSummary, int i, int x, int y, int h, Tezzelator t, int mouseX, int mouseY) {
+         String name = levelSummary.getLevelName();
+         if (name == null || name.isEmpty()) {
+            name = au.this.j + " " + (i + 1);
+         }
+
+         String id = levelSummary.getLevelId();
+         id = id + " (" + au.this.f.format(new Date(levelSummary.getLastPlayed()));
+         id = id + ")";
+         String info = "";
+         if (levelSummary.isRequiresConversion()) {
+            info = au.this.k + " " + info;
+         } else {
+            info = au.this.l[levelSummary.getGameMode()];
+            if (levelSummary.isHardcore()) {
+               info = q.e + RealmsScreen.getLocalizedString("mco.upload.hardcore") + q.v;
             }
 
-            int clickSlotPos = (int)Math.floor(ym - (double)this.y0()) - this.headerHeight() + this.getScroll() - 4;
-            int slot = clickSlotPos / this.itemHeight();
-            if (xm >= (double)x0 && xm < (double)this.getScrollbarPosition() && slot >= 0 && clickSlotPos >= 0 && slot < this.getItemCount()) {
-               this.selectItem(slot);
-               this.itemClicked(clickSlotPos, slot, xm, ym, this.width());
-               if (slot >= au.this.d.size()) {
-                  return super.mouseClicked(xm, ym, buttonNum);
-               }
-
-               au.this.f = slot;
-               au.this.c = null;
-               au.this.b();
-               au.this.n = au.this.n + 7;
-               if (au.this.n >= 10) {
-                  au.this.g();
-               }
-
-               return true;
+            if (levelSummary.hasCheats()) {
+               info = info + ", " + RealmsScreen.getLocalizedString("selectWorld.cheats");
             }
          }
 
-         return super.mouseClicked(xm, ym, buttonNum);
+         au.this.drawString(name, x + 2, y + 1, 16777215);
+         au.this.drawString(id, x + 2, y + 12, 8421504);
+         au.this.drawString(info, x + 2, y + 12 + 10, 8421504);
+      }
+   }
+
+   class b extends RealmsObjectSelectionList {
+      public b() {
+         super(au.this.width(), au.this.height(), u.a(0), au.this.height() - 40, 36);
       }
 
-      public void selectItem(int item) {
-         au.this.f = item;
-         this.setSelected(item);
-         if (item != -1) {
-            Realms.narrateNow(RealmsScreen.getLocalizedString("narrator.select", new Object[]{((WorldTemplate)au.this.d.get(item)).name}));
-         }
-
-         au.this.b();
+      public void a(RealmsLevelSummary levelSummary) {
+         this.addEntry(au.this.new a(levelSummary));
       }
 
-      public void itemClicked(int clickSlotPos, int slot, double xm, double ym, int width) {
-         if (slot < au.this.d.size()) {
-            ;
-         }
+      public int getItemCount() {
+         return au.this.g.size();
       }
 
       public int getMaxPosition() {
-         return this.getItemCount() * 46;
+         return au.this.g.size() * 36;
+      }
+
+      public boolean isFocused() {
+         return au.this.isFocused(this);
       }
 
       public void renderBackground() {
          au.this.renderBackground();
       }
 
-      public int getScrollbarPosition() {
-         return super.getScrollbarPosition() + 30;
-      }
-
-      public boolean isFocused() {
-         return au.this.isFocused(this);
-      }
-   }
-
-   class b extends RealmListEntry {
-      final WorldTemplate a;
-
-      public b(WorldTemplate template) {
-         this.a = template;
-      }
-
-      public void render(int index, int rowTop, int rowLeft, int rowWidth, int rowHeight, int mouseX, int mouseY, boolean hovered, float a) {
-         this.a(this.a, rowLeft, rowTop, mouseX, mouseY);
-      }
-
-      private void a(WorldTemplate worldTemplate, int x, int y, int mouseX, int mouseY) {
-         int textStart = x + 20;
-         au.this.drawString(worldTemplate.name, textStart, y + 2, 16777215);
-         au.this.drawString(worldTemplate.author, textStart, y + 15, 7105644);
-         au.this.drawString(worldTemplate.version, textStart + 227 - au.this.fontWidth(worldTemplate.version), y + 1, 7105644);
-         if (!"".equals(worldTemplate.link) || !"".equals(worldTemplate.trailer) || !"".equals(worldTemplate.recommendedPlayers)) {
-            this.a(textStart - 1, y + 25, mouseX, mouseY, worldTemplate.link, worldTemplate.trailer, worldTemplate.recommendedPlayers);
+      public void selectItem(int item) {
+         this.setSelected(item);
+         if (item != -1) {
+            Realms.narrateNow(RealmsScreen.getLocalizedString("narrator.select", new Object[]{((RealmsLevelSummary)au.this.g.get(item)).getLevelName()}));
          }
 
-         this.a(x - 45, y + 1, mouseX, mouseY, worldTemplate);
-      }
-
-      private void a(int x, int y, int xm, int ym, WorldTemplate worldTemplate) {
-         bi.a(worldTemplate.id, worldTemplate.image);
-         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-         RealmsScreen.blit(x + 1, y + 1, 0.0F, 0.0F, 38, 38, 38, 38);
-         RealmsScreen.bind("realms:textures/gui/realms/slot_frame.png");
-         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-         RealmsScreen.blit(x, y, 0.0F, 0.0F, 40, 40, 40, 40);
-      }
-
-      private void a(int x, int y, int xm, int ym, String link, String trailerLink, String recommendedPlayers) {
-         if (!"".equals(recommendedPlayers)) {
-            au.this.drawString(recommendedPlayers, x, y + 4, 5000268);
-         }
-
-         int offset = "".equals(recommendedPlayers) ? 0 : au.this.fontWidth(recommendedPlayers) + 2;
-         boolean linkHovered = false;
-         boolean trailerHovered = false;
-         if (xm >= x + offset && xm <= x + offset + 32 && ym >= y && ym <= y + 15 && ym < au.this.height() - 15 && ym > 32) {
-            if (xm <= x + 15 + offset && xm > offset) {
-               if ("".equals(link)) {
-                  trailerHovered = true;
-               } else {
-                  linkHovered = true;
-               }
-            } else if (!"".equals(link)) {
-               trailerHovered = true;
-            }
-         }
-
-         if (!"".equals(link)) {
-            RealmsScreen.bind("realms:textures/gui/realms/link_icons.png");
-            GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            GlStateManager.pushMatrix();
-            GlStateManager.scalef(1.0F, 1.0F, 1.0F);
-            RealmsScreen.blit(x + offset, y, linkHovered ? 15.0F : 0.0F, 0.0F, 15, 15, 30, 15);
-            GlStateManager.popMatrix();
-         }
-
-         if (!"".equals(trailerLink)) {
-            RealmsScreen.bind("realms:textures/gui/realms/trailer_icons.png");
-            GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            GlStateManager.pushMatrix();
-            GlStateManager.scalef(1.0F, 1.0F, 1.0F);
-            RealmsScreen.blit(x + offset + ("".equals(link) ? 0 : 17), y, trailerHovered ? 15.0F : 0.0F, 0.0F, 15, 15, 30, 15);
-            GlStateManager.popMatrix();
-         }
-
-         if (linkHovered && !"".equals(link)) {
-            au.this.k = RealmsScreen.getLocalizedString("mco.template.info.tooltip");
-            au.this.l = link;
-         } else if (trailerHovered && !"".equals(trailerLink)) {
-            au.this.k = RealmsScreen.getLocalizedString("mco.template.trailer.tooltip");
-            au.this.l = trailerLink;
-         }
-
+         au.this.h = item;
+         au.this.e.active(au.this.h >= 0 && au.this.h < this.getItemCount() && !((RealmsLevelSummary)au.this.g.get(au.this.h)).isHardcore());
       }
    }
 }

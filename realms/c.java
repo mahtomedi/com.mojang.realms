@@ -104,7 +104,7 @@ public class c {
       return var5;
    }
 
-   public void a(final WorldDownload worldDownload, final String worldName, final ag.a downloadStatus, final RealmsAnvilLevelStorageSource levelStorageSource) {
+   public void a(final WorldDownload worldDownload, final String worldName, final ah.a downloadStatus, final RealmsAnvilLevelStorageSource levelStorageSource) {
       if (this.i == null) {
          this.i = new Thread() {
             public void run() {
@@ -343,10 +343,10 @@ public class c {
       private final String b;
       private final File c;
       private final RealmsAnvilLevelStorageSource d;
-      private final ag.a e;
+      private final ah.a e;
       private final WorldDownload f;
 
-      private b(String worldName, File tempFile, RealmsAnvilLevelStorageSource levelStorageSource, ag.a downloadStatus, WorldDownload worldDownload) {
+      private b(String worldName, File tempFile, RealmsAnvilLevelStorageSource levelStorageSource, ah.a downloadStatus, WorldDownload worldDownload) {
          this.b = worldName;
          this.c = tempFile;
          this.d = levelStorageSource;
@@ -371,10 +371,10 @@ public class c {
 
    class c implements ActionListener {
       private final File b;
-      private final ag.a c;
+      private final ah.a c;
       private final WorldDownload d;
 
-      private c(File tempFile, ag.a downloadStatus, WorldDownload worldDownload) {
+      private c(File tempFile, ah.a downloadStatus, WorldDownload worldDownload) {
          this.b = tempFile;
          this.c = downloadStatus;
          this.d = worldDownload;

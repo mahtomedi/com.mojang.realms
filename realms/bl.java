@@ -1,161 +1,81 @@
 package realms;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
+import javax.annotation.Nullable;
 
 public class bl {
-   private bl() {
-   }
+   private int[] a;
+   private int b;
+   private int c;
 
-   static List<String> a(String text) {
-      return Arrays.asList(text.split("\\n"));
-   }
-
-   public static List<bl.a> a(String text, bl.b... links) {
-      return a(text, Arrays.asList(links));
-   }
-
-   private static List<bl.a> a(String text, List<bl.b> links) {
-      List<String> brokenLines = a(text);
-      return a(brokenLines, links);
-   }
-
-   private static List<bl.a> a(List<String> lines, List<bl.b> links) {
-      int linkCount = 0;
-      ArrayList<bl.a> processedLines = new ArrayList();
-
-      for(String line : lines) {
-         List<bl.b> segments = new ArrayList();
-
-         for(String part : a(line, "%link")) {
-            if (part.equals("%link")) {
-               segments.add(links.get(linkCount++));
-            } else {
-               segments.add(bl.b.a(part));
-            }
-         }
-
-         processedLines.add(new bl.a(segments));
-      }
-
-      return processedLines;
-   }
-
-   public static List<String> a(String line, String delimiter) {
-      if (delimiter.isEmpty()) {
-         throw new IllegalArgumentException("Delimiter cannot be the empty string");
+   @Nullable
+   public BufferedImage a(BufferedImage image) {
+      if (image == null) {
+         return null;
       } else {
-         List<String> parts = new ArrayList();
+         this.b = 64;
+         this.c = 64;
+         BufferedImage out = new BufferedImage(this.b, this.c, 2);
+         Graphics outGraphics = out.getGraphics();
+         outGraphics.drawImage(image, 0, 0, null);
+         boolean isLegacy = image.getHeight() == 32;
+         if (isLegacy) {
+            outGraphics.setColor(new Color(0, 0, 0, 0));
+            outGraphics.fillRect(0, 32, 64, 32);
+            outGraphics.drawImage(out, 24, 48, 20, 52, 4, 16, 8, 20, null);
+            outGraphics.drawImage(out, 28, 48, 24, 52, 8, 16, 12, 20, null);
+            outGraphics.drawImage(out, 20, 52, 16, 64, 8, 20, 12, 32, null);
+            outGraphics.drawImage(out, 24, 52, 20, 64, 4, 20, 8, 32, null);
+            outGraphics.drawImage(out, 28, 52, 24, 64, 0, 20, 4, 32, null);
+            outGraphics.drawImage(out, 32, 52, 28, 64, 12, 20, 16, 32, null);
+            outGraphics.drawImage(out, 40, 48, 36, 52, 44, 16, 48, 20, null);
+            outGraphics.drawImage(out, 44, 48, 40, 52, 48, 16, 52, 20, null);
+            outGraphics.drawImage(out, 36, 52, 32, 64, 48, 20, 52, 32, null);
+            outGraphics.drawImage(out, 40, 52, 36, 64, 44, 20, 48, 32, null);
+            outGraphics.drawImage(out, 44, 52, 40, 64, 40, 20, 44, 32, null);
+            outGraphics.drawImage(out, 48, 52, 44, 64, 52, 20, 56, 32, null);
+         }
 
-         int searchStart;
-         int matchIndex;
-         for(searchStart = 0; (matchIndex = line.indexOf(delimiter, searchStart)) != -1; searchStart = matchIndex + delimiter.length()) {
-            if (matchIndex > searchStart) {
-               parts.add(line.substring(searchStart, matchIndex));
+         outGraphics.dispose();
+         this.a = ((DataBufferInt)out.getRaster().getDataBuffer()).getData();
+         this.b(0, 0, 32, 16);
+         if (isLegacy) {
+            this.a(32, 0, 64, 32);
+         }
+
+         this.b(0, 16, 64, 32);
+         this.b(16, 48, 48, 64);
+         return out;
+      }
+   }
+
+   private void a(int x0, int y0, int x1, int y1) {
+      for(int x = x0; x < x1; ++x) {
+         for(int y = y0; y < y1; ++y) {
+            int pix = this.a[x + y * this.b];
+            if ((pix >> 24 & 0xFF) < 128) {
+               return;
             }
-
-            parts.add(delimiter);
          }
-
-         if (searchStart < line.length()) {
-            parts.add(line.substring(searchStart));
-         }
-
-         return parts;
       }
+
+      for(int x = x0; x < x1; ++x) {
+         for(int y = y0; y < y1; ++y) {
+            this.a[x + y * this.b] &= 16777215;
+         }
+      }
+
    }
 
-   public static class a {
-      public final List<bl.b> a;
-
-      a(bl.b... segments) {
-         this(Arrays.asList(segments));
-      }
-
-      a(List<bl.b> segments) {
-         this.a = segments;
-      }
-
-      public String toString() {
-         return "Line{segments=" + this.a + '}';
-      }
-
-      public boolean equals(Object o) {
-         if (this == o) {
-            return true;
-         } else if (o != null && this.getClass() == o.getClass()) {
-            bl.a line = (bl.a)o;
-            return Objects.equals(this.a, line.a);
-         } else {
-            return false;
+   private void b(int x0, int y0, int x1, int y1) {
+      for(int x = x0; x < x1; ++x) {
+         for(int y = y0; y < y1; ++y) {
+            this.a[x + y * this.b] |= -16777216;
          }
       }
 
-      public int hashCode() {
-         return Objects.hash(new Object[]{this.a});
-      }
-   }
-
-   public static class b {
-      final String a;
-      final String b;
-      final String c;
-
-      private b(String fullText) {
-         this.a = fullText;
-         this.b = null;
-         this.c = null;
-      }
-
-      private b(String fullText, String linkTitle, String linkUrl) {
-         this.a = fullText;
-         this.b = linkTitle;
-         this.c = linkUrl;
-      }
-
-      public boolean equals(Object o) {
-         if (this == o) {
-            return true;
-         } else if (o != null && this.getClass() == o.getClass()) {
-            bl.b segment = (bl.b)o;
-            return Objects.equals(this.a, segment.a) && Objects.equals(this.b, segment.b) && Objects.equals(this.c, segment.c);
-         } else {
-            return false;
-         }
-      }
-
-      public int hashCode() {
-         return Objects.hash(new Object[]{this.a, this.b, this.c});
-      }
-
-      public String toString() {
-         return "Segment{fullText='" + this.a + '\'' + ", linkTitle='" + this.b + '\'' + ", linkUrl='" + this.c + '\'' + '}';
-      }
-
-      public String a() {
-         return this.b() ? this.b : this.a;
-      }
-
-      public boolean b() {
-         return this.b != null;
-      }
-
-      public String c() {
-         if (!this.b()) {
-            throw new IllegalStateException("Not a link: " + this);
-         } else {
-            return this.c;
-         }
-      }
-
-      public static bl.b a(String linkTitle, String linkUrl) {
-         return new bl.b(null, linkTitle, linkUrl);
-      }
-
-      static bl.b a(String fullText) {
-         return new bl.b(fullText);
-      }
    }
 }

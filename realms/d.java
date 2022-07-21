@@ -38,7 +38,7 @@ public class d {
    private final String h;
    private final k i;
    private AtomicBoolean j = new AtomicBoolean(false);
-   private CompletableFuture<ba> k;
+   private CompletableFuture<bb> k;
    private final RequestConfig l = RequestConfig.custom()
       .setSocketTimeout((int)TimeUnit.MINUTES.toMillis(10L))
       .setConnectTimeout((int)TimeUnit.SECONDS.toMillis(15L))
@@ -55,7 +55,7 @@ public class d {
       this.i = uploadStatus;
    }
 
-   public void a(Consumer<ba> callback) {
+   public void a(Consumer<bb> callback) {
       if (this.k == null) {
          this.k = CompletableFuture.supplyAsync(() -> this.a(0));
          this.k.thenAccept(callback);
@@ -71,8 +71,8 @@ public class d {
 
    }
 
-   private ba a(int currentAttempt) {
-      ba.a uploadResultBuilder = new ba.a();
+   private bb a(int currentAttempt) {
+      bb.a uploadResultBuilder = new bb.a();
       if (this.j.get()) {
          return uploadResultBuilder.a();
       } else {
@@ -80,7 +80,7 @@ public class d {
          HttpPost request = new HttpPost("http://" + this.e.getUploadEndpoint() + ":" + this.e.getPort() + "/upload" + "/" + this.c + "/" + this.d);
          CloseableHttpClient client = HttpClientBuilder.create().setDefaultRequestConfig(this.l).build();
 
-         ba var8;
+         bb var8;
          try {
             this.a(request);
             HttpResponse response = client.execute(request);
@@ -118,7 +118,7 @@ public class d {
    }
 
    private void a(HttpPost request) throws FileNotFoundException {
-      String realmsVersion = bc.a();
+      String realmsVersion = bd.a();
       if (realmsVersion != null) {
          request.setHeader(
             "Cookie", "sid=" + this.f + ";token=" + this.e.getToken() + ";user=" + this.g + ";version=" + this.h + ";realms_version=" + realmsVersion
@@ -132,7 +132,7 @@ public class d {
       request.setEntity(entity);
    }
 
-   private void a(HttpResponse response, ba.a uploadResultBuilder) throws IOException {
+   private void a(HttpResponse response, bb.a uploadResultBuilder) throws IOException {
       int statusCode = response.getStatusLine().getStatusCode();
       if (statusCode == 401) {
          a.debug("Realms server returned 401: " + response.getFirstHeader("WWW-Authenticate"));
@@ -158,7 +158,7 @@ public class d {
       return retryDelaySeconds > 0L && currentAttempt + 1 < 5;
    }
 
-   private ba b(long retryDelaySeconds, int currentAttempt) throws InterruptedException {
+   private bb b(long retryDelaySeconds, int currentAttempt) throws InterruptedException {
       Thread.sleep(Duration.ofSeconds(retryDelaySeconds).toMillis());
       return this.a(currentAttempt + 1);
    }

@@ -1,9 +1,9 @@
 package realms;
 
 public abstract class t implements Runnable, r, s {
-   protected ak a;
+   protected al a;
 
-   public void a(ak longRunningMcoTaskScreen) {
+   public void a(al longRunningMcoTaskScreen) {
       this.a = longRunningMcoTaskScreen;
    }
 

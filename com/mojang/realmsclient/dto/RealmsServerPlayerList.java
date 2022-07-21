@@ -9,7 +9,7 @@ import java.util.List;
 import net.minecraft.obfuscate.DontObfuscateOrShrink;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import realms.bd;
+import realms.be;
 import realms.l;
 
 @DontObfuscateOrShrink
@@ -23,8 +23,8 @@ public class RealmsServerPlayerList extends l {
       RealmsServerPlayerList playerList = new RealmsServerPlayerList();
 
       try {
-         playerList.serverId = bd.a("serverId", node, -1L);
-         String playerListString = bd.a("playerList", node, null);
+         playerList.serverId = be.a("serverId", node, -1L);
+         String playerListString = be.a("playerList", node, null);
          if (playerListString != null) {
             JsonElement element = jsonParser.parse(playerListString);
             if (element.isJsonArray()) {

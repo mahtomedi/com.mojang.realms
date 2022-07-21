@@ -19,8 +19,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import realms.bd;
-import realms.bj;
+import realms.be;
+import realms.bk;
 import realms.l;
 
 @DontObfuscateOrShrink
@@ -74,7 +74,7 @@ public class RealmsServer extends l {
             String name = "";
 
             try {
-               name = bj.a(uuid);
+               name = bk.a(uuid);
             } catch (Exception var8) {
                LOGGER.error("Could not get name for " + uuid, var8);
                continue;
@@ -97,12 +97,12 @@ public class RealmsServer extends l {
       RealmsServer server = new RealmsServer();
 
       try {
-         server.id = bd.a("id", node, -1L);
-         server.remoteSubscriptionId = bd.a("remoteSubscriptionId", node, null);
-         server.name = bd.a("name", node, null);
-         server.motd = bd.a("motd", node, null);
-         server.state = getState(bd.a("state", node, RealmsServer.b.a.name()));
-         server.owner = bd.a("owner", node, null);
+         server.id = be.a("id", node, -1L);
+         server.remoteSubscriptionId = be.a("remoteSubscriptionId", node, null);
+         server.name = be.a("name", node, null);
+         server.motd = be.a("motd", node, null);
+         server.state = getState(be.a("state", node, RealmsServer.b.a.name()));
+         server.owner = be.a("owner", node, null);
          if (node.get("players") != null && node.get("players").isJsonArray()) {
             server.players = parseInvited(node.get("players").getAsJsonArray());
             sortInvited(server);
@@ -110,21 +110,21 @@ public class RealmsServer extends l {
             server.players = new ArrayList();
          }
 
-         server.daysLeft = bd.a("daysLeft", node, 0);
-         server.expired = bd.a("expired", node, false);
-         server.expiredTrial = bd.a("expiredTrial", node, false);
-         server.worldType = getWorldType(bd.a("worldType", node, RealmsServer.c.a.name()));
-         server.ownerUUID = bd.a("ownerUUID", node, "");
+         server.daysLeft = be.a("daysLeft", node, 0);
+         server.expired = be.a("expired", node, false);
+         server.expiredTrial = be.a("expiredTrial", node, false);
+         server.worldType = getWorldType(be.a("worldType", node, RealmsServer.c.a.name()));
+         server.ownerUUID = be.a("ownerUUID", node, "");
          if (node.get("slots") != null && node.get("slots").isJsonArray()) {
             server.slots = parseSlots(node.get("slots").getAsJsonArray());
          } else {
             server.slots = getEmptySlots();
          }
 
-         server.minigameName = bd.a("minigameName", node, null);
-         server.activeSlot = bd.a("activeSlot", node, -1);
-         server.minigameId = bd.a("minigameId", node, -1);
-         server.minigameImage = bd.a("minigameImage", node, null);
+         server.minigameName = be.a("minigameName", node, null);
+         server.activeSlot = be.a("activeSlot", node, -1);
+         server.minigameId = be.a("minigameId", node, -1);
+         server.minigameImage = be.a("minigameImage", node, null);
       } catch (Exception var3) {
          LOGGER.error("Could not parse McoServer: " + var3.getMessage());
       }
@@ -153,11 +153,11 @@ public class RealmsServer extends l {
          try {
             JsonObject node = aJsonArray.getAsJsonObject();
             PlayerInfo playerInfo = new PlayerInfo();
-            playerInfo.setName(bd.a("name", node, null));
-            playerInfo.setUuid(bd.a("uuid", node, null));
-            playerInfo.setOperator(bd.a("operator", node, false));
-            playerInfo.setAccepted(bd.a("accepted", node, false));
-            playerInfo.setOnline(bd.a("online", node, false));
+            playerInfo.setName(be.a("name", node, null));
+            playerInfo.setUuid(be.a("uuid", node, null));
+            playerInfo.setOperator(be.a("operator", node, false));
+            playerInfo.setAccepted(be.a("accepted", node, false));
+            playerInfo.setOnline(be.a("online", node, false));
             invited.add(playerInfo);
          } catch (Exception var6) {
          }
@@ -181,7 +181,7 @@ public class RealmsServer extends l {
                options = RealmsWorldOptions.parse(element.getAsJsonObject());
             }
 
-            int slot = bd.a("slotId", node, -1);
+            int slot = be.a("slotId", node, -1);
             slots.put(slot, options);
          } catch (Exception var9) {
          }

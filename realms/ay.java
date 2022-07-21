@@ -1,7 +1,13 @@
 package realms;
 
 import com.mojang.realmsclient.dto.RealmsServer;
-import java.util.concurrent.locks.ReentrantLock;
+import com.mojang.realmsclient.dto.Subscription;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Locale;
+import java.util.TimeZone;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsScreen;
@@ -11,33 +17,102 @@ import org.apache.logging.log4j.Logger;
 public class ay extends RealmsScreen {
    private static final Logger a = LogManager.getLogger();
    private final RealmsScreen b;
-   private final b c;
-   private final RealmsServer d;
-   private RealmsButton e;
-   private boolean f;
-   private final String g = "https://minecraft.net/realms/terms";
+   private final RealmsServer c;
+   private final RealmsScreen d;
+   private final int e = 0;
+   private final int f = 1;
+   private final int g = 2;
+   private final String h;
+   private final String i;
+   private final String j;
+   private final String k;
+   private int l;
+   private String m;
+   private Subscription.a n;
+   private final String o = "https://account.mojang.com/buy/realms";
 
-   public ay(RealmsScreen lastScreen, b mainScreen, RealmsServer realmsServer) {
+   public ay(RealmsScreen lastScreen, RealmsServer serverData, RealmsScreen mainScreen) {
       this.b = lastScreen;
-      this.c = mainScreen;
-      this.d = realmsServer;
+      this.c = serverData;
+      this.d = mainScreen;
+      this.h = getLocalizedString("mco.configure.world.subscription.title");
+      this.i = getLocalizedString("mco.configure.world.subscription.start");
+      this.j = getLocalizedString("mco.configure.world.subscription.timeleft");
+      this.k = getLocalizedString("mco.configure.world.subscription.recurring.daysleft");
    }
 
    public void init() {
+      this.a(this.c.id);
+      Realms.narrateNow(new String[]{this.h, this.i, this.m, this.j, this.a(this.l)});
       this.setKeyboardHandlerSendRepeatsToGui(true);
-      int column1X = this.width() / 4;
-      int columnWidth = this.width() / 4 - 2;
-      int column2X = this.width() / 2 + 4;
-      this.buttonsAdd(this.e = new RealmsButton(1, column1X, u.a(12), columnWidth, 20, getLocalizedString("mco.terms.buttons.agree")) {
+      this.buttonsAdd(new RealmsButton(2, this.width() / 2 - 100, u.a(6), getLocalizedString("mco.configure.world.subscription.extend")) {
          public void onPress() {
-            ay.this.a();
+            String extensionUrl = "https://account.mojang.com/buy/realms?sid=" + ay.this.c.remoteSubscriptionId + "&pid=" + Realms.getUUID();
+            Realms.setClipboard(extensionUrl);
+            bk.c(extensionUrl);
          }
       });
-      this.buttonsAdd(new RealmsButton(2, column2X, u.a(12), columnWidth, 20, getLocalizedString("mco.terms.buttons.disagree")) {
+      this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 100, u.a(12), getLocalizedString("gui.back")) {
          public void onPress() {
             Realms.setScreen(ay.this.b);
          }
       });
+      if (this.c.expired) {
+         this.buttonsAdd(new RealmsButton(1, this.width() / 2 - 100, u.a(10), getLocalizedString("mco.configure.world.delete.button")) {
+            public void onPress() {
+               String line2 = RealmsScreen.getLocalizedString("mco.configure.world.delete.question.line1");
+               String line3 = RealmsScreen.getLocalizedString("mco.configure.world.delete.question.line2");
+               Realms.setScreen(new ak(ay.this, ak.a.a, line2, line3, true, 1));
+            }
+         });
+      }
+
+   }
+
+   private void a(long worldId) {
+      g client = realms.g.a();
+
+      try {
+         Subscription subscription = client.h(worldId);
+         this.l = subscription.daysLeft;
+         this.m = this.b(subscription.startDate);
+         this.n = subscription.type;
+      } catch (o var5) {
+         a.error("Couldn't get subscription");
+         Realms.setScreen(new ai(var5, this.b));
+      } catch (IOException var6) {
+         a.error("Couldn't parse response subscribing");
+      }
+
+   }
+
+   public void confirmResult(boolean result, int id) {
+      if (id == 1 && result) {
+         (new Thread("Realms-delete-realm") {
+            public void run() {
+               try {
+                  g client = realms.g.a();
+                  client.i(ay.this.c.id);
+               } catch (o var2) {
+                  ay.a.error("Couldn't delete world");
+                  ay.a.error(var2);
+               } catch (IOException var3) {
+                  ay.a.error("Couldn't delete world");
+                  var3.printStackTrace();
+               }
+
+               Realms.setScreen(ay.this.d);
+            }
+         }).start();
+      }
+
+      Realms.setScreen(this);
+   }
+
+   private String b(long cetTime) {
+      Calendar cal = new GregorianCalendar(TimeZone.getDefault());
+      cal.setTimeInMillis(cetTime);
+      return DateFormat.getDateTimeInstance().format(cal.getTime());
    }
 
    public void removed() {
@@ -53,47 +128,54 @@ public class ay extends RealmsScreen {
       }
    }
 
-   private void a() {
-      g client = realms.g.a();
-
-      try {
-         client.l();
-         ak longRunningMcoTaskScreen = new ak(this.b, new bh.e(this.c, this.b, this.d, new ReentrantLock()));
-         longRunningMcoTaskScreen.a();
-         Realms.setScreen(longRunningMcoTaskScreen);
-      } catch (o var3) {
-         a.error("Couldn't agree to TOS");
-      }
-
-   }
-
-   public boolean mouseClicked(double x, double y, int buttonNum) {
-      if (this.f) {
-         Realms.setClipboard("https://minecraft.net/realms/terms");
-         bj.c("https://minecraft.net/realms/terms");
-         return true;
-      } else {
-         return super.mouseClicked(x, y, buttonNum);
-      }
-   }
-
    public void render(int xm, int ym, float a) {
       this.renderBackground();
-      this.drawCenteredString(getLocalizedString("mco.terms.title"), this.width() / 2, 17, 16777215);
-      this.drawString(getLocalizedString("mco.terms.sentence.1"), this.width() / 2 - 120, u.a(5), 16777215);
-      int firstPartWidth = this.fontWidth(getLocalizedString("mco.terms.sentence.1"));
-      int x1 = this.width() / 2 - 121 + firstPartWidth;
-      int y1 = u.a(5);
-      int x2 = x1 + this.fontWidth("mco.terms.sentence.2") + 1;
-      int y2 = y1 + 1 + this.fontLineHeight();
-      if (x1 <= xm && xm <= x2 && y1 <= ym && ym <= y2) {
-         this.f = true;
-         this.drawString(" " + getLocalizedString("mco.terms.sentence.2"), this.width() / 2 - 120 + firstPartWidth, u.a(5), 7107012);
-      } else {
-         this.f = false;
-         this.drawString(" " + getLocalizedString("mco.terms.sentence.2"), this.width() / 2 - 120 + firstPartWidth, u.a(5), 3368635);
+      int center = this.width() / 2 - 100;
+      this.drawCenteredString(this.h, this.width() / 2, 17, 16777215);
+      this.drawString(this.i, center, u.a(0), 10526880);
+      this.drawString(this.m, center, u.a(1), 16777215);
+      if (this.n == Subscription.a.a) {
+         this.drawString(this.j, center, u.a(3), 10526880);
+      } else if (this.n == Subscription.a.b) {
+         this.drawString(this.k, center, u.a(3), 10526880);
       }
 
+      this.drawString(this.a(this.l), center, u.a(4), 16777215);
       super.render(xm, ym, a);
+   }
+
+   private String a(int daysLeft) {
+      if (daysLeft == -1 && this.c.expired) {
+         return getLocalizedString("mco.configure.world.subscription.expired");
+      } else if (daysLeft <= 1) {
+         return getLocalizedString("mco.configure.world.subscription.less_than_a_day");
+      } else {
+         int months = daysLeft / 30;
+         int days = daysLeft % 30;
+         StringBuilder sb = new StringBuilder();
+         if (months > 0) {
+            sb.append(months).append(" ");
+            if (months == 1) {
+               sb.append(getLocalizedString("mco.configure.world.subscription.month").toLowerCase(Locale.ROOT));
+            } else {
+               sb.append(getLocalizedString("mco.configure.world.subscription.months").toLowerCase(Locale.ROOT));
+            }
+         }
+
+         if (days > 0) {
+            if (sb.length() > 0) {
+               sb.append(", ");
+            }
+
+            sb.append(days).append(" ");
+            if (days == 1) {
+               sb.append(getLocalizedString("mco.configure.world.subscription.day").toLowerCase(Locale.ROOT));
+            } else {
+               sb.append(getLocalizedString("mco.configure.world.subscription.days").toLowerCase(Locale.ROOT));
+            }
+         }
+
+         return sb.toString();
+      }
    }
 }

@@ -5,7 +5,7 @@ import com.google.gson.JsonParser;
 import net.minecraft.obfuscate.DontObfuscateOrShrink;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import realms.bd;
+import realms.be;
 import realms.l;
 
 @DontObfuscateOrShrink
@@ -21,9 +21,9 @@ public class WorldDownload extends l {
       WorldDownload worldDownload = new WorldDownload();
 
       try {
-         worldDownload.downloadLink = bd.a("downloadLink", jsonObject, "");
-         worldDownload.resourcePackUrl = bd.a("resourcePackUrl", jsonObject, "");
-         worldDownload.resourcePackHash = bd.a("resourcePackHash", jsonObject, "");
+         worldDownload.downloadLink = be.a("downloadLink", jsonObject, "");
+         worldDownload.resourcePackUrl = be.a("resourcePackUrl", jsonObject, "");
+         worldDownload.resourcePackHash = be.a("resourcePackHash", jsonObject, "");
       } catch (Exception var5) {
          LOGGER.error("Could not parse WorldDownload: " + var5.getMessage());
       }

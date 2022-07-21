@@ -333,13 +333,13 @@ public class v {
                } catch (Exception var5) {
                }
 
-               bg.a data = bg.a();
+               bh.a data = bh.a();
                if (fetchedNews != null) {
                   String fetchedNewsLink = fetchedNews.newsLink;
                   if (fetchedNewsLink != null && !fetchedNewsLink.equals(data.a)) {
                      data.b = true;
                      data.a = fetchedNewsLink;
-                     bg.a(data);
+                     bh.a(data);
                   }
                }
 

@@ -1,78 +1,103 @@
 package realms;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.realmsclient.dto.Ops;
+import com.mojang.realmsclient.dto.PlayerInfo;
+import com.mojang.realmsclient.dto.RealmsServer;
+import net.minecraft.realms.RealmListEntry;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
-import net.minecraft.realms.RealmsEditBox;
+import net.minecraft.realms.RealmsDefaultVertexFormat;
 import net.minecraft.realms.RealmsLabel;
+import net.minecraft.realms.RealmsObjectSelectionList;
 import net.minecraft.realms.RealmsScreen;
+import net.minecraft.realms.Tezzelator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ap extends RealmsScreen {
-   private final aq b;
-   private RealmsLabel c;
-   private RealmsEditBox d;
-   private Boolean e = true;
-   private Integer f = 0;
-   String[] a;
-   private final int g = 0;
-   private final int h = 1;
-   private final int i = 4;
+   private static final Logger a = LogManager.getLogger();
+   private String b;
+   private final ad c;
+   private final RealmsServer d;
+   private ap.a e;
+   private int f;
+   private int g;
+   private int h;
+   private RealmsButton i;
    private RealmsButton j;
-   private RealmsButton k;
-   private RealmsButton l;
-   private String m = getLocalizedString("mco.backup.button.reset");
+   private int k = -1;
+   private String l;
+   private int m = -1;
+   private boolean n;
+   private RealmsLabel o;
 
-   public ap(aq lastScreen) {
-      this.b = lastScreen;
-   }
-
-   public ap(aq lastScreen, String buttonTitle) {
-      this(lastScreen);
-      this.m = buttonTitle;
+   public ap(ad lastScreen, RealmsServer serverData) {
+      this.c = lastScreen;
+      this.d = serverData;
    }
 
    public void tick() {
-      this.d.tick();
       super.tick();
    }
 
    public void init() {
-      this.a = new String[]{
-         getLocalizedString("generator.default"),
-         getLocalizedString("generator.flat"),
-         getLocalizedString("generator.largeBiomes"),
-         getLocalizedString("generator.amplified")
-      };
+      this.f = this.width() / 2 - 160;
+      this.g = 150;
+      this.h = this.width() / 2 + 12;
       this.setKeyboardHandlerSendRepeatsToGui(true);
-      this.buttonsAdd(new RealmsButton(0, this.width() / 2 + 8, u.a(12), 97, 20, getLocalizedString("gui.back")) {
+      this.buttonsAdd(new RealmsButton(1, this.h, u.a(1), this.g + 10, 20, getLocalizedString("mco.configure.world.buttons.invite")) {
          public void onPress() {
-            Realms.setScreen(ap.this.b);
+            Realms.setScreen(new aj(ap.this.c, ap.this, ap.this.d));
          }
       });
-      this.buttonsAdd(this.j = new RealmsButton(1, this.width() / 2 - 102, u.a(12), 97, 20, this.m) {
+      RealmsButton activityFeedButton = new RealmsButton(3, this.h, u.a(3), this.g + 10, 20, getLocalizedString("mco.configure.world.buttons.activity")) {
          public void onPress() {
-            ap.this.a();
+            Realms.setScreen(new y(ap.this, ap.this.d));
+         }
+      };
+      activityFeedButton.active(false);
+      this.buttonsAdd(activityFeedButton);
+      this.buttonsAdd(this.i = new RealmsButton(4, this.h, u.a(7), this.g + 10, 20, getLocalizedString("mco.configure.world.invites.remove.tooltip")) {
+         public void onPress() {
+            ap.this.d(ap.this.m);
          }
       });
-      this.d = this.newEditBox(4, this.width() / 2 - 100, u.a(2), 200, 20, getLocalizedString("mco.reset.world.seed"));
-      this.d.setMaxLength(32);
-      this.d.setValue("");
-      this.addWidget(this.d);
-      this.focusOn(this.d);
-      this.buttonsAdd(this.k = new RealmsButton(2, this.width() / 2 - 102, u.a(4), 205, 20, this.b()) {
+      this.buttonsAdd(this.j = new RealmsButton(5, this.h, u.a(9), this.g + 10, 20, getLocalizedString("mco.configure.world.invites.ops.tooltip")) {
          public void onPress() {
-            ap.this.f = (ap.this.f + 1) % ap.this.a.length;
-            this.setMessage(ap.this.b());
+            if (((PlayerInfo)ap.this.d.players.get(ap.this.m)).isOperator()) {
+               ap.this.c(ap.this.m);
+            } else {
+               ap.this.b(ap.this.m);
+            }
+
          }
       });
-      this.buttonsAdd(this.l = new RealmsButton(3, this.width() / 2 - 102, u.a(6) - 2, 205, 20, this.c()) {
+      this.buttonsAdd(new RealmsButton(0, this.h + this.g / 2 + 2, u.a(12), this.g / 2 + 10 - 2, 20, getLocalizedString("gui.back")) {
          public void onPress() {
-            ap.this.e = !ap.this.e;
-            this.setMessage(ap.this.c());
+            ap.this.b();
          }
       });
-      this.c = new RealmsLabel(getLocalizedString("mco.reset.world.generate"), this.width() / 2, 17, 16777215);
-      this.addWidget(this.c);
+      this.e = new ap.a();
+      this.e.setLeftPos(this.f);
+      this.addWidget(this.e);
+
+      for(PlayerInfo playerInfo : this.d.players) {
+         this.e.a(playerInfo);
+      }
+
+      this.addWidget(this.o = new RealmsLabel(getLocalizedString("mco.configure.world.players.title"), this.width() / 2, 17, 16777215));
       this.narrateLabels();
+      this.a();
+   }
+
+   private void a() {
+      this.i.setVisible(this.a(this.m));
+      this.j.setVisible(this.a(this.m));
+   }
+
+   private boolean a(int player) {
+      return player != -1;
    }
 
    public void removed() {
@@ -81,31 +106,297 @@ public class ap extends RealmsScreen {
 
    public boolean keyPressed(int eventKey, int scancode, int mods) {
       if (eventKey == 256) {
-         Realms.setScreen(this.b);
+         this.b();
          return true;
       } else {
          return super.keyPressed(eventKey, scancode, mods);
       }
    }
 
-   private void a() {
-      this.b.a(new aq.c(this.d.getValue(), this.f, this.e));
+   private void b() {
+      if (this.n) {
+         Realms.setScreen(this.c.b());
+      } else {
+         Realms.setScreen(this.c);
+      }
+
+   }
+
+   private void b(int index) {
+      this.a();
+      g client = realms.g.a();
+      String selectedInvite = ((PlayerInfo)this.d.players.get(index)).getUuid();
+
+      try {
+         this.a(client.e(this.d.id, selectedInvite));
+      } catch (o var5) {
+         a.error("Couldn't op the user");
+      }
+
+   }
+
+   private void c(int index) {
+      this.a();
+      g client = realms.g.a();
+      String selectedInvite = ((PlayerInfo)this.d.players.get(index)).getUuid();
+
+      try {
+         this.a(client.f(this.d.id, selectedInvite));
+      } catch (o var5) {
+         a.error("Couldn't deop the user");
+      }
+
+   }
+
+   private void a(Ops ops) {
+      for(PlayerInfo playerInfo : this.d.players) {
+         playerInfo.setOperator(ops.ops.contains(playerInfo.getName()));
+      }
+
+   }
+
+   private void d(int index) {
+      this.a();
+      if (index >= 0 && index < this.d.players.size()) {
+         PlayerInfo playerInfo = (PlayerInfo)this.d.players.get(index);
+         this.l = playerInfo.getUuid();
+         this.k = index;
+         ae confirmScreen = new ae(this, "Question", getLocalizedString("mco.configure.world.uninvite.question") + " '" + playerInfo.getName() + "' ?", 2);
+         Realms.setScreen(confirmScreen);
+      }
+
+   }
+
+   public void confirmResult(boolean result, int id) {
+      if (id == 2) {
+         if (result) {
+            g client = realms.g.a();
+
+            try {
+               client.a(this.d.id, this.l);
+            } catch (o var5) {
+               a.error("Couldn't uninvite user");
+            }
+
+            this.e(this.k);
+            this.m = -1;
+            this.a();
+         }
+
+         this.n = true;
+         Realms.setScreen(this);
+      }
+
+   }
+
+   private void e(int selectedInvitedIndex) {
+      this.d.players.remove(selectedInvitedIndex);
    }
 
    public void render(int xm, int ym, float a) {
+      this.b = null;
       this.renderBackground();
-      this.c.render(this);
-      this.drawString(getLocalizedString("mco.reset.world.seed"), this.width() / 2 - 100, u.a(1), 10526880);
-      this.d.render(xm, ym, a);
+      if (this.e != null) {
+         this.e.render(xm, ym, a);
+      }
+
+      int bottomBorder = u.a(12) + 20;
+      GlStateManager.disableLighting();
+      GlStateManager.disableFog();
+      Tezzelator t = Tezzelator.instance;
+      bind("textures/gui/options_background.png");
+      GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+      float s = 32.0F;
+      t.begin(7, RealmsDefaultVertexFormat.POSITION_TEX_COLOR);
+      t.vertex(0.0, (double)this.height(), 0.0).tex(0.0, (double)((float)(this.height() - bottomBorder) / 32.0F + 0.0F)).color(64, 64, 64, 255).endVertex();
+      t.vertex((double)this.width(), (double)this.height(), 0.0)
+         .tex((double)((float)this.width() / 32.0F), (double)((float)(this.height() - bottomBorder) / 32.0F + 0.0F))
+         .color(64, 64, 64, 255)
+         .endVertex();
+      t.vertex((double)this.width(), (double)bottomBorder, 0.0).tex((double)((float)this.width() / 32.0F), 0.0).color(64, 64, 64, 255).endVertex();
+      t.vertex(0.0, (double)bottomBorder, 0.0).tex(0.0, 0.0).color(64, 64, 64, 255).endVertex();
+      t.end();
+      this.o.render(this);
+      if (this.d != null && this.d.players != null) {
+         this.drawString(getLocalizedString("mco.configure.world.invited") + " (" + this.d.players.size() + ")", this.f, u.a(0), 10526880);
+      } else {
+         this.drawString(getLocalizedString("mco.configure.world.invited"), this.f, u.a(0), 10526880);
+      }
+
       super.render(xm, ym, a);
+      if (this.d != null) {
+         if (this.b != null) {
+            this.a(this.b, xm, ym);
+         }
+
+      }
    }
 
-   private String b() {
-      String levelType = getLocalizedString("selectWorld.mapType");
-      return levelType + " " + this.a[this.f];
+   protected void a(String msg, int x, int y) {
+      if (msg != null) {
+         int rx = x + 12;
+         int ry = y - 12;
+         int width = this.fontWidth(msg);
+         this.fillGradient(rx - 3, ry - 3, rx + width + 3, ry + 8 + 3, -1073741824, -1073741824);
+         this.fontDrawShadow(msg, rx, ry, 16777215);
+      }
    }
 
-   private String c() {
-      return getLocalizedString("selectWorld.mapFeatures") + " " + getLocalizedString(this.e ? "mco.configure.world.on" : "mco.configure.world.off");
+   private void a(int x, int y, int xm, int ym) {
+      boolean hovered = xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9 && ym < u.a(12) + 20 && ym > u.a(1);
+      bind("realms:textures/gui/realms/cross_player_icon.png");
+      GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+      GlStateManager.pushMatrix();
+      RealmsScreen.blit(x, y, 0.0F, hovered ? 7.0F : 0.0F, 8, 7, 8, 14);
+      GlStateManager.popMatrix();
+      if (hovered) {
+         this.b = getLocalizedString("mco.configure.world.invites.remove.tooltip");
+      }
+
+   }
+
+   private void b(int x, int y, int xm, int ym) {
+      boolean hovered = xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9 && ym < u.a(12) + 20 && ym > u.a(1);
+      bind("realms:textures/gui/realms/op_icon.png");
+      GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+      GlStateManager.pushMatrix();
+      RealmsScreen.blit(x, y, 0.0F, hovered ? 8.0F : 0.0F, 8, 8, 8, 16);
+      GlStateManager.popMatrix();
+      if (hovered) {
+         this.b = getLocalizedString("mco.configure.world.invites.ops.tooltip");
+      }
+
+   }
+
+   private void c(int x, int y, int xm, int ym) {
+      boolean hovered = xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9 && ym < u.a(12) + 20 && ym > u.a(1);
+      bind("realms:textures/gui/realms/user_icon.png");
+      GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+      GlStateManager.pushMatrix();
+      RealmsScreen.blit(x, y, 0.0F, hovered ? 8.0F : 0.0F, 8, 8, 8, 16);
+      GlStateManager.popMatrix();
+      if (hovered) {
+         this.b = getLocalizedString("mco.configure.world.invites.normal.tooltip");
+      }
+
+   }
+
+   class a extends RealmsObjectSelectionList {
+      public a() {
+         super(ap.this.g + 10, u.a(12) + 20, u.a(1), u.a(12) + 20, 13);
+      }
+
+      public void a(PlayerInfo playerInfo) {
+         this.addEntry(ap.this.new b(playerInfo));
+      }
+
+      public int getRowWidth() {
+         return (int)((double)this.width() * 1.0);
+      }
+
+      public boolean isFocused() {
+         return ap.this.isFocused(this);
+      }
+
+      public boolean mouseClicked(double xm, double ym, int buttonNum) {
+         if (buttonNum == 0 && xm < (double)this.getScrollbarPosition() && ym >= (double)this.y0() && ym <= (double)this.y1()) {
+            int x0 = ap.this.f;
+            int x1 = ap.this.f + ap.this.g;
+            int clickSlotPos = (int)Math.floor(ym - (double)this.y0()) - this.headerHeight() + this.getScroll() - 4;
+            int slot = clickSlotPos / this.itemHeight();
+            if (xm >= (double)x0 && xm <= (double)x1 && slot >= 0 && clickSlotPos >= 0 && slot < this.getItemCount()) {
+               this.selectItem(slot);
+               this.itemClicked(clickSlotPos, slot, xm, ym, this.width());
+            }
+
+            return true;
+         } else {
+            return super.mouseClicked(xm, ym, buttonNum);
+         }
+      }
+
+      public void itemClicked(int clickSlotPos, int slot, double xm, double ym, int width) {
+         if (slot >= 0 && slot <= ap.this.d.players.size() && ap.this.b != null) {
+            if (!ap.this.b.equals(RealmsScreen.getLocalizedString("mco.configure.world.invites.ops.tooltip"))
+               && !ap.this.b.equals(RealmsScreen.getLocalizedString("mco.configure.world.invites.normal.tooltip"))) {
+               if (ap.this.b.equals(RealmsScreen.getLocalizedString("mco.configure.world.invites.remove.tooltip"))) {
+                  ap.this.d(slot);
+               }
+            } else if (((PlayerInfo)ap.this.d.players.get(slot)).isOperator()) {
+               ap.this.c(slot);
+            } else {
+               ap.this.b(slot);
+            }
+
+         }
+      }
+
+      public void selectItem(int item) {
+         this.setSelected(item);
+         if (item != -1) {
+            Realms.narrateNow(RealmsScreen.getLocalizedString("narrator.select", new Object[]{((PlayerInfo)ap.this.d.players.get(item)).getName()}));
+         }
+
+         this.a(item);
+      }
+
+      public void a(int item) {
+         ap.this.m = item;
+         ap.this.a();
+      }
+
+      public void renderBackground() {
+         ap.this.renderBackground();
+      }
+
+      public int getScrollbarPosition() {
+         return ap.this.f + this.width() - 5;
+      }
+
+      public int getItemCount() {
+         return ap.this.d == null ? 1 : ap.this.d.players.size();
+      }
+
+      public int getMaxPosition() {
+         return this.getItemCount() * 13;
+      }
+   }
+
+   class b extends RealmListEntry {
+      final PlayerInfo a;
+
+      public b(PlayerInfo playerInfo) {
+         this.a = playerInfo;
+      }
+
+      public void render(int index, int rowTop, int rowLeft, int rowWidth, int rowHeight, int mouseX, int mouseY, boolean hovered, float a) {
+         this.a(this.a, rowLeft, rowTop, mouseX, mouseY);
+      }
+
+      private void a(PlayerInfo invited, int x, int y, int mouseX, int mouseY) {
+         int inviteColor;
+         if (!invited.getAccepted()) {
+            inviteColor = 10526880;
+         } else if (invited.getOnline()) {
+            inviteColor = 8388479;
+         } else {
+            inviteColor = 16777215;
+         }
+
+         ap.this.drawString(invited.getName(), ap.this.f + 3 + 12, y + 1, inviteColor);
+         if (invited.isOperator()) {
+            ap.this.b(ap.this.f + ap.this.g - 10, y + 1, mouseX, mouseY);
+         } else {
+            ap.this.c(ap.this.f + ap.this.g - 10, y + 1, mouseX, mouseY);
+         }
+
+         ap.this.a(ap.this.f + ap.this.g - 22, y + 2, mouseX, mouseY);
+         ap.this.drawString(RealmsScreen.getLocalizedString("mco.configure.world.activityfeed.disabled"), ap.this.h, u.a(5), 10526880);
+         bj.a(invited.getUuid(), (Runnable)(() -> {
+            GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            RealmsScreen.blit(ap.this.f + 2 + 2, y + 1, 8.0F, 8.0F, 8, 8, 8, 8, 64, 64);
+            RealmsScreen.blit(ap.this.f + 2 + 2, y + 1, 40.0F, 8.0F, 8, 8, 8, 8, 64, 64);
+         }));
+      }
    }
 }

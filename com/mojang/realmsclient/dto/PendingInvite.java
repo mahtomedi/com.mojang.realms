@@ -5,7 +5,7 @@ import java.util.Date;
 import net.minecraft.obfuscate.DontObfuscateOrShrink;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import realms.bd;
+import realms.be;
 import realms.l;
 
 @DontObfuscateOrShrink
@@ -21,11 +21,11 @@ public class PendingInvite extends l {
       PendingInvite invite = new PendingInvite();
 
       try {
-         invite.invitationId = bd.a("invitationId", json, "");
-         invite.worldName = bd.a("worldName", json, "");
-         invite.worldOwnerName = bd.a("worldOwnerName", json, "");
-         invite.worldOwnerUuid = bd.a("worldOwnerUuid", json, "");
-         invite.date = bd.a("date", json);
+         invite.invitationId = be.a("invitationId", json, "");
+         invite.worldName = be.a("worldName", json, "");
+         invite.worldOwnerName = be.a("worldOwnerName", json, "");
+         invite.worldOwnerUuid = be.a("worldOwnerUuid", json, "");
+         invite.date = be.a("date", json);
       } catch (Exception var3) {
          LOGGER.error("Could not parse PendingInvite: " + var3.getMessage());
       }

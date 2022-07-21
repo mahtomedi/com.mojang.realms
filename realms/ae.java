@@ -1,116 +1,72 @@
 package realms;
 
-import com.mojang.realmsclient.dto.RealmsServer;
-import net.minecraft.realms.Realms;
+import net.minecraft.realms.AbstractRealmsButton;
 import net.minecraft.realms.RealmsButton;
-import net.minecraft.realms.RealmsEditBox;
-import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsScreen;
 
 public class ae extends RealmsScreen {
-   private final RealmsServer a;
-   private final b b;
-   private RealmsEditBox c;
-   private RealmsEditBox d;
-   private RealmsButton e;
-   private RealmsLabel f;
+   protected RealmsScreen a;
+   protected String b;
+   private final String f;
+   protected String c;
+   protected String d;
+   protected int e;
+   private int g;
 
-   public ae(RealmsServer server, b lastScreen) {
-      this.a = server;
-      this.b = lastScreen;
+   public ae(RealmsScreen parent, String title1, String title2, int id) {
+      this.a = parent;
+      this.b = title1;
+      this.f = title2;
+      this.e = id;
+      this.c = getLocalizedString("gui.yes");
+      this.d = getLocalizedString("gui.no");
    }
 
-   public void tick() {
-      if (this.c != null) {
-         this.c.tick();
-      }
-
-      if (this.d != null) {
-         this.d.tick();
-      }
-
+   public ae(RealmsScreen parent, String title1, String title2, String yesButton, String noButton, int id) {
+      this.a = parent;
+      this.b = title1;
+      this.f = title2;
+      this.c = yesButton;
+      this.d = noButton;
+      this.e = id;
    }
 
    public void init() {
-      this.setKeyboardHandlerSendRepeatsToGui(true);
-      this.buttonsAdd(this.e = new RealmsButton(0, this.width() / 2 - 100, this.height() / 4 + 120 + 17, 97, 20, getLocalizedString("mco.create.world")) {
+      this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 105, u.a(9), 100, 20, this.c) {
          public void onPress() {
-            ae.this.a();
+            ae.this.a.confirmResult(true, ae.this.e);
          }
       });
-      this.buttonsAdd(new RealmsButton(1, this.width() / 2 + 5, this.height() / 4 + 120 + 17, 95, 20, getLocalizedString("gui.cancel")) {
+      this.buttonsAdd(new RealmsButton(1, this.width() / 2 + 5, u.a(9), 100, 20, this.d) {
          public void onPress() {
-            Realms.setScreen(ae.this.b);
+            ae.this.a.confirmResult(false, ae.this.e);
          }
       });
-      this.e.active(false);
-      this.c = this.newEditBox(3, this.width() / 2 - 100, 65, 200, 20, getLocalizedString("mco.configure.world.name"));
-      this.addWidget(this.c);
-      this.focusOn(this.c);
-      this.d = this.newEditBox(4, this.width() / 2 - 100, 115, 200, 20, getLocalizedString("mco.configure.world.description"));
-      this.addWidget(this.d);
-      this.f = new RealmsLabel(getLocalizedString("mco.selectServer.create"), this.width() / 2, 11, 16777215);
-      this.addWidget(this.f);
-      this.narrateLabels();
-   }
-
-   public void removed() {
-      this.setKeyboardHandlerSendRepeatsToGui(false);
-   }
-
-   public boolean charTyped(char character, int mods) {
-      this.e.active(this.b());
-      return false;
-   }
-
-   public boolean keyPressed(int eventKey, int scancode, int mods) {
-      switch(eventKey) {
-         case 256:
-            Realms.setScreen(this.b);
-            return true;
-         default:
-            this.e.active(this.b());
-            return false;
-      }
-   }
-
-   private void a() {
-      if (this.b()) {
-         aq resetWorldScreen = new aq(
-            this.b,
-            this.a,
-            this.b.f(),
-            getLocalizedString("mco.selectServer.create"),
-            getLocalizedString("mco.create.world.subtitle"),
-            10526880,
-            getLocalizedString("mco.create.world.skip")
-         );
-         resetWorldScreen.a(getLocalizedString("mco.create.world.reset.title"));
-         bh.k worldCreationTask = new bh.k(this.a.id, this.c.getValue(), this.d.getValue(), resetWorldScreen);
-         ak longRunningMcoTaskScreen = new ak(this.b, worldCreationTask);
-         longRunningMcoTaskScreen.a();
-         Realms.setScreen(longRunningMcoTaskScreen);
-      }
-
-   }
-
-   private boolean b() {
-      return this.c.getValue() != null && !this.c.getValue().trim().isEmpty();
    }
 
    public void render(int xm, int ym, float a) {
       this.renderBackground();
-      this.f.render(this);
-      this.drawString(getLocalizedString("mco.configure.world.name"), this.width() / 2 - 100, 52, 10526880);
-      this.drawString(getLocalizedString("mco.configure.world.description"), this.width() / 2 - 100, 102, 10526880);
-      if (this.c != null) {
-         this.c.render(xm, ym, a);
-      }
-
-      if (this.d != null) {
-         this.d.render(xm, ym, a);
-      }
-
+      this.drawCenteredString(this.b, this.width() / 2, u.a(3), 16777215);
+      this.drawCenteredString(this.f, this.width() / 2, u.a(5), 16777215);
       super.render(xm, ym, a);
+   }
+
+   public void a(int delay) {
+      this.g = delay;
+
+      for(AbstractRealmsButton<?> button : this.buttons()) {
+         button.active(false);
+      }
+
+   }
+
+   public void tick() {
+      super.tick();
+      if (--this.g == 0) {
+         for(AbstractRealmsButton<?> button : this.buttons()) {
+            button.active(true);
+         }
+      }
+
    }
 }

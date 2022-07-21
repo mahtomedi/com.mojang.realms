@@ -1,14 +1,30 @@
 package realms;
 
-import net.minecraft.realms.RealmsScreen;
-import net.minecraft.realms.pluginapi.LoadedRealmsPlugin;
+public class bb {
+   public final int a;
+   public final String b;
 
-public class bb implements LoadedRealmsPlugin {
-   public RealmsScreen getMainScreen(RealmsScreen lastScreen) {
-      return new b(lastScreen);
+   public bb(int statusCode, String errorMessage) {
+      this.a = statusCode;
+      this.b = errorMessage;
    }
 
-   public RealmsScreen getNotificationsScreen(RealmsScreen lastScreen) {
-      return new al(lastScreen);
+   public static class a {
+      private int a = -1;
+      private String b = null;
+
+      public bb.a a(int statusCode) {
+         this.a = statusCode;
+         return this;
+      }
+
+      public bb.a a(String errorMessage) {
+         this.b = errorMessage;
+         return this;
+      }
+
+      public bb a() {
+         return new bb(this.a, this.b);
+      }
    }
 }

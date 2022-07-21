@@ -343,7 +343,7 @@ public class g {
       r.a("sid", this.d);
       r.a("user", this.e);
       r.a("version", Realms.getMinecraftVersionString());
-      String realmsVersion = bc.a();
+      String realmsVersion = bd.a();
       if (realmsVersion != null) {
          r.a("realms_version", realmsVersion);
       }

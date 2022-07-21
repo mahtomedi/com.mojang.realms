@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.obfuscate.DontObfuscateOrShrink;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import realms.bd;
+import realms.be;
 import realms.l;
 
 @DontObfuscateOrShrink
@@ -24,15 +24,15 @@ public class WorldTemplate extends l {
       WorldTemplate template = new WorldTemplate();
 
       try {
-         template.id = bd.a("id", node, "");
-         template.name = bd.a("name", node, "");
-         template.version = bd.a("version", node, "");
-         template.author = bd.a("author", node, "");
-         template.link = bd.a("link", node, "");
-         template.image = bd.a("image", node, null);
-         template.trailer = bd.a("trailer", node, "");
-         template.recommendedPlayers = bd.a("recommendedPlayers", node, "");
-         template.type = WorldTemplate.a.valueOf(bd.a("type", node, WorldTemplate.a.a.name()));
+         template.id = be.a("id", node, "");
+         template.name = be.a("name", node, "");
+         template.version = be.a("version", node, "");
+         template.author = be.a("author", node, "");
+         template.link = be.a("link", node, "");
+         template.image = be.a("image", node, null);
+         template.trailer = be.a("trailer", node, "");
+         template.recommendedPlayers = be.a("recommendedPlayers", node, "");
+         template.type = WorldTemplate.a.valueOf(be.a("type", node, WorldTemplate.a.a.name()));
       } catch (Exception var3) {
          LOGGER.error("Could not parse WorldTemplate: " + var3.getMessage());
       }

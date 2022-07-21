@@ -1,81 +1,71 @@
 package realms;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
-import javax.annotation.Nullable;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.minecraft.MinecraftProfileTexture;
+import com.mojang.authlib.minecraft.MinecraftSessionService;
+import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
+import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+import com.mojang.util.UUIDTypeAdapter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import net.minecraft.realms.Realms;
 
 public class bk {
-   private int[] a;
-   private int b;
-   private int c;
-
-   @Nullable
-   public BufferedImage a(BufferedImage image) {
-      if (image == null) {
-         return null;
-      } else {
-         this.b = 64;
-         this.c = 64;
-         BufferedImage out = new BufferedImage(this.b, this.c, 2);
-         Graphics outGraphics = out.getGraphics();
-         outGraphics.drawImage(image, 0, 0, null);
-         boolean isLegacy = image.getHeight() == 32;
-         if (isLegacy) {
-            outGraphics.setColor(new Color(0, 0, 0, 0));
-            outGraphics.fillRect(0, 32, 64, 32);
-            outGraphics.drawImage(out, 24, 48, 20, 52, 4, 16, 8, 20, null);
-            outGraphics.drawImage(out, 28, 48, 24, 52, 8, 16, 12, 20, null);
-            outGraphics.drawImage(out, 20, 52, 16, 64, 8, 20, 12, 32, null);
-            outGraphics.drawImage(out, 24, 52, 20, 64, 4, 20, 8, 32, null);
-            outGraphics.drawImage(out, 28, 52, 24, 64, 0, 20, 4, 32, null);
-            outGraphics.drawImage(out, 32, 52, 28, 64, 12, 20, 16, 32, null);
-            outGraphics.drawImage(out, 40, 48, 36, 52, 44, 16, 48, 20, null);
-            outGraphics.drawImage(out, 44, 48, 40, 52, 48, 16, 52, 20, null);
-            outGraphics.drawImage(out, 36, 52, 32, 64, 48, 20, 52, 32, null);
-            outGraphics.drawImage(out, 40, 52, 36, 64, 44, 20, 48, 32, null);
-            outGraphics.drawImage(out, 44, 52, 40, 64, 40, 20, 44, 32, null);
-            outGraphics.drawImage(out, 48, 52, 44, 64, 52, 20, 56, 32, null);
-         }
-
-         outGraphics.dispose();
-         this.a = ((DataBufferInt)out.getRaster().getDataBuffer()).getData();
-         this.b(0, 0, 32, 16);
-         if (isLegacy) {
-            this.a(32, 0, 64, 32);
-         }
-
-         this.b(0, 16, 64, 32);
-         this.b(16, 48, 48, 64);
-         return out;
-      }
-   }
-
-   private void a(int x0, int y0, int x1, int y1) {
-      for(int x = x0; x < x1; ++x) {
-         for(int y = y0; y < y1; ++y) {
-            int pix = this.a[x + y * this.b];
-            if ((pix >> 24 & 0xFF) < 128) {
-               return;
+   private static final YggdrasilAuthenticationService b = new YggdrasilAuthenticationService(Realms.getProxy(), UUID.randomUUID().toString());
+   private static final MinecraftSessionService c = b.createMinecraftSessionService();
+   public static LoadingCache<String, GameProfile> a = CacheBuilder.newBuilder()
+      .expireAfterWrite(60L, TimeUnit.MINUTES)
+      .build(new CacheLoader<String, GameProfile>() {
+         public GameProfile a(String uuid) throws Exception {
+            GameProfile profile = bk.c.fillProfileProperties(new GameProfile(UUIDTypeAdapter.fromString(uuid), null), false);
+            if (profile == null) {
+               throw new Exception("Couldn't get profile");
+            } else {
+               return profile;
             }
          }
-      }
+      });
 
-      for(int x = x0; x < x1; ++x) {
-         for(int y = y0; y < y1; ++y) {
-            this.a[x + y * this.b] &= 16777215;
-         }
-      }
-
+   public static String a(String uuid) throws Exception {
+      GameProfile gameProfile = (GameProfile)a.get(uuid);
+      return gameProfile.getName();
    }
 
-   private void b(int x0, int y0, int x1, int y1) {
-      for(int x = x0; x < x1; ++x) {
-         for(int y = y0; y < y1; ++y) {
-            this.a[x + y * this.b] |= -16777216;
+   public static Map<Type, MinecraftProfileTexture> b(String uuid) {
+      try {
+         GameProfile gameProfile = (GameProfile)a.get(uuid);
+         return c.getTextures(gameProfile, false);
+      } catch (Exception var2) {
+         return new HashMap();
+      }
+   }
+
+   public static void c(String uri) {
+      Realms.openUri(uri);
+   }
+
+   public static String a(Long timeDiff) {
+      if (timeDiff < 0L) {
+         return "right now";
+      } else {
+         long timeDiffInSeconds = timeDiff / 1000L;
+         if (timeDiffInSeconds < 60L) {
+            return (timeDiffInSeconds == 1L ? "1 second" : timeDiffInSeconds + " seconds") + " ago";
+         } else if (timeDiffInSeconds < 3600L) {
+            long minutes = timeDiffInSeconds / 60L;
+            return (minutes == 1L ? "1 minute" : minutes + " minutes") + " ago";
+         } else if (timeDiffInSeconds < 86400L) {
+            long hours = timeDiffInSeconds / 3600L;
+            return (hours == 1L ? "1 hour" : hours + " hours") + " ago";
+         } else {
+            long days = timeDiffInSeconds / 86400L;
+            return (days == 1L ? "1 day" : days + " days") + " ago";
          }
       }
-
    }
 }

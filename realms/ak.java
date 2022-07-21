@@ -2,122 +2,82 @@ package realms;
 
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
+import net.minecraft.realms.RealmsConfirmResultListener;
 import net.minecraft.realms.RealmsScreen;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-public class ak extends RealmsScreen implements r {
-   private static final Logger b = LogManager.getLogger();
-   private final int c = 666;
-   private final int d = 667;
-   private final RealmsScreen e;
-   private final t f;
-   private volatile String g = "";
-   private volatile boolean h;
-   private volatile String i;
-   private volatile boolean j;
-   private int k;
-   private final t l;
-   private final int m = 212;
-   public static final String[] a = new String[]{
-      "▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃",
-      "_ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄",
-      "_ _ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅",
-      "_ _ _ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆",
-      "_ _ _ _ ▃ ▄ ▅ ▆ ▇ █ ▇",
-      "_ _ _ _ _ ▃ ▄ ▅ ▆ ▇ █",
-      "_ _ _ _ ▃ ▄ ▅ ▆ ▇ █ ▇",
-      "_ _ _ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆",
-      "_ _ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅",
-      "_ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄",
-      "▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃",
-      "▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ _",
-      "▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ _ _",
-      "▆ ▇ █ ▇ ▆ ▅ ▄ ▃ _ _ _",
-      "▇ █ ▇ ▆ ▅ ▄ ▃ _ _ _ _",
-      "█ ▇ ▆ ▅ ▄ ▃ _ _ _ _ _",
-      "▇ █ ▇ ▆ ▅ ▄ ▃ _ _ _ _",
-      "▆ ▇ █ ▇ ▆ ▅ ▄ ▃ _ _ _",
-      "▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ _ _",
-      "▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ _"
-   };
+public class ak extends RealmsScreen {
+   private final ak.a e;
+   private final String f;
+   private final String g;
+   protected final RealmsConfirmResultListener a;
+   protected final String b;
+   protected final String c;
+   private final String h;
+   protected final int d;
+   private final boolean i;
 
-   public ak(RealmsScreen lastScreen, t task) {
-      this.e = lastScreen;
-      this.l = task;
-      task.a(this);
-      this.f = task;
+   public ak(RealmsConfirmResultListener listener, ak.a type, String line2, String line3, boolean yesNoQuestion, int id) {
+      this.a = listener;
+      this.d = id;
+      this.e = type;
+      this.f = line2;
+      this.g = line3;
+      this.i = yesNoQuestion;
+      this.b = getLocalizedString("gui.yes");
+      this.c = getLocalizedString("gui.no");
+      this.h = getLocalizedString("mco.gui.ok");
    }
 
-   public void a() {
-      Thread thread = new Thread(this.f, "Realms-long-running-task");
-      thread.setUncaughtExceptionHandler(new m(b));
-      thread.start();
-   }
+   public void init() {
+      Realms.narrateNow(new String[]{this.e.d, this.f, this.g});
+      if (this.i) {
+         this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 105, u.a(8), 100, 20, this.b) {
+            public void onPress() {
+               ak.this.a.confirmResult(true, ak.this.d);
+            }
+         });
+         this.buttonsAdd(new RealmsButton(1, this.width() / 2 + 5, u.a(8), 100, 20, this.c) {
+            public void onPress() {
+               ak.this.a.confirmResult(false, ak.this.d);
+            }
+         });
+      } else {
+         this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 50, u.a(8), 100, 20, this.h) {
+            public void onPress() {
+               ak.this.a.confirmResult(true, ak.this.d);
+            }
+         });
+      }
 
-   public void tick() {
-      super.tick();
-      Realms.narrateRepeatedly(this.g);
-      ++this.k;
-      this.l.a();
    }
 
    public boolean keyPressed(int eventKey, int scancode, int mods) {
       if (eventKey == 256) {
-         this.c();
+         this.a.confirmResult(false, this.d);
          return true;
       } else {
          return super.keyPressed(eventKey, scancode, mods);
       }
    }
 
-   public void init() {
-      this.l.c();
-      this.buttonsAdd(new RealmsButton(666, this.width() / 2 - 106, u.a(12), 212, 20, getLocalizedString("gui.cancel")) {
-         public void onPress() {
-            ak.this.c();
-         }
-      });
-   }
-
-   private void c() {
-      this.j = true;
-      this.l.d();
-      Realms.setScreen(this.e);
-   }
-
    public void render(int xm, int ym, float a) {
       this.renderBackground();
-      this.drawCenteredString(this.g, this.width() / 2, u.a(3), 16777215);
-      if (!this.h) {
-         this.drawCenteredString(ak.a[this.k % ak.a.length], this.width() / 2, u.a(8), 8421504);
-      }
-
-      if (this.h) {
-         this.drawCenteredString(this.i, this.width() / 2, u.a(8), 16711680);
-      }
-
+      this.drawCenteredString(this.e.d, this.width() / 2, u.a(2), this.e.c);
+      this.drawCenteredString(this.f, this.width() / 2, u.a(4), 16777215);
+      this.drawCenteredString(this.g, this.width() / 2, u.a(6), 16777215);
       super.render(xm, ym, a);
    }
 
-   @Override
-   public void a(String errorMessage) {
-      this.h = true;
-      this.i = errorMessage;
-      Realms.narrateNow(errorMessage);
-      this.buttonsClear();
-      this.buttonsAdd(new RealmsButton(667, this.width() / 2 - 106, this.height() / 4 + 120 + 12, getLocalizedString("gui.back")) {
-         public void onPress() {
-            ak.this.c();
-         }
-      });
-   }
+   public static enum a {
+      a("Warning!", 16711680),
+      b("Info!", 8226750);
 
-   public void b(String title) {
-      this.g = title;
-   }
+      public final int c;
+      public final String d;
 
-   public boolean b() {
-      return this.j;
+      private a(String text, int colorCode) {
+         this.d = text;
+         this.c = colorCode;
+      }
    }
 }

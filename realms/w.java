@@ -126,11 +126,11 @@ public class w extends RealmsButton {
       }
 
       if (minigame) {
-         bi.a(String.valueOf(imageId), image);
+         bj.a(String.valueOf(imageId), image);
       } else if (empty) {
          Realms.bind("realms:textures/gui/realms/empty_frame.png");
       } else if (image != null && imageId != -1L) {
-         bi.a(String.valueOf(imageId), image);
+         bj.a(String.valueOf(imageId), image);
       } else if (i == 1) {
          Realms.bind("textures/gui/title/background/panorama_0.png");
       } else if (i == 2) {

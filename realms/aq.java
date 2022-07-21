@@ -1,139 +1,77 @@
 package realms;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.realmsclient.dto.RealmsServer;
-import com.mojang.realmsclient.dto.WorldTemplate;
-import com.mojang.realmsclient.dto.WorldTemplatePaginatedList;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
+import net.minecraft.realms.RealmsEditBox;
 import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsScreen;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-public class aq extends as<WorldTemplate> {
-   private static final Logger b = LogManager.getLogger();
-   private final RealmsScreen c;
-   private final RealmsServer d;
-   private final RealmsScreen e;
-   private RealmsLabel f;
-   private RealmsLabel g;
-   private String h = getLocalizedString("mco.reset.world.title");
-   private String i = getLocalizedString("mco.reset.world.warning");
-   private String j = getLocalizedString("gui.cancel");
-   private int k = 16711680;
-   private final int l = 0;
-   private final int m = 100;
-   private final WorldTemplatePaginatedList n = new WorldTemplatePaginatedList();
-   private final WorldTemplatePaginatedList o = new WorldTemplatePaginatedList();
-   private final WorldTemplatePaginatedList p = new WorldTemplatePaginatedList();
-   private final WorldTemplatePaginatedList q = new WorldTemplatePaginatedList();
-   public int a = -1;
-   private aq.b r = aq.b.a;
-   private aq.c s = null;
-   private WorldTemplate t = null;
-   private String u = null;
-   private int v = -1;
+public class aq extends RealmsScreen {
+   private final ar b;
+   private RealmsLabel c;
+   private RealmsEditBox d;
+   private Boolean e = true;
+   private Integer f = 0;
+   String[] a;
+   private final int g = 0;
+   private final int h = 1;
+   private final int i = 4;
+   private RealmsButton j;
+   private RealmsButton k;
+   private RealmsButton l;
+   private String m = getLocalizedString("mco.backup.button.reset");
 
-   public aq(RealmsScreen lastScreen, RealmsServer serverData, RealmsScreen returnScreen) {
-      this.c = lastScreen;
-      this.d = serverData;
-      this.e = returnScreen;
+   public aq(ar lastScreen) {
+      this.b = lastScreen;
    }
 
-   public aq(RealmsScreen lastScreen, RealmsServer serverData, RealmsScreen returnScreen, String title, String subtitle, int subtitleColor, String buttonTitle) {
-      this(lastScreen, serverData, returnScreen);
-      this.h = title;
-      this.i = subtitle;
-      this.k = subtitleColor;
-      this.j = buttonTitle;
+   public aq(ar lastScreen, String buttonTitle) {
+      this(lastScreen);
+      this.m = buttonTitle;
    }
 
-   public void a(int confirmationId) {
-      this.v = confirmationId;
-   }
-
-   public void b(int slot) {
-      this.a = slot;
-   }
-
-   public void a(String title) {
-      this.u = title;
+   public void tick() {
+      this.d.tick();
+      super.tick();
    }
 
    public void init() {
-      this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 40, realms.u.a(14) - 10, 80, 20, this.j) {
+      this.a = new String[]{
+         getLocalizedString("generator.default"),
+         getLocalizedString("generator.flat"),
+         getLocalizedString("generator.largeBiomes"),
+         getLocalizedString("generator.amplified")
+      };
+      this.setKeyboardHandlerSendRepeatsToGui(true);
+      this.buttonsAdd(new RealmsButton(0, this.width() / 2 + 8, u.a(12), 97, 20, getLocalizedString("gui.back")) {
          public void onPress() {
-            Realms.setScreen(aq.this.c);
+            Realms.setScreen(aq.this.b);
          }
       });
-      (new Thread("Realms-reset-world-fetcher") {
-         public void run() {
-            g client = realms.g.a();
-
-            try {
-               aq.this.n.set(client.a(1, 10, RealmsServer.c.a));
-               aq.this.o.set(client.a(1, 10, RealmsServer.c.c));
-               aq.this.p.set(client.a(1, 10, RealmsServer.c.d));
-               aq.this.q.set(client.a(1, 10, RealmsServer.c.e));
-            } catch (o var3) {
-               aq.b.error("Couldn't fetch templates in reset world", var3);
-            }
-
+      this.buttonsAdd(this.j = new RealmsButton(1, this.width() / 2 - 102, u.a(12), 97, 20, this.m) {
+         public void onPress() {
+            aq.this.a();
          }
-      }).start();
-      this.addWidget(this.f = new RealmsLabel(this.h, this.width() / 2, 7, 16777215));
-      this.addWidget(this.g = new RealmsLabel(this.i, this.width() / 2, 22, this.k));
-      this.buttonsAdd(
-         new aq.a(this.c(1), realms.u.a(0) + 10, getLocalizedString("mco.reset.world.generate"), -1L, "realms:textures/gui/realms/new_world.png", aq.b.b) {
-            public void onPress() {
-               Realms.setScreen(new ap(aq.this, aq.this.h));
-            }
+      });
+      this.d = this.newEditBox(4, this.width() / 2 - 100, u.a(2), 200, 20, getLocalizedString("mco.reset.world.seed"));
+      this.d.setMaxLength(32);
+      this.d.setValue("");
+      this.addWidget(this.d);
+      this.focusOn(this.d);
+      this.buttonsAdd(this.k = new RealmsButton(2, this.width() / 2 - 102, u.a(4), 205, 20, this.b()) {
+         public void onPress() {
+            aq.this.f = (aq.this.f + 1) % aq.this.a.length;
+            this.setMessage(aq.this.b());
          }
-      );
-      this.buttonsAdd(
-         new aq.a(this.c(2), realms.u.a(0) + 10, getLocalizedString("mco.reset.world.upload"), -1L, "realms:textures/gui/realms/upload.png", aq.b.c) {
-            public void onPress() {
-               Realms.setScreen(new at(aq.this.d.id, aq.this.a != -1 ? aq.this.a : aq.this.d.activeSlot, aq.this));
-            }
+      });
+      this.buttonsAdd(this.l = new RealmsButton(3, this.width() / 2 - 102, u.a(6) - 2, 205, 20, this.c()) {
+         public void onPress() {
+            aq.this.e = !aq.this.e;
+            this.setMessage(aq.this.c());
          }
-      );
-      this.buttonsAdd(
-         new aq.a(this.c(3), realms.u.a(0) + 10, getLocalizedString("mco.reset.world.template"), -1L, "realms:textures/gui/realms/survival_spawn.png", aq.b.e) {
-            public void onPress() {
-               au templateScreen = new au(aq.this, null, RealmsServer.c.a, new WorldTemplatePaginatedList(aq.this.n));
-               templateScreen.a(RealmsScreen.getLocalizedString("mco.reset.world.template"));
-               Realms.setScreen(templateScreen);
-            }
-         }
-      );
-      this.buttonsAdd(
-         new aq.a(this.c(1), realms.u.a(6) + 20, getLocalizedString("mco.reset.world.adventure"), -1L, "realms:textures/gui/realms/adventure.png", aq.b.d) {
-            public void onPress() {
-               au screen = new au(aq.this, null, RealmsServer.c.c, new WorldTemplatePaginatedList(aq.this.o));
-               screen.a(RealmsScreen.getLocalizedString("mco.reset.world.adventure"));
-               Realms.setScreen(screen);
-            }
-         }
-      );
-      this.buttonsAdd(
-         new aq.a(this.c(2), realms.u.a(6) + 20, getLocalizedString("mco.reset.world.experience"), -1L, "realms:textures/gui/realms/experience.png", aq.b.f) {
-            public void onPress() {
-               au experienceScreen = new au(aq.this, null, RealmsServer.c.d, new WorldTemplatePaginatedList(aq.this.p));
-               experienceScreen.a(RealmsScreen.getLocalizedString("mco.reset.world.experience"));
-               Realms.setScreen(experienceScreen);
-            }
-         }
-      );
-      this.buttonsAdd(
-         new aq.a(this.c(3), realms.u.a(6) + 20, getLocalizedString("mco.reset.world.inspiration"), -1L, "realms:textures/gui/realms/inspiration.png", aq.b.g) {
-            public void onPress() {
-               au inspirationScreen = new au(aq.this, null, RealmsServer.c.e, new WorldTemplatePaginatedList(aq.this.q));
-               inspirationScreen.a(RealmsScreen.getLocalizedString("mco.reset.world.inspiration"));
-               Realms.setScreen(inspirationScreen);
-            }
-         }
-      );
+      });
+      this.c = new RealmsLabel(getLocalizedString("mco.reset.world.generate"), this.width() / 2, 17, 16777215);
+      this.addWidget(this.c);
       this.narrateLabels();
    }
 
@@ -143,215 +81,31 @@ public class aq extends as<WorldTemplate> {
 
    public boolean keyPressed(int eventKey, int scancode, int mods) {
       if (eventKey == 256) {
-         Realms.setScreen(this.c);
+         Realms.setScreen(this.b);
          return true;
       } else {
          return super.keyPressed(eventKey, scancode, mods);
       }
    }
 
-   public boolean mouseClicked(double x, double y, int buttonNum) {
-      return super.mouseClicked(x, y, buttonNum);
-   }
-
-   private int c(int i) {
-      return this.width() / 2 - 130 + (i - 1) * 100;
+   private void a() {
+      this.b.a(new ar.c(this.d.getValue(), this.f, this.e));
    }
 
    public void render(int xm, int ym, float a) {
       this.renderBackground();
-      this.f.render(this);
-      this.g.render(this);
+      this.c.render(this);
+      this.drawString(getLocalizedString("mco.reset.world.seed"), this.width() / 2 - 100, u.a(1), 10526880);
+      this.d.render(xm, ym, a);
       super.render(xm, ym, a);
    }
 
-   private void a(int x, int y, String text, long imageId, String image, aq.b resetType, boolean hoveredOrFocused, boolean hovered) {
-      if (imageId == -1L) {
-         bind(image);
-      } else {
-         bi.a(String.valueOf(imageId), image);
-      }
-
-      if (hoveredOrFocused) {
-         GlStateManager.color4f(0.56F, 0.56F, 0.56F, 1.0F);
-      } else {
-         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-      }
-
-      RealmsScreen.blit(x + 2, y + 14, 0.0F, 0.0F, 56, 56, 56, 56);
-      bind("realms:textures/gui/realms/slot_frame.png");
-      if (hoveredOrFocused) {
-         GlStateManager.color4f(0.56F, 0.56F, 0.56F, 1.0F);
-      } else {
-         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-      }
-
-      RealmsScreen.blit(x, y + 12, 0.0F, 0.0F, 60, 60, 60, 60);
-      this.drawCenteredString(text, x + 30, y, hoveredOrFocused ? 10526880 : 16777215);
+   private String b() {
+      String levelType = getLocalizedString("selectWorld.mapType");
+      return levelType + " " + this.a[this.f];
    }
 
-   void a(WorldTemplate worldTemplate) {
-      if (worldTemplate != null) {
-         if (this.a == -1) {
-            this.b(worldTemplate);
-         } else {
-            switch(worldTemplate.type) {
-               case a:
-                  this.r = aq.b.e;
-                  break;
-               case c:
-                  this.r = aq.b.d;
-                  break;
-               case d:
-                  this.r = aq.b.f;
-                  break;
-               case e:
-                  this.r = aq.b.g;
-            }
-
-            this.t = worldTemplate;
-            this.b();
-         }
-      }
-
-   }
-
-   private void b() {
-      this.a((RealmsScreen)this);
-   }
-
-   public void a(RealmsScreen screen) {
-      bh.i switchSlotTask = new bh.i(this.d.id, this.a, screen, 100);
-      ak longRunningMcoTaskScreen = new ak(this.c, switchSlotTask);
-      longRunningMcoTaskScreen.a();
-      Realms.setScreen(longRunningMcoTaskScreen);
-   }
-
-   public void confirmResult(boolean result, int id) {
-      if (id == 100 && result) {
-         switch(this.r) {
-            case d:
-            case e:
-            case f:
-            case g:
-               if (this.t != null) {
-                  this.b(this.t);
-               }
-               break;
-            case b:
-               if (this.s != null) {
-                  this.b(this.s);
-               }
-               break;
-            default:
-               return;
-         }
-
-      } else {
-         if (result) {
-            Realms.setScreen(this.e);
-            if (this.v != -1) {
-               this.e.confirmResult(true, this.v);
-            }
-         }
-
-      }
-   }
-
-   public void b(WorldTemplate template) {
-      bh.f resettingWorldTask = new bh.f(this.d.id, this.e, template);
-      if (this.u != null) {
-         resettingWorldTask.c(this.u);
-      }
-
-      if (this.v != -1) {
-         resettingWorldTask.a(this.v);
-      }
-
-      ak longRunningMcoTaskScreen = new ak(this.c, resettingWorldTask);
-      longRunningMcoTaskScreen.a();
-      Realms.setScreen(longRunningMcoTaskScreen);
-   }
-
-   public void a(aq.c resetWorldInfo) {
-      if (this.a == -1) {
-         this.b(resetWorldInfo);
-      } else {
-         this.r = aq.b.b;
-         this.s = resetWorldInfo;
-         this.b();
-      }
-
-   }
-
-   private void b(aq.c resetWorldInfo) {
-      bh.f resettingWorldTask = new bh.f(this.d.id, this.e, resetWorldInfo.a, resetWorldInfo.b, resetWorldInfo.c);
-      if (this.u != null) {
-         resettingWorldTask.c(this.u);
-      }
-
-      if (this.v != -1) {
-         resettingWorldTask.a(this.v);
-      }
-
-      ak longRunningMcoTaskScreen = new ak(this.c, resettingWorldTask);
-      longRunningMcoTaskScreen.a();
-      Realms.setScreen(longRunningMcoTaskScreen);
-   }
-
-   abstract class a extends RealmsButton {
-      private final long a;
-      private final String c;
-      private final aq.b d;
-
-      public a(int x, int y, String text, long imageId, String image, aq.b resetType) {
-         super(100 + resetType.ordinal(), x, y, 60, 72, text);
-         this.a = imageId;
-         this.c = image;
-         this.d = resetType;
-      }
-
-      public void tick() {
-         super.tick();
-      }
-
-      public void render(int xm, int ym, float a) {
-         super.render(xm, ym, a);
-      }
-
-      public void renderButton(int mouseX, int mouseY, float a) {
-         aq.this.a(
-            this.x(),
-            this.y(),
-            this.getProxy().getMessage(),
-            this.a,
-            this.c,
-            this.d,
-            this.getProxy().isHovered(),
-            this.getProxy().isMouseOver((double)mouseX, (double)mouseY)
-         );
-      }
-   }
-
-   static enum b {
-      a,
-      b,
-      c,
-      d,
-      e,
-      f,
-      g;
-   }
-
-   public static class c {
-      String a;
-      int b;
-      boolean c;
-
-      public c(String seed, int levelType, boolean generateStructures) {
-         this.a = seed;
-         this.b = levelType;
-         this.c = generateStructures;
-      }
+   private String c() {
+      return getLocalizedString("selectWorld.mapFeatures") + " " + getLocalizedString(this.e ? "mco.configure.world.on" : "mco.configure.world.off");
    }
 }

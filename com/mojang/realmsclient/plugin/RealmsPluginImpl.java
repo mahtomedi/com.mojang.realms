@@ -7,15 +7,15 @@ import net.minecraft.realms.pluginapi.LoadedRealmsPlugin;
 import net.minecraft.realms.pluginapi.RealmsPlugin;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import realms.bb;
 import realms.bc;
+import realms.bd;
 
 @DontObfuscateOrShrink
 public class RealmsPluginImpl implements RealmsPlugin {
    private static final Logger LOGGER = LogManager.getLogger();
 
    public Either<LoadedRealmsPlugin, String> tryLoad(@Nonnull String minecraftVersionString) {
-      String builtForMinecraftVersion = bc.b();
+      String builtForMinecraftVersion = bd.b();
       LOGGER.info("Built for minecraft version {}", builtForMinecraftVersion);
       return builtForMinecraftVersion != null && !builtForMinecraftVersion.equals(minecraftVersionString)
          ? Either.right(
@@ -25,6 +25,6 @@ public class RealmsPluginImpl implements RealmsPlugin {
                minecraftVersionString
             )
          )
-         : Either.left(new bb());
+         : Either.left(new bc());
    }
 }

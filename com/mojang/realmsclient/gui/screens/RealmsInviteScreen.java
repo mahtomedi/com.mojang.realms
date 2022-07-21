@@ -59,7 +59,7 @@ public class RealmsInviteScreen extends RealmsScreen {
                }
 
                try {
-                  RealmsServer realmsServer = client.invite(this.serverData.id, this.profileName.getValue());
+                  RealmsServer realmsServer = client.invite(this.serverData.id, this.profileName.getValue().trim());
                   if (realmsServer != null) {
                      this.serverData.players = realmsServer.players;
                      Realms.setScreen(new RealmsPlayerScreen(this.configureScreen, this.serverData));

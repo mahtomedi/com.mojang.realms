@@ -10,6 +10,7 @@ import com.mojang.realmsclient.dto.WorldTemplate;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.exception.RetryCallException;
 import com.mojang.realmsclient.gui.LongRunningTask;
+import com.mojang.realmsclient.gui.screens.RealmsBrokenWorldScreen;
 import com.mojang.realmsclient.gui.screens.RealmsConfigureWorldScreen;
 import com.mojang.realmsclient.gui.screens.RealmsDownloadLatestWorldScreen;
 import com.mojang.realmsclient.gui.screens.RealmsGenericErrorScreen;
@@ -232,10 +233,12 @@ public class RealmsTasks {
    public static class RealmsGetServerDetailsTask extends LongRunningTask {
       private final RealmsServer server;
       private final RealmsScreen lastScreen;
+      private final RealmsMainScreen mainScreen;
       private final ReentrantLock connectLock;
 
-      public RealmsGetServerDetailsTask(RealmsScreen lastScreen, RealmsServer server, ReentrantLock connectLock) {
+      public RealmsGetServerDetailsTask(RealmsMainScreen mainScreen, RealmsScreen lastScreen, RealmsServer server, ReentrantLock connectLock) {
          this.lastScreen = lastScreen;
+         this.mainScreen = mainScreen;
          this.server = server;
          this.connectLock = connectLock;
       }
@@ -248,28 +251,31 @@ public class RealmsTasks {
          int sleepTime = 5;
          RealmsServerAddress address = null;
          boolean tosNotAccepted = false;
+         boolean brokenWorld = false;
 
          for(int i = 0; i < 40 && !this.aborted(); ++i) {
             try {
                address = client.join(this.server.id);
                addressRetrieved = true;
-            } catch (RetryCallException var9) {
-               sleepTime = var9.delaySeconds;
-            } catch (RealmsServiceException var10) {
-               if (var10.errorCode == 6002) {
+            } catch (RetryCallException var10) {
+               sleepTime = var10.delaySeconds;
+            } catch (RealmsServiceException var11) {
+               if (var11.errorCode == 6002) {
                   tosNotAccepted = true;
+               } else if (var11.errorCode == 6006) {
+                  brokenWorld = true;
                } else {
                   hasError = true;
-                  this.error(var10.toString());
-                  RealmsTasks.LOGGER.error("Couldn't connect to world", var10);
+                  this.error(var11.toString());
+                  RealmsTasks.LOGGER.error("Couldn't connect to world", var11);
                }
                break;
-            } catch (IOException var11) {
-               RealmsTasks.LOGGER.error("Couldn't parse response connecting to world", var11);
-            } catch (Exception var12) {
+            } catch (IOException var12) {
+               RealmsTasks.LOGGER.error("Couldn't parse response connecting to world", var12);
+            } catch (Exception var13) {
                hasError = true;
-               RealmsTasks.LOGGER.error("Couldn't connect to world", var12);
-               this.error(var12.getLocalizedMessage());
+               RealmsTasks.LOGGER.error("Couldn't connect to world", var13);
+               this.error(var13.getLocalizedMessage());
                break;
             }
 
@@ -281,7 +287,24 @@ public class RealmsTasks {
          }
 
          if (tosNotAccepted) {
-            Realms.setScreen(new RealmsTermsScreen(this.lastScreen, this.server));
+            Realms.setScreen(new RealmsTermsScreen(this.lastScreen, this.mainScreen, this.server));
+         } else if (brokenWorld) {
+            if (this.server.ownerUUID.equals(Realms.getUUID())) {
+               RealmsBrokenWorldScreen brokenWorldScreen = new RealmsBrokenWorldScreen(this.lastScreen, this.mainScreen, this.server.id);
+               if (this.server.worldType.equals(RealmsServer.WorldType.MINIGAME)) {
+                  brokenWorldScreen.setTitle(RealmsScreen.getLocalizedString("mco.brokenworld.minigame.title"));
+               }
+
+               Realms.setScreen(brokenWorldScreen);
+            } else {
+               Realms.setScreen(
+                  new RealmsGenericErrorScreen(
+                     RealmsScreen.getLocalizedString("mco.brokenworld.nonowner.title"),
+                     RealmsScreen.getLocalizedString("mco.brokenworld.nonowner.error"),
+                     this.lastScreen
+                  )
+               );
+            }
          } else if (!this.aborted() && !hasError) {
             if (addressRetrieved) {
                if (address.resourcePackUrl != null && address.resourcePackHash != null) {

@@ -17,7 +17,6 @@ public class RealmsWorldOptions {
    public String slotName;
    public long templateId;
    public String templateImage;
-   public String minecraftVersion;
    public boolean adventureMap;
    public boolean empty;
    private static final boolean forceGameModeDefault = false;
@@ -29,10 +28,9 @@ public class RealmsWorldOptions {
    private static final boolean commandBlocksDefault = false;
    private static final int difficultyDefault = 2;
    private static final int gameModeDefault = 0;
-   private static final String slotNameDefault = null;
+   private static final String slotNameDefault = "";
    private static final long templateIdDefault = -1L;
    private static final String templateImageDefault = null;
-   private static final String minecraftVersionDefault = null;
    private static final boolean adventureMapDefault = false;
 
    public RealmsWorldOptions(
@@ -60,11 +58,11 @@ public class RealmsWorldOptions {
    }
 
    public static RealmsWorldOptions getDefaults() {
-      return new RealmsWorldOptions(true, true, true, true, 0, false, 2, 0, false, slotNameDefault);
+      return new RealmsWorldOptions(true, true, true, true, 0, false, 2, 0, false, "");
    }
 
    public static RealmsWorldOptions getEmptyDefaults() {
-      RealmsWorldOptions options = new RealmsWorldOptions(true, true, true, true, 0, false, 2, 0, false, slotNameDefault);
+      RealmsWorldOptions options = new RealmsWorldOptions(true, true, true, true, 0, false, 2, 0, false, "");
       options.setEmpty(true);
       return options;
    }
@@ -84,11 +82,10 @@ public class RealmsWorldOptions {
          JsonUtils.getIntOr("difficulty", jsonObject, 2),
          JsonUtils.getIntOr("gameMode", jsonObject, 0),
          JsonUtils.getBooleanOr("forceGameMode", jsonObject, false),
-         JsonUtils.getStringOr("slotName", jsonObject, slotNameDefault)
+         JsonUtils.getStringOr("slotName", jsonObject, "")
       );
       newOptions.templateId = JsonUtils.getLongOr("worldTemplateId", jsonObject, -1L);
       newOptions.templateImage = JsonUtils.getStringOr("worldTemplateImage", jsonObject, templateImageDefault);
-      newOptions.minecraftVersion = JsonUtils.getStringOr("minecraftVersion", jsonObject, minecraftVersionDefault);
       newOptions.adventureMap = JsonUtils.getBooleanOr("adventureMap", jsonObject, false);
       return newOptions;
    }
@@ -97,9 +94,7 @@ public class RealmsWorldOptions {
       if (this.slotName != null && !this.slotName.isEmpty()) {
          return this.slotName;
       } else {
-         return this.empty
-            ? RealmsScreen.getLocalizedString("mco.configure.world.slot.empty")
-            : RealmsScreen.getLocalizedString("mco.configure.world.slot", new Object[]{i});
+         return this.empty ? RealmsScreen.getLocalizedString("mco.configure.world.slot.empty") : this.getDefaultSlotName(i);
       }
    }
 
@@ -145,7 +140,7 @@ public class RealmsWorldOptions {
          jsonObject.addProperty("forceGameMode", this.forceGameMode);
       }
 
-      if (!this.slotName.equals(slotNameDefault) && !this.slotName.isEmpty()) {
+      if (this.slotName != null && !this.slotName.equals("")) {
          jsonObject.addProperty("slotName", this.slotName);
       }
 

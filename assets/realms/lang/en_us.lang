@@ -281,5 +281,8 @@ mco.brokenworld.message.line1=Please reset or select another world.
 mco.brokenworld.message.line2=You can also choose to download the world to singleplayer.
 mco.brokenworld.minigame.title=This mini-game is no longer supported
 
+mco.brokenworld.nonowner.title=World is out of date
+mco.brokenworld.nonowner.error=Please wait for the realm owner to reset the world
+
 mco.error.invalid.session.title=Invalid session id
 mco.error.invalid.session.message=Please try restarting Minecraft

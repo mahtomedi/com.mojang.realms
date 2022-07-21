@@ -11,7 +11,6 @@ import com.mojang.realmsclient.dto.RegionPingResult;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.gui.ChatFormatting;
 import com.mojang.realmsclient.gui.RealmsDataFetcher;
-import com.mojang.realmsclient.gui.screens.RealmsBrokenWorldScreen;
 import com.mojang.realmsclient.gui.screens.RealmsClientOutdatedScreen;
 import com.mojang.realmsclient.gui.screens.RealmsConfigureWorldScreen;
 import com.mojang.realmsclient.gui.screens.RealmsCreateRealmScreen;
@@ -111,7 +110,6 @@ public class RealmsMainScreen extends RealmsScreen {
    private final char[] lchars = new char[]{'9', '8', '7', '4', '5', '6'};
    private ReentrantLock connectLock = new ReentrantLock();
    private boolean expiredHover;
-   private boolean mapOnlySupportsVersionHover;
 
    public RealmsMainScreen(RealmsScreen lastScreen) {
       this.lastScreen = lastScreen;
@@ -190,13 +188,7 @@ public class RealmsMainScreen extends RealmsScreen {
    }
 
    private boolean shouldPlayButtonBeActive(RealmsServer server) {
-      return server != null
-         && !server.expired
-         && (!RealmsUtil.mapIsBrokenByUpdate(server) || this.isSelfOwnedServer(server))
-         && (
-            server.state == RealmsServer.State.OPEN
-               || server.state == RealmsServer.State.CLOSED && RealmsUtil.mapIsBrokenByUpdate(server) && this.isSelfOwnedServer(server)
-         );
+      return server != null && !server.expired && server.state == RealmsServer.State.OPEN;
    }
 
    public void postInit() {
@@ -335,11 +327,7 @@ public class RealmsMainScreen extends RealmsScreen {
                   return;
                }
 
-               if (this.isSelfOwnedServer(server) && RealmsUtil.mapIsBrokenByUpdate(server)) {
-                  this.navigateToBrokenWorldScreen(server);
-               } else {
-                  this.play(server, this);
-               }
+               this.play(server, this);
                break;
             case 2:
             default:
@@ -490,23 +478,10 @@ public class RealmsMainScreen extends RealmsScreen {
       realmsDataFetcher.stop();
    }
 
-   private void navigateToBrokenWorldScreen(RealmsServer server) {
-      RealmsBrokenWorldScreen brokenWorldScreen = new RealmsBrokenWorldScreen(this, server.id);
-      if (server.worldType.equals(RealmsServer.WorldType.MINIGAME)) {
-         brokenWorldScreen.setTitle(getLocalizedString("mco.brokenworld.minigame.title"));
-      }
-
-      Realms.setScreen(brokenWorldScreen);
-   }
-
    private void configureClicked(RealmsServer selectedServer) {
       if (Realms.getUUID().equals(selectedServer.ownerUUID) || overrideConfigure) {
          this.saveListScrollPosition();
-         if (RealmsUtil.mapIsBrokenByUpdate(selectedServer) && !selectedServer.expired) {
-            this.navigateToBrokenWorldScreen(selectedServer);
-         } else {
-            Realms.setScreen(new RealmsConfigureWorldScreen(this, selectedServer.id));
-         }
+         Realms.setScreen(new RealmsConfigureWorldScreen(this, selectedServer.id));
       }
 
    }
@@ -732,7 +707,6 @@ public class RealmsMainScreen extends RealmsScreen {
 
    public void render(int xm, int ym, float a) {
       this.expiredHover = false;
-      this.mapOnlySupportsVersionHover = false;
       this.toolTip = null;
       this.renderBackground();
       this.serverSelectionList.render(xm, ym, a);
@@ -984,7 +958,7 @@ public class RealmsMainScreen extends RealmsScreen {
 
    private void connectToServer(RealmsServer server, RealmsScreen cancelScreen) {
       RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(
-         cancelScreen, new RealmsTasks.RealmsGetServerDetailsTask(cancelScreen, server, this.connectLock)
+         cancelScreen, new RealmsTasks.RealmsGetServerDetailsTask(this, cancelScreen, server, this.connectLock)
       );
       longRunningMcoTaskScreen.start();
       Realms.setScreen(longRunningMcoTaskScreen);
@@ -1208,11 +1182,7 @@ public class RealmsMainScreen extends RealmsScreen {
 
             RealmsMainScreen.this.playButton.active(RealmsMainScreen.this.shouldPlayButtonBeActive(server));
             if (doubleClick && RealmsMainScreen.this.playButton.active()) {
-               if (RealmsMainScreen.this.isSelfOwnedServer(server) && RealmsUtil.mapIsBrokenByUpdate(server)) {
-                  RealmsMainScreen.this.navigateToBrokenWorldScreen(server);
-               } else {
-                  RealmsMainScreen.this.play(RealmsMainScreen.this.findServer(RealmsMainScreen.this.selectedServerId), RealmsMainScreen.this);
-               }
+               RealmsMainScreen.this.play(RealmsMainScreen.this.findServer(RealmsMainScreen.this.selectedServerId), RealmsMainScreen.this);
             }
 
          }
@@ -1306,10 +1276,9 @@ public class RealmsMainScreen extends RealmsScreen {
          if (slot < RealmsMainScreen.this.realmsServers.size()) {
             RealmsServer server = (RealmsServer)RealmsMainScreen.this.realmsServers.get(slot);
             if (server != null) {
-               if (RealmsMainScreen.this.mapOnlySupportsVersionHover) {
-                  RealmsMainScreen.this.navigateToBrokenWorldScreen(server);
-               } else if (RealmsMainScreen.this.toolTip != null
-                  && RealmsMainScreen.this.toolTip.equals(RealmsScreen.getLocalizedString("mco.selectServer.configure"))) {
+               if (RealmsMainScreen.this.toolTip != null && RealmsMainScreen.this.toolTip.equals(RealmsScreen.getLocalizedString("mco.selectServer.configure"))
+                  )
+                {
                   RealmsMainScreen.this.selectedServerId = server.id;
                   RealmsMainScreen.this.configureClicked(server);
                } else if (RealmsMainScreen.this.toolTip != null
@@ -1362,19 +1331,12 @@ public class RealmsMainScreen extends RealmsScreen {
             int dy = 2;
             if (serverData.expired) {
                RealmsMainScreen.this.drawExpired(x + 225 - 14, y + 2, this.xm(), this.ym());
-            } else if ((
-                  serverData.state != RealmsServer.State.CLOSED
-                     || RealmsUtil.mapIsBrokenByUpdate(serverData) && RealmsMainScreen.this.isSelfOwnedServer(serverData)
-               )
-               && (!RealmsUtil.mapIsBrokenByUpdate(serverData) || RealmsMainScreen.this.isSelfOwnedServer(serverData))) {
-               if (RealmsMainScreen.this.isSelfOwnedServer(serverData) && serverData.daysLeft < 7) {
-                  RealmsMainScreen.this.drawExpiring(x + 225 - 14, y + 2, this.xm(), this.ym(), serverData.daysLeft);
-               } else if (serverData.state == RealmsServer.State.OPEN
-                  || RealmsUtil.mapIsBrokenByUpdate(serverData) && RealmsMainScreen.this.isSelfOwnedServer(serverData)) {
-                  RealmsMainScreen.this.drawOpen(x + 225 - 14, y + 2, this.xm(), this.ym());
-               }
-            } else {
+            } else if (serverData.state == RealmsServer.State.CLOSED) {
                RealmsMainScreen.this.drawClose(x + 225 - 14, y + 2, this.xm(), this.ym());
+            } else if (RealmsMainScreen.this.isSelfOwnedServer(serverData) && serverData.daysLeft < 7) {
+               RealmsMainScreen.this.drawExpiring(x + 225 - 14, y + 2, this.xm(), this.ym(), serverData.daysLeft);
+            } else if (serverData.state == RealmsServer.State.OPEN) {
+               RealmsMainScreen.this.drawOpen(x + 225 - 14, y + 2, this.xm(), this.ym());
             }
 
             if (!RealmsMainScreen.this.isSelfOwnedServer(serverData) && !RealmsMainScreen.overrideConfigure) {
@@ -1451,22 +1413,7 @@ public class RealmsMainScreen extends RealmsScreen {
                   RealmsMainScreen.this.drawString(serverData.getDescription(), x + 2, y + 12, 7105644);
                }
 
-               if (RealmsUtil.mapIsBrokenByUpdate(serverData)) {
-                  String noteText;
-                  if (serverData.worldType.equals(RealmsServer.WorldType.ADVENTUREMAP)) {
-                     noteText = RealmsScreen.getLocalizedString(
-                        "mco.selectServer.mapOnlySupportedForVersion", new Object[]{RealmsSharedConstants.VERSION_STRING}
-                     );
-                  } else {
-                     noteText = RealmsScreen.getLocalizedString(
-                        "mco.selectServer.minigameNotSupportedInVersion", new Object[]{RealmsSharedConstants.VERSION_STRING}
-                     );
-                  }
-
-                  if (this.renderRealmNote(i, x, y, noteText, RealmsMainScreen.this.isSelfOwnedServer(serverData))) {
-                     RealmsMainScreen.this.mapOnlySupportsVersionHover = true;
-                  }
-               } else if (!RealmsMainScreen.this.isSelfOwnedServer(serverData)) {
+               if (!RealmsMainScreen.this.isSelfOwnedServer(serverData)) {
                   RealmsMainScreen.this.drawString(serverData.owner, x + 2, y + 12 + 11, 5000268);
                }
             }

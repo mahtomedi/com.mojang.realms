@@ -1,5 +1,6 @@
 package com.mojang.realmsclient.gui.screens;
 
+import com.mojang.realmsclient.RealmsMainScreen;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.exception.RealmsServiceException;
@@ -22,13 +23,15 @@ public class RealmsTermsScreen extends RealmsScreen {
    private static final int BUTTON_AGREE_ID = 1;
    private static final int BUTTON_DISAGREE_ID = 2;
    private final RealmsScreen lastScreen;
+   private final RealmsMainScreen mainScreen;
    private final RealmsServer realmsServer;
    private RealmsButton agreeButton;
    private boolean onLink;
    private final String realmsToSUrl = "https://minecraft.net/realms/terms";
 
-   public RealmsTermsScreen(RealmsScreen lastScreen, RealmsServer realmsServer) {
+   public RealmsTermsScreen(RealmsScreen lastScreen, RealmsMainScreen mainScreen, RealmsServer realmsServer) {
       this.lastScreen = lastScreen;
+      this.mainScreen = mainScreen;
       this.realmsServer = realmsServer;
    }
 
@@ -75,7 +78,7 @@ public class RealmsTermsScreen extends RealmsScreen {
       try {
          client.agreeToTos();
          RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(
-            this.lastScreen, new RealmsTasks.RealmsGetServerDetailsTask(this.lastScreen, this.realmsServer, new ReentrantLock())
+            this.lastScreen, new RealmsTasks.RealmsGetServerDetailsTask(this.mainScreen, this.lastScreen, this.realmsServer, new ReentrantLock())
          );
          longRunningMcoTaskScreen.start();
          Realms.setScreen(longRunningMcoTaskScreen);

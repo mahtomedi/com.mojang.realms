@@ -3,8 +3,6 @@ package com.mojang.realmsclient.util;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.mojang.realmsclient.dto.RealmsServer;
-import com.mojang.realmsclient.dto.RealmsWorldOptions;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
 import net.minecraft.realms.Realms;
@@ -59,13 +57,5 @@ public class RealmsUtil {
             return (days == 1L ? "1 day" : days + " days") + " ago";
          }
       }
-   }
-
-   public static boolean slotIsBrokenByUpdate(RealmsWorldOptions slot) {
-      return slot.adventureMap && "1.8.9".equals(slot.minecraftVersion);
-   }
-
-   public static boolean mapIsBrokenByUpdate(RealmsServer serverData) {
-      return serverData.minecraftVersion != null && "1.8.9".equals(serverData.minecraftVersion) && !serverData.worldType.equals(RealmsServer.WorldType.NORMAL);
    }
 }

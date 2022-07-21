@@ -9,7 +9,6 @@ import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.gui.RealmsConstants;
 import com.mojang.realmsclient.util.RealmsTasks;
 import com.mojang.realmsclient.util.RealmsTextureManager;
-import com.mojang.realmsclient.util.RealmsUtil;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +28,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
    private static final String SLOT_FRAME_LOCATION = "realms:textures/gui/realms/slot_frame.png";
    private static final String EMPTY_FRAME_LOCATION = "realms:textures/gui/realms/empty_frame.png";
    private final RealmsScreen lastScreen;
+   private final RealmsMainScreen mainScreen;
    private RealmsServer serverData;
    private final long serverId;
    private String title = getLocalizedString("mco.brokenworld.title");
@@ -47,17 +47,14 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
    private static final int RESET_CONFIRMATION_ID = 14;
    private int animTick;
 
-   public RealmsBrokenWorldScreen(RealmsScreen lastScreen, long serverId) {
+   public RealmsBrokenWorldScreen(RealmsScreen lastScreen, RealmsMainScreen mainScreen, long serverId) {
       this.lastScreen = lastScreen;
+      this.mainScreen = mainScreen;
       this.serverId = serverId;
    }
 
    public void setTitle(String title) {
       this.title = title;
-   }
-
-   public void setMessage(String message) {
-      this.message = message;
    }
 
    public void mouseEvent() {
@@ -81,7 +78,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
    public void addButtons() {
       for(Entry<Integer, RealmsWorldOptions> entry : this.serverData.slots.entrySet()) {
          RealmsWorldOptions slot = (RealmsWorldOptions)entry.getValue();
-         boolean canPlay = !RealmsUtil.slotIsBrokenByUpdate(slot);
+         boolean canPlay = entry.getKey() != this.serverData.activeSlot || this.serverData.worldType.equals(RealmsServer.WorldType.MINIGAME);
          RealmsButton downloadButton = newButton(
             canPlay ? (Integer)playButtonIds.get(entry.getKey() - 1) : (Integer)downloadButtonIds.get(entry.getKey() - 1),
             this.getFramePositionX(entry.getKey()),
@@ -264,7 +261,8 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
                         Realms.setScreen(openWorldLongRunningTaskScreen);
                      } else {
                         try {
-                           ((RealmsMainScreen)RealmsBrokenWorldScreen.this.lastScreen)
+                           RealmsBrokenWorldScreen.this.mainScreen
+                              .newScreen()
                               .play(client.getOwnWorld(RealmsBrokenWorldScreen.this.serverId), RealmsBrokenWorldScreen.this);
                         } catch (RealmsServiceException var4) {
                            RealmsBrokenWorldScreen.LOGGER.error("Couldn't get own world");

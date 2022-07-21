@@ -258,7 +258,7 @@ public class FileDownload {
                }
             }
          }
-      } catch (Exception var21) {
+      } catch (Exception var22) {
          this.error = true;
          return;
       }
@@ -303,10 +303,10 @@ public class FileDownload {
                }
 
                bout.close();
-               Object var31 = null;
+               Object var32 = null;
             }
          }
-      } catch (Exception var19) {
+      } catch (Exception var20) {
          this.error = true;
       } finally {
          if (tarIn != null) {
@@ -318,6 +318,8 @@ public class FileDownload {
          }
 
          levelStorageSource.renameLevel(finalName, finalName.trim());
+         File dataFile = new File(saves, finalName + File.separator + "level.dat");
+         Realms.deletePlayerTag(dataFile);
          this.resourcePackPath = new File(saves, finalName + File.separator + "resources.zip");
       }
 

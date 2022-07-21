@@ -82,15 +82,15 @@ public class RealmsTasks {
 
    public static class OpenServerTask extends LongRunningTask {
       private final RealmsServer serverData;
-      private final RealmsConfigureWorldScreen configureScreen;
+      private final RealmsScreen returnScreen;
       private final boolean join;
-      private final RealmsScreen lastScreen;
+      private final RealmsScreen mainScreen;
 
-      public OpenServerTask(RealmsServer realmsServer, RealmsConfigureWorldScreen configureWorldScreen, RealmsScreen lastScreen, boolean join) {
+      public OpenServerTask(RealmsServer realmsServer, RealmsScreen returnScreen, RealmsScreen mainScreen, boolean join) {
          this.serverData = realmsServer;
-         this.configureScreen = configureWorldScreen;
+         this.returnScreen = returnScreen;
          this.join = join;
-         this.lastScreen = lastScreen;
+         this.mainScreen = mainScreen;
       }
 
       public void run() {
@@ -105,12 +105,15 @@ public class RealmsTasks {
             try {
                boolean openResult = client.open(this.serverData.id);
                if (openResult) {
-                  this.configureScreen.stateChanged();
+                  if (this.returnScreen instanceof RealmsConfigureWorldScreen) {
+                     ((RealmsConfigureWorldScreen)this.returnScreen).stateChanged();
+                  }
+
                   this.serverData.state = RealmsServer.State.OPEN;
                   if (this.join) {
-                     ((RealmsMainScreen)this.lastScreen).play(this.serverData);
+                     ((RealmsMainScreen)this.mainScreen).play(this.serverData);
                   } else {
-                     Realms.setScreen(this.configureScreen);
+                     Realms.setScreen(this.returnScreen);
                   }
                   break;
                }
@@ -432,6 +435,7 @@ public class RealmsTasks {
          try {
             RealmsServer server = client.createTrial(this.name, this.motd);
             if (server != null) {
+               this.lastScreen.setCreatedTrial(true);
                this.lastScreen.closePopup();
                RealmsResetWorldScreen resetWorldScreen = new RealmsResetWorldScreen(
                   this.lastScreen,

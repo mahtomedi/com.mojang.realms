@@ -255,21 +255,32 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
             }
          } else {
             (new Thread() {
-               public void run() {
-                  RealmsClient client = RealmsClient.createRealmsClient();
-
-                  try {
-                     ((RealmsMainScreen)RealmsBrokenWorldScreen.this.lastScreen).play(client.getOwnWorld(RealmsBrokenWorldScreen.this.serverId));
-                  } catch (RealmsServiceException var3) {
-                     RealmsBrokenWorldScreen.LOGGER.error("Couldn't get own world");
-                     Realms.setScreen(RealmsBrokenWorldScreen.this.lastScreen);
-                  } catch (IOException var4) {
-                     RealmsBrokenWorldScreen.LOGGER.error("Couldn't parse response getting own world");
-                     Realms.setScreen(RealmsBrokenWorldScreen.this.lastScreen);
+                  public void run() {
+                     RealmsClient client = RealmsClient.createRealmsClient();
+                     if (RealmsBrokenWorldScreen.this.serverData.state.equals(RealmsServer.State.CLOSED)) {
+                        RealmsTasks.OpenServerTask openServerTask = new RealmsTasks.OpenServerTask(
+                           RealmsBrokenWorldScreen.this.serverData, RealmsBrokenWorldScreen.this, RealmsBrokenWorldScreen.this.lastScreen, true
+                        );
+                        RealmsLongRunningMcoTaskScreen openWorldLongRunningTaskScreen = new RealmsLongRunningMcoTaskScreen(
+                           RealmsBrokenWorldScreen.this, openServerTask
+                        );
+                        openWorldLongRunningTaskScreen.start();
+                        Realms.setScreen(openWorldLongRunningTaskScreen);
+                     } else {
+                        try {
+                           ((RealmsMainScreen)RealmsBrokenWorldScreen.this.lastScreen).play(client.getOwnWorld(RealmsBrokenWorldScreen.this.serverId));
+                        } catch (RealmsServiceException var4) {
+                           RealmsBrokenWorldScreen.LOGGER.error("Couldn't get own world");
+                           Realms.setScreen(RealmsBrokenWorldScreen.this.lastScreen);
+                        } catch (IOException var5) {
+                           RealmsBrokenWorldScreen.LOGGER.error("Couldn't parse response getting own world");
+                           Realms.setScreen(RealmsBrokenWorldScreen.this.lastScreen);
+                        }
+                     }
+   
                   }
-
-               }
-            }).start();
+               })
+               .start();
          }
 
       }

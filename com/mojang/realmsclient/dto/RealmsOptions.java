@@ -21,7 +21,7 @@ public class RealmsOptions {
    private static boolean spawnNPCsDefault = true;
    private static int spawnProtectionDefault = 0;
    private static boolean commandBlocksDefault = false;
-   private static int difficultyDefault = 1;
+   private static int difficultyDefault = 2;
    private static int gameModeDefault = 0;
    private static String slotNameDefault = null;
 
@@ -125,7 +125,7 @@ public class RealmsOptions {
          jsonObject.addProperty("forceGameMode", this.forceGameMode);
       }
 
-      if (this.slotName != slotNameDefault && !this.slotName.equals("")) {
+      if (!this.slotName.equals(slotNameDefault) && !this.slotName.equals("")) {
          jsonObject.addProperty("slotName", this.slotName);
       }
 

@@ -11,9 +11,9 @@ import com.mojang.realmsclient.gui.RealmsConnectTask;
 import com.mojang.realmsclient.gui.RealmsConstants;
 import com.mojang.realmsclient.gui.RealmsHideableButton;
 import com.mojang.realmsclient.util.RealmsTasks;
+import com.mojang.realmsclient.util.RealmsTextureManager;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Random;
 import java.util.Map.Entry;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
@@ -64,12 +64,10 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
    private int animTick;
    private int clicks = 0;
    private boolean hoveredActiveSlot = false;
-   private final int randomMinigameImage;
 
    public RealmsConfigureWorldScreen(RealmsScreen lastScreen, long serverId) {
       this.lastScreen = lastScreen;
       this.serverId = serverId;
-      this.randomMinigameImage = RealmsConstants.RANDOM_MINIGAME_IMAGES.get(new Random().nextInt(RealmsConstants.RANDOM_MINIGAME_IMAGES.size()));
    }
 
    public void mouseEvent() {
@@ -509,10 +507,8 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
          bind("textures/gui/title/background/panorama_2.png");
       } else if (i == 3) {
          bind("textures/gui/title/background/panorama_3.png");
-      } else if (this.isMinigame()) {
-         bind(RealmsConstants.getMinigameImage(this.serverData.minigameId));
       } else {
-         bind(RealmsConstants.getMinigameImage(this.randomMinigameImage));
+         RealmsTextureManager.bindWorldTemplate(String.valueOf(this.serverData.minigameId), this.serverData.minigameImage);
       }
 
       if (!active) {

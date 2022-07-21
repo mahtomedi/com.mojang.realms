@@ -3,7 +3,7 @@ package com.mojang.realmsclient.gui.screens;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.WorldTemplate;
 import com.mojang.realmsclient.exception.RealmsServiceException;
-import com.mojang.realmsclient.gui.RealmsConstants;
+import com.mojang.realmsclient.util.RealmsTextureManager;
 import com.mojang.realmsclient.util.RealmsUtil;
 import java.util.Collections;
 import java.util.List;
@@ -179,7 +179,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
                RealmsSelectWorldTemplateScreen.this.selectButton.active(true);
                RealmsSelectWorldTemplateScreen.this.selectedTemplate = slot;
                RealmsSelectWorldTemplateScreen.this.selectedWorldTemplate = null;
-               RealmsSelectWorldTemplateScreen.this.clicks += RealmsSharedConstants.TICKS_PER_SECOND / 3 + 1;
+               RealmsSelectWorldTemplateScreen.this.clicks = RealmsSelectWorldTemplateScreen.this.clicks + RealmsSharedConstants.TICKS_PER_SECOND / 3 + 1;
                if (RealmsSelectWorldTemplateScreen.this.clicks >= RealmsSharedConstants.TICKS_PER_SECOND / 2) {
                   RealmsSelectWorldTemplateScreen.this.selectTemplate();
                }
@@ -267,11 +267,11 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
             this.drawInfo(dx, y + dy, this.xm(), this.ym(), worldTemplate.link);
          }
 
-         this.drawImage(x - 25, y + 1, this.xm(), this.ym(), Integer.valueOf(worldTemplate.id));
+         this.drawImage(x - 25, y + 1, this.xm(), this.ym(), worldTemplate);
       }
 
-      private void drawImage(int x, int y, int xm, int ym, int id) {
-         RealmsScreen.bind(RealmsConstants.getMinigameImage(id));
+      private void drawImage(int x, int y, int xm, int ym, WorldTemplate worldTemplate) {
+         RealmsTextureManager.bindWorldTemplate(worldTemplate.id, worldTemplate.image);
          GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
          RealmsScreen.blit(x + 1, y + 1, 0.0F, 0.0F, 38, 38, 38.0F, 38.0F);
          RealmsScreen.bind("realms:textures/gui/realms/slot_frame.png");

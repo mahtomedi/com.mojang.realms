@@ -13,6 +13,7 @@ public class WorldTemplate extends ValueObject {
    public String author;
    public String link;
    public boolean minigame = false;
+   public String image;
 
    public static WorldTemplate parse(JsonObject node) {
       WorldTemplate template = new WorldTemplate();
@@ -23,6 +24,7 @@ public class WorldTemplate extends ValueObject {
          template.version = JsonUtils.getStringOr("version", node, "");
          template.author = JsonUtils.getStringOr("author", node, "");
          template.link = JsonUtils.getStringOr("link", node, "");
+         template.image = JsonUtils.getStringOr("image", node, null);
       } catch (Exception var3) {
          LOGGER.error("Could not parse WorldTemplate: " + var3.getMessage());
       }

@@ -309,7 +309,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
    }
 
    private String getSlotName() {
-      return this.nameEdit.getValue().toLowerCase().equals(this.options.getDefaultSlotName(this.activeSlot).toLowerCase()) ? "" : this.nameEdit.getValue();
+      return this.nameEdit.getValue().equals(this.options.getDefaultSlotName(this.activeSlot)) ? "" : this.nameEdit.getValue();
    }
 
    private void saveSettings() {

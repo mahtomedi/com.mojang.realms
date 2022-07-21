@@ -39,6 +39,7 @@ public class RealmsServer extends ValueObject {
    public int minigameId;
    public int protocol;
    public String status = "";
+   public String minigameImage;
    public RealmsServerPing serverPing = new RealmsServerPing();
 
    public String getDescription() {
@@ -104,6 +105,7 @@ public class RealmsServer extends ValueObject {
          server.minigameName = JsonUtils.getStringOr("minigameName", node, null);
          server.activeSlot = JsonUtils.getIntOr("activeSlot", node, -1);
          server.minigameId = JsonUtils.getIntOr("minigameId", node, -1);
+         server.minigameImage = JsonUtils.getStringOr("minigameImage", node, null);
       } catch (Exception var3) {
          LOGGER.error("Could not parse McoServer: " + var3.getMessage());
       }
@@ -257,6 +259,7 @@ public class RealmsServer extends ValueObject {
       server.minigameName = this.minigameName;
       server.activeSlot = this.activeSlot;
       server.minigameId = this.minigameId;
+      server.minigameImage = this.minigameImage;
       return server;
    }
 

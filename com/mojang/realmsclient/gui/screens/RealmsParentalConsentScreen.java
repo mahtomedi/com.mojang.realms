@@ -11,12 +11,6 @@ public class RealmsParentalConsentScreen extends RealmsScreen {
    private final RealmsScreen nextScreen;
    private static final int BUTTON_BACK_ID = 0;
    private static final int BUTTON_OK_ID = 1;
-   private final String line1 = "If you have an older Minecraft account (you log in with your username),";
-   private final String line2 = "you need to migrate the account to a Mojang account in order to access Realms.";
-   private final String line3 = "As you probably know, Mojang is a part of Microsoft. Microsoft implements";
-   private final String line4 = "certain procedures to help protect children and their privacy,";
-   private final String line5 = "including complying with the Children’s Online Privacy Protection Act (COPPA)";
-   private final String line6 = "You may need to obtain parental consent before accessing your Realms account.";
    private boolean onLink;
 
    public RealmsParentalConsentScreen(RealmsScreen nextScreen) {
@@ -25,8 +19,11 @@ public class RealmsParentalConsentScreen extends RealmsScreen {
 
    public void init() {
       this.buttonsClear();
-      this.buttonsAdd(newButton(1, this.width() / 2 - 100, RealmsConstants.row(11), 200, 20, "Go to accounts page"));
-      this.buttonsAdd(newButton(0, this.width() / 2 - 100, RealmsConstants.row(13), 200, 20, "Back"));
+      String updateAccount = getLocalizedString("mco.account.update");
+      String back = getLocalizedString("gui.back");
+      int buttonWidth = Math.max(this.fontWidth(updateAccount), this.fontWidth(back)) + 30;
+      this.buttonsAdd(new RealmsButton(0, this.width() / 2 - (buttonWidth + 5), RealmsConstants.row(13), buttonWidth, 20, back));
+      this.buttonsAdd(new RealmsButton(1, this.width() / 2 + 5, RealmsConstants.row(13), buttonWidth, 20, updateAccount));
    }
 
    public void tick() {
@@ -39,7 +36,7 @@ public class RealmsParentalConsentScreen extends RealmsScreen {
             Realms.setScreen(this.nextScreen);
             break;
          case 1:
-            RealmsUtil.browseTo("https://accounts.mojang.com/me/verify/" + Realms.getUUID());
+            RealmsUtil.browseTo("https://minecraft.net/update-account");
             break;
          default:
             return;
@@ -47,37 +44,37 @@ public class RealmsParentalConsentScreen extends RealmsScreen {
 
    }
 
+   public void render(int xm, int ym, float a) {
+      this.renderBackground();
+      String translatedText = getLocalizedString("mco.account.privacyinfo");
+      int y = 15;
+
+      for(String lineBrokenOnExplicits : translatedText.split("\\\\n")) {
+         this.drawCenteredString(lineBrokenOnExplicits, this.width() / 2, y, 16777215);
+         y += 15;
+      }
+
+      this.renderLink(xm, ym, y);
+      super.render(xm, ym, a);
+   }
+
    public void mouseClicked(int x, int y, int buttonNum) {
       if (this.onLink) {
-         RealmsUtil.browseTo("http://www.ftc.gov/enforcement/rules/rulemaking-regulatory-reform-proceedings/childrens-online-privacy-protection-rule");
+         RealmsUtil.browseTo("https://minecraft.net/privacy/gdpr/");
       }
 
    }
 
-   public void render(int xm, int ym, float a) {
-      this.renderBackground();
-      this.drawCenteredString("If you have an older Minecraft account (you log in with your username),", this.width() / 2, 30, 16777215);
-      this.drawCenteredString("you need to migrate the account to a Mojang account in order to access Realms.", this.width() / 2, 45, 16777215);
-      this.drawCenteredString("As you probably know, Mojang is a part of Microsoft. Microsoft implements", this.width() / 2, 85, 16777215);
-      this.drawCenteredString("certain procedures to help protect children and their privacy,", this.width() / 2, 100, 16777215);
-      this.drawCenteredString("including complying with the Children’s Online Privacy Protection Act (COPPA)", this.width() / 2, 115, 16777215);
-      this.drawCenteredString("You may need to obtain parental consent before accessing your Realms account.", this.width() / 2, 130, 16777215);
-      this.renderLink(xm, ym);
-      super.render(xm, ym, a);
-   }
-
-   private void renderLink(int xm, int ym) {
-      String text = getLocalizedString("Read more about COPPA");
+   private void renderLink(int xm, int ym, int top) {
+      String text = getLocalizedString("mco.account.privacy.info");
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glPushMatrix();
       int textWidth = this.fontWidth(text);
       int leftPadding = this.width() / 2 - textWidth / 2;
-      int topPadding = 145;
       int x2 = leftPadding + textWidth + 1;
-      int y1 = 145;
-      int y2 = 145 + this.fontLineHeight();
-      GL11.glTranslatef((float)leftPadding, 145.0F, 0.0F);
-      if (leftPadding <= xm && xm <= x2 && 145 <= ym && ym <= y2) {
+      int y2 = top + this.fontLineHeight();
+      GL11.glTranslatef((float)leftPadding, (float)top, 0.0F);
+      if (leftPadding <= xm && xm <= x2 && top <= ym && ym <= y2) {
          this.onLink = true;
          this.drawString(text, 0, 0, 7107012);
       } else {

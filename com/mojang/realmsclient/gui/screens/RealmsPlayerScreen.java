@@ -65,9 +65,11 @@ public class RealmsPlayerScreen extends RealmsScreen {
       this.buttonsAdd(
          newButton(1, this.column2_x, RealmsConstants.row(1), this.column_width + 10, 20, getLocalizedString("mco.configure.world.buttons.invite"))
       );
-      this.buttonsAdd(
-         newButton(3, this.column2_x, RealmsConstants.row(3), this.column_width + 10, 20, getLocalizedString("mco.configure.world.buttons.activity"))
+      RealmsButton playerActivityButton = newButton(
+         3, this.column2_x, RealmsConstants.row(3), this.column_width + 10, 20, getLocalizedString("mco.configure.world.buttons.activity")
       );
+      playerActivityButton.active(false);
+      this.buttonsAdd(playerActivityButton);
       this.buttonsAdd(
          newButton(0, this.column2_x + this.column_width / 2 + 2, RealmsConstants.row(12), this.column_width / 2 + 10 - 2, 20, getLocalizedString("gui.back"))
       );
@@ -214,6 +216,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
          this.drawString(getLocalizedString("mco.configure.world.invited"), this.column1_x, RealmsConstants.row(0), 10526880);
       }
 
+      this.drawString(getLocalizedString("mco.configure.world.activityfeed.disabled"), this.column2_x, RealmsConstants.row(5), 10526880);
       super.render(xm, ym, a);
       if (this.serverData != null) {
          if (this.toolTip != null) {
@@ -325,13 +328,13 @@ public class RealmsPlayerScreen extends RealmsScreen {
       protected void renderItem(int i, int x, int y, int h, Tezzelator t, int mouseX, int mouseY) {
          if (RealmsPlayerScreen.this.serverData != null) {
             if (i < RealmsPlayerScreen.this.serverData.players.size()) {
-               this.renderInvitedItem(i, x, y, h);
+               this.renderInvitedItem(i, y);
             }
 
          }
       }
 
-      private void renderInvitedItem(int i, int x, int y, int h) {
+      private void renderInvitedItem(int i, int y) {
          PlayerInfo invited = (PlayerInfo)RealmsPlayerScreen.this.serverData.players.get(i);
          int inviteColor;
          if (!invited.getAccepted()) {

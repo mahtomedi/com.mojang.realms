@@ -60,6 +60,7 @@ mco.configure.world.buttons.open=Open realm
 mco.configure.world.buttons.close=Close realm
 mco.configure.world.buttons.invite=Invite player
 mco.configure.world.buttons.activity=Player activity
+mco.configure.world.activityfeed.disabled=Player feed temporarily disabled
 mco.configure.world.buttons.moreoptions=More options
 mco.configure.world.invite.profile.name=Name
 mco.configure.world.uninvite.question=Are you sure that you want to uninvite
@@ -285,3 +286,6 @@ mco.error.invalid.session.title=Invalid session
 mco.error.invalid.session.message=Please try restarting Minecraft
 
 mco.news=Realms news
+mco.account.privacyinfo=Mojang implements certain procedures to help protect\nchildren and their privacy including complying with the\nChildren’s Online Privacy Protection Act (COPPA) and\nGeneral Data Protection Regulation (GDPR).\n\nYou may need to obtain parental consent before\naccessing your Realms account.\n\nIf you have an older Minecraft account (you log in with\nyour username), you need to migrate the account to a\nMojang account in order to access Realms.
+mco.account.update=Update Account
+mco.account.privacy.info=Read more about Mojang and privacy laws

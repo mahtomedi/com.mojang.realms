@@ -73,6 +73,12 @@ public class RealmsMainScreen extends RealmsScreen {
    private static final String TRIAL_ICON_LOCATION = "realms:textures/gui/realms/trial_icon.png";
    private static final String BUTTON_LOCATION = "minecraft:textures/gui/widgets.png";
    private static final String[] IMAGES_LOCATION = new String[]{
+      "realms:textures/gui/realms/images/sand_castle.png",
+      "realms:textures/gui/realms/images/factory_floor.png",
+      "realms:textures/gui/realms/images/escher_tunnel.png",
+      "realms:textures/gui/realms/images/tree_houses.png",
+      "realms:textures/gui/realms/images/balloon_trip.png",
+      "realms:textures/gui/realms/images/halloween_woods.png",
       "realms:textures/gui/realms/images/flower_mountain.png",
       "realms:textures/gui/realms/images/dornenstein_estate.png",
       "realms:textures/gui/realms/images/desert.png",
@@ -869,7 +875,7 @@ public class RealmsMainScreen extends RealmsScreen {
       GL11.glPushMatrix();
       RealmsScreen.blit(xo + 7, yo + 7, 0.0F, 0.0F, 195, 152, 195.0F, 152.0F);
       GL11.glPopMatrix();
-      if (this.carouselTick % 100 < 5) {
+      if (this.carouselTick % 95 < 5) {
          if (!this.hasSwitchedCarouselImage) {
             if (this.carouselIndex == IMAGES_LOCATION.length - 1) {
                this.carouselIndex = 0;

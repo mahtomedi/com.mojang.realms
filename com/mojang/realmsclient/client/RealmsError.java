@@ -19,6 +19,7 @@ public class RealmsError {
          this.errorCode = JsonUtils.getIntOr("errorCode", object, -1);
       } catch (Exception var4) {
          LOGGER.error("Could not parse RealmsError: " + var4.getMessage());
+         LOGGER.error("The error was: " + error);
       }
 
    }

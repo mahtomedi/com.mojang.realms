@@ -73,8 +73,8 @@ mco.configure.world.invites.ops.tooltip=Operator
 mco.configure.world.invites.normal.tooltip=Normal user
 mco.configure.world.invites.remove.tooltip=Remove
 
-mco.configure.world.closing=Closing the realm...
-mco.configure.world.opening=Opening the realm...
+mco.configure.world.closing=Closing the Realm...
+mco.configure.world.opening=Opening the Realm...
 
 mco.configure.world.buttons.open=Open Realm
 mco.configure.world.buttons.close=Close Realm
@@ -155,13 +155,13 @@ mco.configure.world.slot.tooltip=Switch world
 mco.configure.world.slot.tooltip.minigame=Switch to minigame
 mco.configure.world.slot.tooltip.active=Double-click to join
 
-mco.configure.world.close.question.line1=Your realm will become unavailable.
+mco.configure.world.close.question.line1=Your Realm will become unavailable.
 mco.configure.world.close.question.line2=Are you sure you want to do this?
 
-mco.configure.world.leave.question.line1=If you leave this realm you won't see it unless invited again
+mco.configure.world.leave.question.line1=If you leave this Realm you won't see it unless invited again
 mco.configure.world.leave.question.line2=Are you sure you want to do this?
 
-mco.configure.world.resourcepack.question.line1=This realm requires a custom resource pack.
+mco.configure.world.resourcepack.question.line1=This Realm requires a custom resource pack.
 mco.configure.world.resourcepack.question.line2=Do you want to automatically download and install it to play?
 
 mco.configure.world.reset.question.line1=Your world will be regenerated and your current world will be lost
@@ -191,9 +191,9 @@ mco.configure.world.delete.button=Delete Realm
 mco.configure.world.delete.question.line1=Your Realm will be permanently deleted
 mco.configure.world.delete.question.line2=Are you sure you want to do this?
 
-mco.connect.connecting=Connecting to the realm...
+mco.connect.connecting=Connecting to the Realm...
 mco.connect.authorizing=Logging in...
-mco.connect.failed=Failed to connect to the realm
+mco.connect.failed=Failed to connect to the Realm
 
 mco.create.world=Create
 mco.create.world.reset.title=Creating world...
@@ -214,7 +214,7 @@ mco.backup.generate.world=Generate world
 mco.backup.restoring=Restoring your realm
 mco.backup.button.download=Download Latest
 mco.backup.changes.tooltip=Changes
-mco.backup.nobackups=This realm doesn't have any backups currently.
+mco.backup.nobackups=This Realm doesn't have any backups currently.
 mco.backup.button.upload=Upload world
 mco.backup.button.reset=Reset world
 

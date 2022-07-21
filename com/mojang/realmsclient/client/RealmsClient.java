@@ -403,7 +403,16 @@ public class RealmsClient {
                throw new RealmsServiceException(responseCode, authenticationHeader, -1, authenticationHeader);
             } else if (responseText != null && responseText.length() != 0) {
                RealmsError error = new RealmsError(responseText);
-               LOGGER.error("Realms http code: " + responseCode + " -  error code: " + error.getErrorCode() + " -  message: " + error.getErrorMessage());
+               LOGGER.error(
+                  "Realms http code: "
+                     + responseCode
+                     + " -  error code: "
+                     + error.getErrorCode()
+                     + " -  message: "
+                     + error.getErrorMessage()
+                     + " - raw body: "
+                     + responseText
+               );
                throw new RealmsServiceException(responseCode, responseText, error);
             } else {
                LOGGER.error("Realms error code: " + responseCode + " message: " + responseText);

@@ -9,8 +9,8 @@ import net.minecraft.realms.RealmsScreen;
 import org.lwjgl.input.Keyboard;
 
 public class RealmsSettingsScreen extends RealmsScreen {
-   private RealmsConfigureWorldScreen configureWorldScreen;
-   private RealmsServer serverData;
+   private final RealmsConfigureWorldScreen configureWorldScreen;
+   private final RealmsServer serverData;
    private static final int BUTTON_CANCEL_ID = 0;
    private static final int BUTTON_DONE_ID = 1;
    private static final int NAME_EDIT_BOX = 2;
@@ -29,7 +29,7 @@ public class RealmsSettingsScreen extends RealmsScreen {
    public void tick() {
       this.nameEdit.tick();
       this.descEdit.tick();
-      this.doneButton.active(this.nameEdit.getValue() != null && !this.nameEdit.getValue().trim().equals(""));
+      this.doneButton.active(this.nameEdit.getValue() != null && !this.nameEdit.getValue().trim().isEmpty());
    }
 
    public void init() {
@@ -45,9 +45,7 @@ public class RealmsSettingsScreen extends RealmsScreen {
             RealmsConstants.row(0),
             106,
             20,
-            this.serverData.state.equals(RealmsServer.State.OPEN)
-               ? getLocalizedString("mco.configure.world.buttons.close")
-               : getLocalizedString("mco.configure.world.buttons.open")
+            getLocalizedString(this.serverData.state.equals(RealmsServer.State.OPEN) ? "mco.configure.world.buttons.close" : "mco.configure.world.buttons.open")
          )
       );
       this.nameEdit = this.newEditBox(2, center, RealmsConstants.row(4), 212, 20);

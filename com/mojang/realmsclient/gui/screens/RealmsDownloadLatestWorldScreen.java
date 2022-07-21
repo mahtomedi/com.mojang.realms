@@ -22,22 +22,22 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
    private RealmsButton cancelButton;
    private final String worldName;
    private final RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus;
-   private volatile String errorMessage = null;
-   private volatile String status = null;
-   private volatile String progress = null;
-   private volatile boolean cancelled = false;
+   private volatile String errorMessage;
+   private volatile String status;
+   private volatile String progress;
+   private volatile boolean cancelled;
    private volatile boolean showDots = true;
-   private volatile boolean finished = false;
-   private volatile boolean extracting = false;
-   private Long previousWrittenBytes = null;
-   private Long previousTimeSnapshot = null;
-   private long bytesPersSecond = 0L;
-   private int animTick = 0;
+   private volatile boolean finished;
+   private volatile boolean extracting;
+   private Long previousWrittenBytes;
+   private Long previousTimeSnapshot;
+   private long bytesPersSecond;
+   private int animTick;
    private static final String[] DOTS = new String[]{"", ".", ". .", ". . ."};
-   private int dotIndex = 0;
+   private int dotIndex;
    private final int WARNING_ID = 100;
    private int confirmationId = -1;
-   private boolean checked = false;
+   private boolean checked;
    private static final ReentrantLock downloadLock = new ReentrantLock();
 
    public RealmsDownloadLatestWorldScreen(RealmsScreen lastScreen, WorldDownload worldDownload, String worldName) {
@@ -199,23 +199,23 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 
    public static String humanReadableSpeed(long bytes) {
       int unit = 1024;
-      if (bytes < (long)unit) {
+      if (bytes < 1024L) {
          return bytes + " B";
       } else {
-         int exp = (int)(Math.log((double)bytes) / Math.log((double)unit));
+         int exp = (int)(Math.log((double)bytes) / Math.log(1024.0));
          String pre = "KMGTPE".charAt(exp - 1) + "";
-         return String.format("%.1f %sB/s", (double)bytes / Math.pow((double)unit, (double)exp), pre);
+         return String.format("%.1f %sB/s", (double)bytes / Math.pow(1024.0, (double)exp), pre);
       }
    }
 
    public static String humanReadableSize(long bytes) {
       int unit = 1024;
-      if (bytes < (long)unit) {
+      if (bytes < 1024L) {
          return bytes + " B";
       } else {
-         int exp = (int)(Math.log((double)bytes) / Math.log((double)unit));
+         int exp = (int)(Math.log((double)bytes) / Math.log(1024.0));
          String pre = "KMGTPE".charAt(exp - 1) + "";
-         return String.format("%.0f %sB", (double)bytes / Math.pow((double)unit, (double)exp), pre);
+         return String.format("%.0f %sB", (double)bytes / Math.pow(1024.0, (double)exp), pre);
       }
    }
 

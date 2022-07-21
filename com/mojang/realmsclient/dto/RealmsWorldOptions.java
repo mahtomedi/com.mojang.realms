@@ -19,21 +19,21 @@ public class RealmsWorldOptions {
    public String templateImage;
    public String minecraftVersion;
    public boolean adventureMap;
-   public boolean empty = false;
-   private static boolean forceGameModeDefault = false;
-   private static boolean pvpDefault = true;
-   private static boolean spawnAnimalsDefault = true;
-   private static boolean spawnMonstersDefault = true;
-   private static boolean spawnNPCsDefault = true;
-   private static int spawnProtectionDefault = 0;
-   private static boolean commandBlocksDefault = false;
-   private static int difficultyDefault = 2;
-   private static int gameModeDefault = 0;
-   private static String slotNameDefault = null;
-   private static long templateIdDefault = -1L;
-   private static String templateImageDefault = null;
-   private static String minecraftVersionDefault = null;
-   private static boolean adventureMapDefault = false;
+   public boolean empty;
+   private static final boolean forceGameModeDefault = false;
+   private static final boolean pvpDefault = true;
+   private static final boolean spawnAnimalsDefault = true;
+   private static final boolean spawnMonstersDefault = true;
+   private static final boolean spawnNPCsDefault = true;
+   private static final int spawnProtectionDefault = 0;
+   private static final boolean commandBlocksDefault = false;
+   private static final int difficultyDefault = 2;
+   private static final int gameModeDefault = 0;
+   private static final String slotNameDefault = null;
+   private static final long templateIdDefault = -1L;
+   private static final String templateImageDefault = null;
+   private static final String minecraftVersionDefault = null;
+   private static final boolean adventureMapDefault = false;
 
    public RealmsWorldOptions(
       Boolean pvp,
@@ -60,33 +60,11 @@ public class RealmsWorldOptions {
    }
 
    public static RealmsWorldOptions getDefaults() {
-      return new RealmsWorldOptions(
-         pvpDefault,
-         spawnAnimalsDefault,
-         spawnMonstersDefault,
-         spawnNPCsDefault,
-         spawnProtectionDefault,
-         commandBlocksDefault,
-         difficultyDefault,
-         gameModeDefault,
-         forceGameModeDefault,
-         slotNameDefault
-      );
+      return new RealmsWorldOptions(true, true, true, true, 0, false, 2, 0, false, slotNameDefault);
    }
 
    public static RealmsWorldOptions getEmptyDefaults() {
-      RealmsWorldOptions options = new RealmsWorldOptions(
-         pvpDefault,
-         spawnAnimalsDefault,
-         spawnMonstersDefault,
-         spawnNPCsDefault,
-         spawnProtectionDefault,
-         commandBlocksDefault,
-         difficultyDefault,
-         gameModeDefault,
-         forceGameModeDefault,
-         slotNameDefault
-      );
+      RealmsWorldOptions options = new RealmsWorldOptions(true, true, true, true, 0, false, 2, 0, false, slotNameDefault);
       options.setEmpty(true);
       return options;
    }
@@ -97,26 +75,26 @@ public class RealmsWorldOptions {
 
    public static RealmsWorldOptions parse(JsonObject jsonObject) {
       RealmsWorldOptions newOptions = new RealmsWorldOptions(
-         JsonUtils.getBooleanOr("pvp", jsonObject, pvpDefault),
-         JsonUtils.getBooleanOr("spawnAnimals", jsonObject, spawnAnimalsDefault),
-         JsonUtils.getBooleanOr("spawnMonsters", jsonObject, spawnMonstersDefault),
-         JsonUtils.getBooleanOr("spawnNPCs", jsonObject, spawnNPCsDefault),
-         JsonUtils.getIntOr("spawnProtection", jsonObject, spawnProtectionDefault),
-         JsonUtils.getBooleanOr("commandBlocks", jsonObject, commandBlocksDefault),
-         JsonUtils.getIntOr("difficulty", jsonObject, difficultyDefault),
-         JsonUtils.getIntOr("gameMode", jsonObject, gameModeDefault),
-         JsonUtils.getBooleanOr("forceGameMode", jsonObject, forceGameModeDefault),
+         JsonUtils.getBooleanOr("pvp", jsonObject, true),
+         JsonUtils.getBooleanOr("spawnAnimals", jsonObject, true),
+         JsonUtils.getBooleanOr("spawnMonsters", jsonObject, true),
+         JsonUtils.getBooleanOr("spawnNPCs", jsonObject, true),
+         JsonUtils.getIntOr("spawnProtection", jsonObject, 0),
+         JsonUtils.getBooleanOr("commandBlocks", jsonObject, false),
+         JsonUtils.getIntOr("difficulty", jsonObject, 2),
+         JsonUtils.getIntOr("gameMode", jsonObject, 0),
+         JsonUtils.getBooleanOr("forceGameMode", jsonObject, false),
          JsonUtils.getStringOr("slotName", jsonObject, slotNameDefault)
       );
-      newOptions.templateId = JsonUtils.getLongOr("worldTemplateId", jsonObject, templateIdDefault);
+      newOptions.templateId = JsonUtils.getLongOr("worldTemplateId", jsonObject, -1L);
       newOptions.templateImage = JsonUtils.getStringOr("worldTemplateImage", jsonObject, templateImageDefault);
       newOptions.minecraftVersion = JsonUtils.getStringOr("minecraftVersion", jsonObject, minecraftVersionDefault);
-      newOptions.adventureMap = JsonUtils.getBooleanOr("adventureMap", jsonObject, adventureMapDefault);
+      newOptions.adventureMap = JsonUtils.getBooleanOr("adventureMap", jsonObject, false);
       return newOptions;
    }
 
    public String getSlotName(int i) {
-      if (this.slotName != null && !this.slotName.equals("")) {
+      if (this.slotName != null && !this.slotName.isEmpty()) {
          return this.slotName;
       } else {
          return this.empty
@@ -131,43 +109,43 @@ public class RealmsWorldOptions {
 
    public String toJson() {
       JsonObject jsonObject = new JsonObject();
-      if (this.pvp != pvpDefault) {
+      if (!this.pvp) {
          jsonObject.addProperty("pvp", this.pvp);
       }
 
-      if (this.spawnAnimals != spawnAnimalsDefault) {
+      if (!this.spawnAnimals) {
          jsonObject.addProperty("spawnAnimals", this.spawnAnimals);
       }
 
-      if (this.spawnMonsters != spawnMonstersDefault) {
+      if (!this.spawnMonsters) {
          jsonObject.addProperty("spawnMonsters", this.spawnMonsters);
       }
 
-      if (this.spawnNPCs != spawnNPCsDefault) {
+      if (!this.spawnNPCs) {
          jsonObject.addProperty("spawnNPCs", this.spawnNPCs);
       }
 
-      if (this.spawnProtection != spawnProtectionDefault) {
+      if (this.spawnProtection != 0) {
          jsonObject.addProperty("spawnProtection", this.spawnProtection);
       }
 
-      if (this.commandBlocks != commandBlocksDefault) {
+      if (this.commandBlocks) {
          jsonObject.addProperty("commandBlocks", this.commandBlocks);
       }
 
-      if (this.difficulty != difficultyDefault) {
+      if (this.difficulty != 2) {
          jsonObject.addProperty("difficulty", this.difficulty);
       }
 
-      if (this.gameMode != gameModeDefault) {
+      if (this.gameMode != 0) {
          jsonObject.addProperty("gameMode", this.gameMode);
       }
 
-      if (this.forceGameMode != forceGameModeDefault) {
+      if (this.forceGameMode) {
          jsonObject.addProperty("forceGameMode", this.forceGameMode);
       }
 
-      if (!this.slotName.equals(slotNameDefault) && !this.slotName.equals("")) {
+      if (!this.slotName.equals(slotNameDefault) && !this.slotName.isEmpty()) {
          jsonObject.addProperty("slotName", this.slotName);
       }
 

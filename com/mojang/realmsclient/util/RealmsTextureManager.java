@@ -20,7 +20,7 @@ import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GLContext;
 
 public class RealmsTextureManager {
-   private static Map<String, RealmsTextureManager.RealmsTexture> textures = new HashMap();
+   private static final Map<String, RealmsTextureManager.RealmsTexture> textures = new HashMap();
    private static Boolean useMultitextureArb;
    public static int GL_TEXTURE0 = -1;
 

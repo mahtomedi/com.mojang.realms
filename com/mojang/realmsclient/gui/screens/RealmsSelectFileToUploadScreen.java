@@ -25,7 +25,7 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
    private static final int UPLOAD_BUTTON = 2;
    private final RealmsResetWorldScreen lastScreen;
    private final long worldId;
-   private int slotId;
+   private final int slotId;
    private RealmsButton uploadButton;
    private final DateFormat DATE_FORMAT = new SimpleDateFormat();
    private List<RealmsLevelSummary> levelList = new ArrayList();
@@ -33,7 +33,7 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
    private RealmsSelectFileToUploadScreen.WorldSelectionList worldSelectionList;
    private String worldLang;
    private String conversionLang;
-   private String[] gameModesLang = new String[4];
+   private final String[] gameModesLang = new String[4];
 
    public RealmsSelectFileToUploadScreen(long worldId, int slotId, RealmsResetWorldScreen lastScreen) {
       this.lastScreen = lastScreen;

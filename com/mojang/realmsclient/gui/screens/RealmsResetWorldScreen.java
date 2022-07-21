@@ -18,9 +18,9 @@ import org.lwjgl.opengl.GL11;
 
 public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTemplate> {
    private static final Logger LOGGER = LogManager.getLogger();
-   private RealmsScreen lastScreen;
-   private RealmsServer serverData;
-   private RealmsScreen returnScreen;
+   private final RealmsScreen lastScreen;
+   private final RealmsServer serverData;
+   private final RealmsScreen returnScreen;
    private String title = getLocalizedString("mco.reset.world.title");
    private String subtitle = getLocalizedString("mco.reset.world.warning");
    private String buttonTitle = getLocalizedString("gui.cancel");
@@ -196,10 +196,10 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTempla
          this.selectedType = resetType;
       }
 
-      if (imageId != -1L) {
-         RealmsTextureManager.bindWorldTemplate(String.valueOf(imageId), image);
-      } else {
+      if (imageId == -1L) {
          bind(image);
+      } else {
+         RealmsTextureManager.bindWorldTemplate(String.valueOf(imageId), image);
       }
 
       if (hovered) {
@@ -222,14 +222,14 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTempla
 
    void callback(WorldTemplate worldTemplate) {
       if (worldTemplate != null) {
-         if (this.slot != -1) {
-            this.typeToReset = worldTemplate.recommendedPlayers.equals("")
+         if (this.slot == -1) {
+            this.resetWorldWithTemplate(worldTemplate);
+         } else {
+            this.typeToReset = worldTemplate.recommendedPlayers != null && worldTemplate.recommendedPlayers.isEmpty()
                ? RealmsResetWorldScreen.ResetType.SURVIVAL_SPAWN
                : RealmsResetWorldScreen.ResetType.ADVENTURE;
             this.worldTemplateToReset = worldTemplate;
             this.switchSlot();
-         } else {
-            this.resetWorldWithTemplate(worldTemplate);
          }
       }
 
@@ -291,12 +291,12 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTempla
    }
 
    public void resetWorld(RealmsResetWorldScreen.ResetWorldInfo resetWorldInfo) {
-      if (this.slot != -1) {
+      if (this.slot == -1) {
+         this.triggerResetWorld(resetWorldInfo);
+      } else {
          this.typeToReset = RealmsResetWorldScreen.ResetType.GENERATE;
          this.worldInfoToReset = resetWorldInfo;
          this.switchSlot();
-      } else {
-         this.triggerResetWorld(resetWorldInfo);
       }
 
    }

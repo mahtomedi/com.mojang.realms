@@ -14,7 +14,7 @@ import org.lwjgl.input.Keyboard;
 public class RealmsInviteScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
    private RealmsEditBox profileName;
-   private RealmsServer serverData;
+   private final RealmsServer serverData;
    private final RealmsConfigureWorldScreen configureScreen;
    private final RealmsScreen lastScreen;
    private final int BUTTON_INVITE_ID = 0;

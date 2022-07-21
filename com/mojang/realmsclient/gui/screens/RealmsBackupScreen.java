@@ -4,10 +4,8 @@ import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.Backup;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.RealmsWorldOptions;
-import com.mojang.realmsclient.dto.WorldDownload;
 import com.mojang.realmsclient.exception.RealmsServiceException;
-import com.mojang.realmsclient.exception.RetryCallException;
-import com.mojang.realmsclient.gui.LongRunningTask;
+import com.mojang.realmsclient.util.RealmsTasks;
 import com.mojang.realmsclient.util.RealmsUtil;
 import java.text.DateFormat;
 import java.util.Collections;
@@ -30,16 +28,16 @@ public class RealmsBackupScreen extends RealmsScreen {
    private static int lastScrollPosition = -1;
    private final RealmsConfigureWorldScreen lastScreen;
    private List<Backup> backups = Collections.emptyList();
-   private String toolTip = null;
+   private String toolTip;
    private RealmsBackupScreen.BackupSelectionList backupSelectionList;
    private int selectedBackup = -1;
    private static final int BACK_BUTTON_ID = 0;
    private static final int RESTORE_BUTTON_ID = 1;
    private static final int DOWNLOAD_BUTTON_ID = 2;
-   private int slotId;
+   private final int slotId;
    private RealmsButton downloadButton;
    private Boolean noBackups = false;
-   private RealmsServer serverData;
+   private final RealmsServer serverData;
    private static final String UPLOADED_KEY = "Uploaded";
 
    public RealmsBackupScreen(RealmsConfigureWorldScreen lastscreen, RealmsServer serverData, int slotId) {
@@ -155,25 +153,18 @@ public class RealmsBackupScreen extends RealmsScreen {
    }
 
    private void downloadWorldData() {
-      RealmsClient client = RealmsClient.createRealmsClient();
-
-      try {
-         WorldDownload worldDownload = client.download(this.serverData.id, this.slotId);
-         Realms.setScreen(
-            new RealmsDownloadLatestWorldScreen(
-               this,
-               worldDownload,
-               this.serverData.name
-                  + " ("
-                  + ((RealmsWorldOptions)this.serverData.slots.get(this.serverData.activeSlot)).getSlotName(this.serverData.activeSlot)
-                  + ")"
-            )
-         );
-      } catch (RealmsServiceException var3) {
-         LOGGER.error("Couldn't download world data");
-         Realms.setScreen(new RealmsGenericErrorScreen(var3, this));
-      }
-
+      RealmsTasks.DownloadTask downloadTask = new RealmsTasks.DownloadTask(
+         this.serverData.id,
+         this.slotId,
+         this.serverData.name
+            + " ("
+            + ((RealmsWorldOptions)this.serverData.slots.get(this.serverData.activeSlot)).getSlotName(this.serverData.activeSlot)
+            + ")",
+         this
+      );
+      RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(this.lastScreen.getNewScreen(), downloadTask);
+      longRunningMcoTaskScreen.start();
+      Realms.setScreen(longRunningMcoTaskScreen);
    }
 
    public void confirmResult(boolean result, int id) {
@@ -189,7 +180,7 @@ public class RealmsBackupScreen extends RealmsScreen {
 
    private void restore() {
       Backup backup = (Backup)this.backups.get(this.selectedBackup);
-      RealmsBackupScreen.RestoreTask restoreTask = new RealmsBackupScreen.RestoreTask(backup);
+      RealmsTasks.RestoreTask restoreTask = new RealmsTasks.RestoreTask(backup, this.serverData.id, this.lastScreen);
       RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(this.lastScreen.getNewScreen(), restoreTask);
       longRunningMcoTaskScreen.start();
       Realms.setScreen(longRunningMcoTaskScreen);
@@ -292,13 +283,13 @@ public class RealmsBackupScreen extends RealmsScreen {
          int dx = this.width() - 30;
          int dy = -3;
          int infox = dx - 10;
-         int infoy = dy + 3;
+         int infoy = 0;
          if (!RealmsBackupScreen.this.serverData.expired) {
-            this.drawRestore(dx, y + dy, this.xm(), this.ym());
+            this.drawRestore(dx, y + -3, this.xm(), this.ym());
          }
 
          if (!backup.changeList.isEmpty()) {
-            this.drawInfo(infox, y + infoy, this.xm(), this.ym());
+            this.drawInfo(infox, y + 0, this.xm(), this.ym());
          }
 
       }
@@ -331,70 +322,6 @@ public class RealmsBackupScreen extends RealmsScreen {
          GL11.glPopMatrix();
          if (hovered) {
             RealmsBackupScreen.this.toolTip = RealmsScreen.getLocalizedString("mco.backup.changes.tooltip");
-         }
-
-      }
-   }
-
-   private class RestoreTask extends LongRunningTask {
-      private final Backup backup;
-
-      private RestoreTask(Backup backup) {
-         this.backup = backup;
-      }
-
-      public void run() {
-         this.setTitle(RealmsScreen.getLocalizedString("mco.backup.restoring"));
-         int i = 0;
-
-         while(i < 6) {
-            try {
-               if (this.aborted()) {
-                  return;
-               }
-
-               RealmsClient client = RealmsClient.createRealmsClient();
-               client.restoreWorld(RealmsBackupScreen.this.serverData.id, this.backup.backupId);
-               this.pause(1);
-               if (this.aborted()) {
-                  return;
-               }
-
-               Realms.setScreen(RealmsBackupScreen.this.lastScreen.getNewScreen());
-               return;
-            } catch (RetryCallException var3) {
-               if (this.aborted()) {
-                  return;
-               }
-
-               this.pause(var3.delaySeconds);
-               ++i;
-            } catch (RealmsServiceException var4) {
-               if (this.aborted()) {
-                  return;
-               }
-
-               RealmsBackupScreen.LOGGER.error("Couldn't restore backup");
-               Realms.setScreen(new RealmsGenericErrorScreen(var4, RealmsBackupScreen.this.lastScreen));
-               return;
-            } catch (Exception var5) {
-               if (this.aborted()) {
-                  return;
-               }
-
-               RealmsBackupScreen.LOGGER.error("Couldn't restore backup");
-               this.error(var5.getLocalizedMessage());
-               return;
-            }
-         }
-
-      }
-
-      private void pause(int pauseSeconds) {
-         try {
-            Thread.sleep((long)(pauseSeconds * 1000));
-         } catch (InterruptedException var3) {
-            RealmsBackupScreen.LOGGER.error(var3);
          }
 
       }

@@ -13,6 +13,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.minecraft.realms.Realms;
@@ -37,15 +38,15 @@ import org.apache.logging.log4j.Logger;
 
 public class FileDownload {
    private static final Logger LOGGER = LogManager.getLogger();
-   private volatile boolean cancelled = false;
-   private volatile boolean finished = false;
-   private volatile boolean error = false;
-   private volatile boolean extracting = false;
+   private volatile boolean cancelled;
+   private volatile boolean finished;
+   private volatile boolean error;
+   private volatile boolean extracting;
    private volatile File tempFile;
    private volatile File resourcePackPath;
    private volatile HttpGet request;
    private Thread currentThread;
-   private RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(120000).setConnectTimeout(120000).build();
+   private final RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(120000).setConnectTimeout(120000).build();
    private static final String[] INVALID_FILE_NAMES = new String[]{
       "CON",
       "COM",
@@ -247,7 +248,7 @@ public class FileDownload {
 
       try {
          for(RealmsLevelSummary summary : levelStorageSource.getLevelList()) {
-            if (summary.getLevelId().toLowerCase().startsWith(name.toLowerCase())) {
+            if (summary.getLevelId().toLowerCase(Locale.ROOT).startsWith(name.toLowerCase(Locale.ROOT))) {
                Matcher matcher = namePattern.matcher(summary.getLevelId());
                if (matcher.matches()) {
                   if (Integer.valueOf(matcher.group(1)) > number) {
@@ -259,6 +260,7 @@ public class FileDownload {
             }
          }
       } catch (Exception var22) {
+         LOGGER.error("Error getting level list", var22);
          this.error = true;
          return;
       }
@@ -307,6 +309,7 @@ public class FileDownload {
             }
          }
       } catch (Exception var20) {
+         LOGGER.error("Error extracting world", var20);
          this.error = true;
       } finally {
          if (tarIn != null) {
@@ -326,7 +329,7 @@ public class FileDownload {
    }
 
    private class DownloadCountingOutputStream extends CountingOutputStream {
-      private ActionListener listener = null;
+      private ActionListener listener;
 
       public DownloadCountingOutputStream(OutputStream out) {
          super(out);
@@ -346,11 +349,11 @@ public class FileDownload {
    }
 
    private class ProgressListener implements ActionListener {
-      private volatile String worldName;
-      private volatile File tempFile;
-      private volatile RealmsAnvilLevelStorageSource levelStorageSource;
-      private volatile RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus;
-      private volatile WorldDownload worldDownload;
+      private final String worldName;
+      private final File tempFile;
+      private final RealmsAnvilLevelStorageSource levelStorageSource;
+      private final RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus;
+      private final WorldDownload worldDownload;
 
       private ProgressListener(
          String worldName,
@@ -373,6 +376,7 @@ public class FileDownload {
                FileDownload.this.extracting = true;
                FileDownload.this.untarGzipArchive(this.worldName, this.tempFile, this.levelStorageSource);
             } catch (IOException var3) {
+               FileDownload.LOGGER.error("Error extracting archive", var3);
                FileDownload.this.error = true;
             }
          }
@@ -381,9 +385,9 @@ public class FileDownload {
    }
 
    private class ResourcePackProgressListener implements ActionListener {
-      private volatile File tempFile;
-      private volatile RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus;
-      private volatile WorldDownload worldDownload;
+      private final File tempFile;
+      private final RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus;
+      private final WorldDownload worldDownload;
 
       private ResourcePackProgressListener(File tempFile, RealmsDownloadLatestWorldScreen.DownloadStatus downloadStatus, WorldDownload worldDownload) {
          this.tempFile = tempFile;

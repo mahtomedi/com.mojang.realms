@@ -27,14 +27,14 @@ public class RealmsGenericErrorScreen extends RealmsScreen {
    }
 
    private void errorMessage(RealmsServiceException realmsServiceException) {
-      if (realmsServiceException.errorCode != -1) {
+      if (realmsServiceException.errorCode == -1) {
+         this.line1 = "An error occurred (" + realmsServiceException.httpResultCode + "):";
+         this.line2 = realmsServiceException.httpResponseContent;
+      } else {
          this.line1 = "Realms (" + realmsServiceException.errorCode + "):";
          String translationKey = "mco.errorMessage." + realmsServiceException.errorCode;
          String translated = getLocalizedString(translationKey);
          this.line2 = translated.equals(translationKey) ? realmsServiceException.errorMsg : translated;
-      } else {
-         this.line1 = "An error occurred (" + realmsServiceException.httpResultCode + "):";
-         this.line2 = realmsServiceException.httpResponseContent;
       }
 
    }

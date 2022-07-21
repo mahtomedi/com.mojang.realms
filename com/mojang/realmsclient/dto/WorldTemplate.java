@@ -12,7 +12,7 @@ public class WorldTemplate extends ValueObject {
    public String version;
    public String author;
    public String link;
-   public boolean minigame = false;
+   public boolean minigame;
    public String image;
    public String trailer;
    public String recommendedPlayers;

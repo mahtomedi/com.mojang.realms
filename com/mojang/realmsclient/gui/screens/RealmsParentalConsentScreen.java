@@ -17,7 +17,7 @@ public class RealmsParentalConsentScreen extends RealmsScreen {
    private final String line4 = "certain procedures to help protect children and their privacy,";
    private final String line5 = "including complying with the Children’s Online Privacy Protection Act (COPPA)";
    private final String line6 = "You may need to obtain parental consent before accessing your Realms account.";
-   private boolean onLink = false;
+   private boolean onLink;
 
    public RealmsParentalConsentScreen(RealmsScreen nextScreen) {
       this.nextScreen = nextScreen;
@@ -74,9 +74,10 @@ public class RealmsParentalConsentScreen extends RealmsScreen {
       int leftPadding = this.width() / 2 - textWidth / 2;
       int topPadding = 145;
       int x2 = leftPadding + textWidth + 1;
-      int y2 = topPadding + this.fontLineHeight();
-      GL11.glTranslatef((float)leftPadding, (float)topPadding, 0.0F);
-      if (leftPadding <= xm && xm <= x2 && topPadding <= ym && ym <= y2) {
+      int y1 = 145;
+      int y2 = 145 + this.fontLineHeight();
+      GL11.glTranslatef((float)leftPadding, 145.0F, 0.0F);
+      if (leftPadding <= xm && xm <= x2 && 145 <= ym && ym <= y2) {
          this.onLink = true;
          this.drawString(text, 0, 0, 7107012);
       } else {

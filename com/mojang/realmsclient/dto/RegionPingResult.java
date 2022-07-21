@@ -1,8 +1,8 @@
 package com.mojang.realmsclient.dto;
 
 public class RegionPingResult {
-   private String regionName;
-   private int ping;
+   private final String regionName;
+   private final int ping;
 
    public RegionPingResult(String regionName, int ping) {
       this.regionName = regionName;

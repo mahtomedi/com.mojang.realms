@@ -147,12 +147,12 @@ public abstract class Request<T extends Request> {
    }
 
    protected T connect() {
-      if (!this.connected) {
+      if (this.connected) {
+         return (T)this;
+      } else {
          T t = this.doConnect();
          this.connected = true;
          return t;
-      } else {
-         return (T)this;
       }
    }
 
@@ -234,7 +234,7 @@ public abstract class Request<T extends Request> {
    }
 
    public static class Post extends Request<Request.Post> {
-      private String content;
+      private final String content;
 
       public Post(String uri, String content, int connectTimeout, int readTimeout) {
          super(uri, connectTimeout, readTimeout);
@@ -264,7 +264,7 @@ public abstract class Request<T extends Request> {
    }
 
    public static class Put extends Request<Request.Put> {
-      private String content;
+      private final String content;
 
       public Put(String uri, String content, int connectTimeout, int readTimeout) {
          super(uri, connectTimeout, readTimeout);

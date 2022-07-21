@@ -22,14 +22,12 @@ public class RealmsClientOutdatedScreen extends RealmsScreen {
 
    public void render(int xm, int ym, float a) {
       this.renderBackground();
-      String title = this.outdated ? getLocalizedString("mco.client.outdated.title") : getLocalizedString("mco.client.incompatible.title");
+      String title = getLocalizedString(this.outdated ? "mco.client.outdated.title" : "mco.client.incompatible.title");
       this.drawCenteredString(title, this.width() / 2, RealmsConstants.row(3), 16711680);
       int lines = this.outdated ? 2 : 3;
 
       for(int i = 0; i < lines; ++i) {
-         String message = this.outdated
-            ? getLocalizedString("mco.client.outdated.msg.line" + (i + 1))
-            : getLocalizedString("mco.client.incompatible.msg.line" + (i + 1));
+         String message = getLocalizedString((this.outdated ? "mco.client.outdated.msg.line" : "mco.client.incompatible.msg.line") + (i + 1));
          this.drawCenteredString(message, this.width() / 2, RealmsConstants.row(5) + i * 12, 16777215);
       }
 

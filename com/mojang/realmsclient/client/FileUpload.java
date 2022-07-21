@@ -23,12 +23,12 @@ import org.apache.logging.log4j.Logger;
 public class FileUpload {
    private static final Logger LOGGER = LogManager.getLogger();
    private static final String UPLOAD_PATH = "/upload";
-   private volatile boolean cancelled = false;
-   private volatile boolean finished = false;
+   private volatile boolean cancelled;
+   private volatile boolean finished;
    private HttpPost request;
    private int statusCode = -1;
    private String errorMessage;
-   private RequestConfig requestConfig = RequestConfig.custom()
+   private final RequestConfig requestConfig = RequestConfig.custom()
       .setSocketTimeout((int)TimeUnit.MINUTES.toMillis(10L))
       .setConnectTimeout((int)TimeUnit.SECONDS.toMillis(15L))
       .build();
@@ -144,9 +144,9 @@ public class FileUpload {
       private final InputStream content;
       private final UploadStatus uploadStatus;
 
-      public CustomInputStreamEntity(InputStream instream, long length, UploadStatus uploadStatus) {
-         super(instream);
-         this.content = instream;
+      public CustomInputStreamEntity(InputStream content, long length, UploadStatus uploadStatus) {
+         super(content);
+         this.content = content;
          this.length = length;
          this.uploadStatus = uploadStatus;
       }

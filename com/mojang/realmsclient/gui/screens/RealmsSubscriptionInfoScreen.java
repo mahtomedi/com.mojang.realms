@@ -10,9 +10,10 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 import java.util.TimeZone;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
@@ -28,11 +29,11 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
    private final RealmsScreen mainScreen;
    private final int BUTTON_BACK_ID = 0;
    private final int BUTTON_DELETE_ID = 1;
+   private final int BUTTON_SUBSCRIPTION_ID = 2;
    private int daysLeft;
    private String startDate;
    private Subscription.SubscriptionType type;
    private final String PURCHASE_LINK = "https://account.mojang.com/buy/realms";
-   private boolean onLink;
 
    public RealmsSubscriptionInfoScreen(RealmsScreen lastScreen, RealmsServer serverData, RealmsScreen mainScreen) {
       this.lastScreen = lastScreen;
@@ -43,6 +44,7 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
    public void init() {
       this.getSubscription(this.serverData.id);
       Keyboard.enableRepeatEvents(true);
+      this.buttonsAdd(newButton(2, this.width() / 2 - 100, RealmsConstants.row(6), getLocalizedString("mco.configure.world.subscription.extend")));
       this.buttonsAdd(newButton(0, this.width() / 2 - 100, RealmsConstants.row(12), getLocalizedString("gui.back")));
       if (this.serverData.expired) {
          this.buttonsAdd(newButton(1, this.width() / 2 - 100, RealmsConstants.row(10), getLocalizedString("mco.configure.world.delete.button")));
@@ -93,7 +95,7 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
    private String localPresentation(long cetTime) {
       Calendar cal = new GregorianCalendar(TimeZone.getDefault());
       cal.setTimeInMillis(cetTime);
-      return SimpleDateFormat.getDateTimeInstance().format(cal.getTime());
+      return DateFormat.getDateTimeInstance().format(cal.getTime());
    }
 
    public void removed() {
@@ -102,12 +104,20 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 
    public void buttonClicked(RealmsButton button) {
       if (button.active()) {
-         if (button.id() == 0) {
-            Realms.setScreen(this.lastScreen);
-         } else if (button.id() == 1) {
-            String line2 = getLocalizedString("mco.configure.world.delete.question.line1");
-            String line3 = getLocalizedString("mco.configure.world.delete.question.line2");
-            Realms.setScreen(new RealmsLongConfirmationScreen(this, RealmsLongConfirmationScreen.Type.Warning, line2, line3, true, 1));
+         switch(button.id()) {
+            case 0:
+               Realms.setScreen(this.lastScreen);
+               break;
+            case 1:
+               String line2 = getLocalizedString("mco.configure.world.delete.question.line1");
+               String line3 = getLocalizedString("mco.configure.world.delete.question.line2");
+               Realms.setScreen(new RealmsLongConfirmationScreen(this, RealmsLongConfirmationScreen.Type.Warning, line2, line3, true, 1));
+               break;
+            case 2:
+               String extensionUrl = "https://account.mojang.com/buy/realms?sid=" + this.serverData.remoteSubscriptionId + "&pid=" + Realms.getUUID();
+               Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+               clipboard.setContents(new StringSelection(extensionUrl), null);
+               RealmsUtil.browseTo(extensionUrl);
          }
 
       }
@@ -116,17 +126,6 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
    public void keyPressed(char ch, int eventKey) {
       if (eventKey == 1) {
          Realms.setScreen(this.lastScreen);
-      }
-
-   }
-
-   public void mouseClicked(int x, int y, int buttonNum) {
-      super.mouseClicked(x, y, buttonNum);
-      if (this.onLink) {
-         String extensionUrl = "https://account.mojang.com/buy/realms?sid=" + this.serverData.remoteSubscriptionId + "&pid=" + Realms.getUUID();
-         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-         clipboard.setContents(new StringSelection(extensionUrl), null);
-         RealmsUtil.browseTo(extensionUrl);
       }
 
    }
@@ -144,21 +143,6 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
       }
 
       this.drawString(this.daysLeftPresentation(this.daysLeft), center, RealmsConstants.row(4), 16777215);
-      this.drawString(getLocalizedString("mco.configure.world.subscription.extendHere"), center, RealmsConstants.row(6), 10526880);
-      int height = RealmsConstants.row(7);
-      int textWidth = this.fontWidth("https://account.mojang.com/buy/realms");
-      int x1 = this.width() / 2 - textWidth / 2 - 1;
-      int y1 = height - 1;
-      int x2 = x1 + textWidth + 1;
-      int y2 = height + 1 + this.fontLineHeight();
-      if (x1 <= xm && xm <= x2 && y1 <= ym && ym <= y2) {
-         this.onLink = true;
-         this.drawString("https://account.mojang.com/buy/realms", this.width() / 2 - textWidth / 2, height, 7107012);
-      } else {
-         this.onLink = false;
-         this.drawString("https://account.mojang.com/buy/realms", this.width() / 2 - textWidth / 2, height, 3368635);
-      }
-
       super.render(xm, ym, a);
    }
 
@@ -174,9 +158,9 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
          if (months > 0) {
             sb.append(months).append(" ");
             if (months == 1) {
-               sb.append(getLocalizedString("mco.configure.world.subscription.month").toLowerCase());
+               sb.append(getLocalizedString("mco.configure.world.subscription.month").toLowerCase(Locale.ROOT));
             } else {
-               sb.append(getLocalizedString("mco.configure.world.subscription.months").toLowerCase());
+               sb.append(getLocalizedString("mco.configure.world.subscription.months").toLowerCase(Locale.ROOT));
             }
          }
 
@@ -187,9 +171,9 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 
             sb.append(days).append(" ");
             if (days == 1) {
-               sb.append(getLocalizedString("mco.configure.world.subscription.day").toLowerCase());
+               sb.append(getLocalizedString("mco.configure.world.subscription.day").toLowerCase(Locale.ROOT));
             } else {
-               sb.append(getLocalizedString("mco.configure.world.subscription.days").toLowerCase());
+               sb.append(getLocalizedString("mco.configure.world.subscription.days").toLowerCase(Locale.ROOT));
             }
          }
 

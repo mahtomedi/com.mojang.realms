@@ -5,6 +5,7 @@ public class PlayerInfo {
    private String uuid;
    private boolean operator = false;
    private boolean accepted = false;
+   private boolean online = false;
 
    public String getName() {
       return this.name;
@@ -36,5 +37,13 @@ public class PlayerInfo {
 
    public void setAccepted(boolean accepted) {
       this.accepted = accepted;
+   }
+
+   public boolean getOnline() {
+      return this.online;
+   }
+
+   public void setOnline(boolean online) {
+      this.online = online;
    }
 }

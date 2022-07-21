@@ -7,7 +7,7 @@ import net.minecraft.realms.RealmsScreen;
 public class RealmsConfirmScreen extends RealmsScreen {
    protected RealmsScreen parent;
    protected String title1;
-   private String title2;
+   private final String title2;
    protected String yesButton;
    protected String noButton;
    protected int id;

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -34,7 +35,7 @@ public enum ChatFormatting {
    public static final char PREFIX_CODE = '§';
    private static final Map<Character, ChatFormatting> FORMATTING_BY_CHAR = new HashMap();
    private static final Map<String, ChatFormatting> FORMATTING_BY_NAME = new HashMap();
-   private static final Pattern STRIP_FORMATTING_PATTERN = Pattern.compile("(?i)" + String.valueOf('§') + "[0-9A-FK-OR]");
+   private static final Pattern STRIP_FORMATTING_PATTERN = Pattern.compile("(?i)§[0-9A-FK-OR]");
    private final char code;
    private final boolean isFormat;
    private final String toString;
@@ -62,7 +63,7 @@ public enum ChatFormatting {
    }
 
    public String getName() {
-      return this.name().toLowerCase();
+      return this.name().toLowerCase(Locale.ROOT);
    }
 
    public String toString() {
@@ -78,7 +79,7 @@ public enum ChatFormatting {
    }
 
    public static ChatFormatting getByName(String name) {
-      return name == null ? null : (ChatFormatting)FORMATTING_BY_NAME.get(name.toLowerCase());
+      return name == null ? null : (ChatFormatting)FORMATTING_BY_NAME.get(name.toLowerCase(Locale.ROOT));
    }
 
    public static Collection<String> getNames(boolean getColors, boolean getFormats) {

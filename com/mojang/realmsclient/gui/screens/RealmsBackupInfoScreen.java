@@ -3,6 +3,7 @@ package com.mojang.realmsclient.gui.screens;
 import com.mojang.realmsclient.dto.Backup;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
@@ -15,7 +16,7 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
    private final RealmsScreen lastScreen;
    private final int BUTTON_BACK_ID = 0;
    private final Backup backup;
-   private List<String> keys = new ArrayList();
+   private final List<String> keys = new ArrayList();
    private RealmsBackupInfoScreen.BackupInfoList backupInfoList;
    String[] difficulties = new String[]{
       getLocalizedString("options.difficulty.peaceful"),
@@ -82,7 +83,7 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
    }
 
    private String checkForSpecificMetadata(String key, String value) {
-      String k = key.toLowerCase();
+      String k = key.toLowerCase(Locale.ROOT);
       if (k.contains("game") && k.contains("mode")) {
          return this.gameModeMetadata(value);
       } else {

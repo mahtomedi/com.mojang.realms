@@ -14,11 +14,11 @@ import org.lwjgl.opengl.GL11;
 public class RealmsNotificationsScreen extends RealmsScreen {
    private static final String INVITE_ICON_LOCATION = "realms:textures/gui/realms/invite_icon.png";
    private static final String TRIAL_ICON_LOCATION = "realms:textures/gui/realms/trial_icon.png";
-   private static RealmsDataFetcher realmsDataFetcher = new RealmsDataFetcher();
-   private volatile int numberOfPendingInvites = 0;
-   private static boolean checkedMcoAvailability = false;
-   private static boolean trialAvailable = false;
-   private static boolean validClient = false;
+   private static final RealmsDataFetcher realmsDataFetcher = new RealmsDataFetcher();
+   private volatile int numberOfPendingInvites;
+   private static boolean checkedMcoAvailability;
+   private static boolean trialAvailable;
+   private static boolean validClient;
    private static final List<RealmsDataFetcher.Task> tasks = Arrays.asList(RealmsDataFetcher.Task.PENDING_INVITE, RealmsDataFetcher.Task.TRIAL_AVAILABLE);
 
    public RealmsNotificationsScreen(RealmsScreen lastScreen) {

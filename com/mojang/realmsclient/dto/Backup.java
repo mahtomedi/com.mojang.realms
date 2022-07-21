@@ -15,7 +15,7 @@ public class Backup extends ValueObject {
    public String backupId;
    public Date lastModifiedDate;
    public long size;
-   private boolean uploadedVersion = false;
+   private boolean uploadedVersion;
    public Map<String, String> metadata = new HashMap();
    public Map<String, String> changeList = new HashMap();
 
@@ -49,7 +49,7 @@ public class Backup extends ValueObject {
 
       for(String world : worlds) {
          if (world != null && world.length() >= 1) {
-            if (world.equals("of")) {
+            if ("of".equals(world)) {
                sb.append(world).append(" ");
             } else {
                char firstCharacter = Character.toUpperCase(world.charAt(0));

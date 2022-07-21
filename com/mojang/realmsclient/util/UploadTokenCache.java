@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UploadTokenCache {
-   private static Map<Long, String> tokenCache = new HashMap();
+   private static final Map<Long, String> tokenCache = new HashMap();
 
    public static String get(long worldId) {
       return (String)tokenCache.get(worldId);

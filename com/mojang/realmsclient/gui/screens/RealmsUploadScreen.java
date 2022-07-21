@@ -38,21 +38,21 @@ public class RealmsUploadScreen extends RealmsScreen {
    private final long worldId;
    private final int slotId;
    private final UploadStatus uploadStatus;
-   private volatile String errorMessage = null;
-   private volatile String status = null;
-   private volatile String progress = null;
-   private volatile boolean cancelled = false;
-   private volatile boolean uploadFinished = false;
+   private volatile String errorMessage;
+   private volatile String status;
+   private volatile String progress;
+   private volatile boolean cancelled;
+   private volatile boolean uploadFinished;
    private volatile boolean showDots = true;
-   private volatile boolean uploadStarted = false;
+   private volatile boolean uploadStarted;
    private RealmsButton backButton;
    private RealmsButton cancelButton;
-   private int animTick = 0;
+   private int animTick;
    private static final String[] DOTS = new String[]{"", ".", ". .", ". . ."};
-   private int dotIndex = 0;
-   private Long previousWrittenBytes = null;
-   private Long previousTimeSnapshot = null;
-   private long bytesPersSecond = 0L;
+   private int dotIndex;
+   private Long previousWrittenBytes;
+   private Long previousTimeSnapshot;
+   private long bytesPersSecond;
    private static final ReentrantLock uploadLock = new ReentrantLock();
    private static final int baseUnit = 1024;
 
@@ -70,10 +70,10 @@ public class RealmsUploadScreen extends RealmsScreen {
       this.backButton = newButton(1, this.width() / 2 - 100, this.height() - 42, 200, 20, getLocalizedString("gui.back"));
       this.buttonsAdd(this.cancelButton = newButton(0, this.width() / 2 - 100, this.height() - 42, 200, 20, getLocalizedString("gui.cancel")));
       if (!this.uploadStarted) {
-         if (this.lastScreen.slot != -1) {
-            this.lastScreen.switchSlot(this);
-         } else {
+         if (this.lastScreen.slot == -1) {
             this.upload();
+         } else {
+            this.lastScreen.switchSlot(this);
          }
       }
 
@@ -106,10 +106,10 @@ public class RealmsUploadScreen extends RealmsScreen {
 
    public void keyPressed(char ch, int eventKey) {
       if (eventKey == 1) {
-         if (!this.showDots) {
-            this.buttonClicked(this.backButton);
-         } else {
+         if (this.showDots) {
             this.buttonClicked(this.cancelButton);
+         } else {
+            this.buttonClicked(this.backButton);
          }
       }
 
@@ -209,12 +209,12 @@ public class RealmsUploadScreen extends RealmsScreen {
 
    public static String humanReadableByteCount(long bytes) {
       int unit = 1024;
-      if (bytes < (long)unit) {
+      if (bytes < 1024L) {
          return bytes + " B";
       } else {
-         int exp = (int)(Math.log((double)bytes) / Math.log((double)unit));
+         int exp = (int)(Math.log((double)bytes) / Math.log(1024.0));
          String pre = "KMGTPE".charAt(exp - 1) + "";
-         return String.format("%.1f %sB/s", (double)bytes / Math.pow((double)unit, (double)exp), pre);
+         return String.format("%.1f %sB/s", (double)bytes / Math.pow(1024.0, (double)exp), pre);
       }
    }
 

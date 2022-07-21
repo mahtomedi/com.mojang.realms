@@ -1,10 +1,10 @@
 package com.mojang.realmsclient.dto;
 
 public class RealmsWorldResetDto {
-   private String seed;
-   private long worldTemplateId;
-   private int levelType;
-   private boolean generateStructures;
+   private final String seed;
+   private final long worldTemplateId;
+   private final int levelType;
+   private final boolean generateStructures;
 
    public RealmsWorldResetDto(String seed, long worldTemplateId, int levelType, boolean generateStructures) {
       this.seed = seed;

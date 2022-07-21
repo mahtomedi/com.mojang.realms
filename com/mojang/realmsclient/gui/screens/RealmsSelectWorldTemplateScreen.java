@@ -38,18 +38,18 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
    private static final int BUTTON_BACK_ID = 0;
    private static final int BUTTON_SELECT_ID = 1;
    private RealmsButton selectButton;
-   private String toolTip = null;
-   private String currentLink = null;
-   private RealmsServer.WorldType worldType;
-   private int clicks = 0;
-   private String warning = null;
-   private String warningURL = null;
-   private boolean displayWarning = false;
-   private boolean hoverWarning = false;
-   private boolean prepopulated = false;
+   private String toolTip;
+   private String currentLink;
+   private final RealmsServer.WorldType worldType;
+   private int clicks;
+   private String warning;
+   private String warningURL;
+   private boolean displayWarning;
+   private boolean hoverWarning;
+   private boolean prepopulated;
    private WorldTemplatePaginatedList paginatedList;
-   private boolean loading = false;
-   private boolean stopLoadingTemplates = false;
+   private boolean loading;
+   private boolean stopLoadingTemplates;
 
    public RealmsSelectWorldTemplateScreen(
       RealmsScreenWithCallback<WorldTemplate> lastScreen, WorldTemplate selectedWorldTemplate, RealmsServer.WorldType worldType
@@ -57,9 +57,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
       this.lastScreen = lastScreen;
       this.selectedWorldTemplate = selectedWorldTemplate;
       this.worldType = worldType;
-      this.title = this.worldType == RealmsServer.WorldType.MINIGAME
-         ? getLocalizedString("mco.template.title.minigame")
-         : getLocalizedString("mco.template.title");
+      this.title = getLocalizedString(this.worldType == RealmsServer.WorldType.MINIGAME ? "mco.template.title.minigame" : "mco.template.title");
       if (this.paginatedList == null) {
          this.paginatedList = new WorldTemplatePaginatedList();
          this.paginatedList.size = 10;
@@ -129,7 +127,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
             this.height() - 32,
             153,
             20,
-            this.worldType == RealmsServer.WorldType.MINIGAME ? getLocalizedString("gui.cancel") : getLocalizedString("gui.back")
+            getLocalizedString(this.worldType == RealmsServer.WorldType.MINIGAME ? "gui.cancel" : "gui.back")
          )
       );
       this.buttonsAdd(this.selectButton = newButton(1, this.width() / 2 - 154, this.height() - 32, 153, 20, getLocalizedString("mco.template.button.select")));
@@ -172,15 +170,15 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
             break;
          case 200:
             if (this.selectedTemplate != -1) {
-               int the_index = this.selectedTemplate;
-               if (the_index == 0) {
+               int theIndex = this.selectedTemplate;
+               if (theIndex == 0) {
                   this.worldTemplateSelectionList.scroll(0 - this.worldTemplateSelectionList.getScroll());
                   return;
                }
 
-               int new_index = the_index - 1;
-               if (new_index > -1) {
-                  this.selectedTemplate = new_index;
+               int newIndex = theIndex - 1;
+               if (newIndex > -1) {
+                  this.selectedTemplate = newIndex;
                   int maxScroll = Math.max(
                      0, this.worldTemplateSelectionList.getMaxPosition() - (this.height() - 40 - (this.displayWarning ? RealmsConstants.row(1) : 32) - 4)
                   );
@@ -188,9 +186,9 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
                   int scroll = this.worldTemplateSelectionList.getScroll();
                   int hiddenItems = (int)Math.ceil((double)((float)scroll / 46.0F));
                   int scrollPerItem = maxScroll / this.templates.size();
-                  int positionNeeded = scrollPerItem * new_index;
+                  int positionNeeded = scrollPerItem * newIndex;
                   int proposedScroll = positionNeeded - this.worldTemplateSelectionList.getScroll();
-                  if (new_index < hiddenItems || new_index > hiddenItems + maxItemsInView) {
+                  if (newIndex < hiddenItems || newIndex > hiddenItems + maxItemsInView) {
                      this.worldTemplateSelectionList.scroll(proposedScroll);
                   }
 
@@ -203,35 +201,35 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
             break;
          case 208:
             if (this.selectedTemplate != -1) {
-               int the_index = this.selectedTemplate;
+               int theIndex = this.selectedTemplate;
                int maxScroll = Math.max(
                   0, this.worldTemplateSelectionList.getMaxPosition() - (this.height() - 40 - (this.displayWarning ? RealmsConstants.row(1) : 32))
                );
-               if (the_index == this.templates.size() - 1) {
+               if (theIndex == this.templates.size() - 1) {
                   this.worldTemplateSelectionList.scroll(maxScroll - this.worldTemplateSelectionList.getScroll() + 46);
                   return;
                }
 
-               int new_index = the_index + 1;
-               if (new_index == this.templates.size() - 1) {
-                  this.selectedTemplate = new_index;
+               int newIndex = theIndex + 1;
+               if (newIndex == this.templates.size() - 1) {
+                  this.selectedTemplate = newIndex;
                   this.worldTemplateSelectionList.scroll(maxScroll - this.worldTemplateSelectionList.getScroll() + 46);
                   return;
                }
 
-               if (new_index < this.templates.size()) {
-                  this.selectedTemplate = new_index;
+               if (newIndex < this.templates.size()) {
+                  this.selectedTemplate = newIndex;
                   int maxItemsInView = (int)Math.floor((double)((this.height() - 40 - (this.displayWarning ? RealmsConstants.row(1) : 32)) / 46));
                   int scroll = this.worldTemplateSelectionList.getScroll();
                   int hiddenItems = (int)Math.ceil((double)((float)scroll / 46.0F));
                   int scrollPerItem = maxScroll / this.templates.size();
-                  int positionNeeded = scrollPerItem * new_index;
+                  int positionNeeded = scrollPerItem * newIndex;
                   int proposedScroll = positionNeeded - this.worldTemplateSelectionList.getScroll();
                   if (proposedScroll > 0) {
                      proposedScroll += scrollPerItem;
                   }
 
-                  if (new_index < hiddenItems || new_index >= hiddenItems + maxItemsInView) {
+                  if (newIndex < hiddenItems || newIndex >= hiddenItems + maxItemsInView) {
                      this.worldTemplateSelectionList.scroll(proposedScroll);
                   }
 
@@ -456,7 +454,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
          RealmsSelectWorldTemplateScreen.this.drawString(
             worldTemplate.version, textStart + 227 - RealmsSelectWorldTemplateScreen.this.fontWidth(worldTemplate.version), y + 1, 7105644
          );
-         if (!worldTemplate.link.equals("") || !worldTemplate.trailer.equals("") || !worldTemplate.recommendedPlayers.equals("")) {
+         if (!"".equals(worldTemplate.link) || !"".equals(worldTemplate.trailer) || !"".equals(worldTemplate.recommendedPlayers)) {
             this.drawIcons(textStart - 1, y + 25, this.xm(), this.ym(), worldTemplate.link, worldTemplate.trailer, worldTemplate.recommendedPlayers);
          }
 
@@ -473,26 +471,26 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
       }
 
       private void drawIcons(int x, int y, int xm, int ym, String link, String trailerLink, String recommendedPlayers) {
-         boolean linkHovered = false;
-         boolean trailerHovered = false;
-         if (!recommendedPlayers.equals("")) {
+         if (!"".equals(recommendedPlayers)) {
             RealmsSelectWorldTemplateScreen.this.drawString(recommendedPlayers, x, y + 4, 5000268);
          }
 
-         int offset = recommendedPlayers.equals("") ? 0 : RealmsSelectWorldTemplateScreen.this.fontWidth(recommendedPlayers) + 2;
+         int offset = "".equals(recommendedPlayers) ? 0 : RealmsSelectWorldTemplateScreen.this.fontWidth(recommendedPlayers) + 2;
+         boolean linkHovered = false;
+         boolean trailerHovered = false;
          if (xm >= x + offset && xm <= x + offset + 32 && ym >= y && ym <= y + 15 && ym < RealmsSelectWorldTemplateScreen.this.height() - 15 && ym > 32) {
             if (xm <= x + 15 + offset && xm > offset) {
-               if (!link.equals("")) {
-                  linkHovered = true;
-               } else {
+               if ("".equals(link)) {
                   trailerHovered = true;
+               } else {
+                  linkHovered = true;
                }
-            } else if (!link.equals("")) {
+            } else if (!"".equals(link)) {
                trailerHovered = true;
             }
          }
 
-         if (!link.equals("")) {
+         if (!"".equals(link)) {
             RealmsScreen.bind("realms:textures/gui/realms/link_icons.png");
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
             GL11.glPushMatrix();
@@ -501,19 +499,19 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
             GL11.glPopMatrix();
          }
 
-         if (!trailerLink.equals("")) {
+         if (!"".equals(trailerLink)) {
             RealmsScreen.bind("realms:textures/gui/realms/trailer_icons.png");
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
             GL11.glPushMatrix();
             GL11.glScalef(1.0F, 1.0F, 1.0F);
-            RealmsScreen.blit(x + offset + (link.equals("") ? 0 : 17), y, trailerHovered ? 15.0F : 0.0F, 0.0F, 15, 15, 30.0F, 15.0F);
+            RealmsScreen.blit(x + offset + ("".equals(link) ? 0 : 17), y, trailerHovered ? 15.0F : 0.0F, 0.0F, 15, 15, 30.0F, 15.0F);
             GL11.glPopMatrix();
          }
 
-         if (linkHovered && !link.equals("")) {
+         if (linkHovered && !"".equals(link)) {
             RealmsSelectWorldTemplateScreen.this.toolTip = RealmsScreen.getLocalizedString("mco.template.info.tooltip");
             RealmsSelectWorldTemplateScreen.this.currentLink = link;
-         } else if (trailerHovered && !trailerLink.equals("")) {
+         } else if (trailerHovered && !"".equals(trailerLink)) {
             RealmsSelectWorldTemplateScreen.this.toolTip = RealmsScreen.getLocalizedString("mco.template.trailer.tooltip");
             RealmsSelectWorldTemplateScreen.this.currentLink = trailerLink;
          }

@@ -36,7 +36,7 @@ public class RealmsActivityScreen extends RealmsScreen {
    private int matrixWidth;
    private String toolTip;
    private volatile List<RealmsActivityScreen.Day> dayList = new ArrayList();
-   private List<RealmsActivityScreen.Color> colors = Arrays.asList(
+   private final List<RealmsActivityScreen.Color> colors = Arrays.asList(
       new RealmsActivityScreen.Color(79, 243, 29),
       new RealmsActivityScreen.Color(243, 175, 29),
       new RealmsActivityScreen.Color(243, 29, 190),
@@ -45,15 +45,15 @@ public class RealmsActivityScreen extends RealmsScreen {
       new RealmsActivityScreen.Color(243, 29, 64),
       new RealmsActivityScreen.Color(29, 74, 243)
    );
-   private int colorIndex = 0;
+   private int colorIndex;
    private long periodInMillis;
-   private int maxKeyWidth = 0;
+   private int maxKeyWidth;
    private Boolean noActivity = false;
-   private int activityPoint = 0;
-   private int dayWidth = 0;
-   private double hourWidth = 0.0;
-   private double minuteWidth = 0.0;
-   private int BUTTON_BACK_ID = 0;
+   private int activityPoint;
+   private int dayWidth;
+   private double hourWidth;
+   private double minuteWidth;
+   private final int BUTTON_BACK_ID = 0;
 
    public RealmsActivityScreen(RealmsScreen lastScreen, RealmsServer serverData) {
       this.lastScreen = lastScreen;
@@ -71,7 +71,7 @@ public class RealmsActivityScreen extends RealmsScreen {
       this.buttonsClear();
       this.matrixWidth = this.width();
       this.list = new RealmsActivityScreen.DetailsList();
-      this.buttonsAdd(newButton(this.BUTTON_BACK_ID, this.width() / 2 - 100, this.height() - 30, 200, 20, getLocalizedString("gui.back")));
+      this.buttonsAdd(newButton(0, this.width() / 2 - 100, this.height() - 30, 200, 20, getLocalizedString("gui.back")));
    }
 
    private RealmsActivityScreen.Color getColor() {
@@ -95,9 +95,9 @@ public class RealmsActivityScreen extends RealmsScreen {
                for(RealmsActivityScreen.ActivityRow row : RealmsActivityScreen.this.activityMap) {
                   for(RealmsActivityScreen.Activity activity : row.activities) {
                      String day = new SimpleDateFormat("dd/MM").format(new Date(activity.start));
-                     RealmsActivityScreen.Day the_day = new RealmsActivityScreen.Day(day, activity.start);
-                     if (!tempDayList.contains(the_day)) {
-                        tempDayList.add(the_day);
+                     RealmsActivityScreen.Day theDay = new RealmsActivityScreen.Day(day, activity.start);
+                     if (!tempDayList.contains(theDay)) {
+                        tempDayList.add(theDay);
                      }
                   }
                }
@@ -107,8 +107,8 @@ public class RealmsActivityScreen extends RealmsScreen {
                for(RealmsActivityScreen.ActivityRow row : RealmsActivityScreen.this.activityMap) {
                   for(RealmsActivityScreen.Activity activity : row.activities) {
                      String day = new SimpleDateFormat("dd/MM").format(new Date(activity.start));
-                     RealmsActivityScreen.Day the_day = new RealmsActivityScreen.Day(day, activity.start);
-                     activity.dayIndex = tempDayList.indexOf(the_day) + 1;
+                     RealmsActivityScreen.Day theDay = new RealmsActivityScreen.Day(day, activity.start);
+                     activity.dayIndex = tempDayList.indexOf(theDay) + 1;
                   }
                }
 
@@ -177,7 +177,7 @@ public class RealmsActivityScreen extends RealmsScreen {
    }
 
    public void buttonClicked(RealmsButton button) {
-      if (button.id() == this.BUTTON_BACK_ID) {
+      if (button.id() == 0) {
          Realms.setScreen(this.lastScreen);
       }
 
@@ -202,7 +202,7 @@ public class RealmsActivityScreen extends RealmsScreen {
       }
 
       int keyRightPadding = 25;
-      this.activityPoint = this.maxKeyWidth + keyRightPadding;
+      this.activityPoint = this.maxKeyWidth + 25;
       int spaceLeft = this.matrixWidth - this.activityPoint - 10;
       int days = this.dayList.size() < 1 ? 1 : this.dayList.size();
       this.dayWidth = spaceLeft / days;
@@ -259,9 +259,9 @@ public class RealmsActivityScreen extends RealmsScreen {
          int width = 0;
 
          for(String s : msg.split("\n")) {
-            int the_width = this.fontWidth(s);
-            if (the_width > width) {
-               width = the_width;
+            int theWidth = this.fontWidth(s);
+            if (theWidth > width) {
+               width = theWidth;
             }
          }
 

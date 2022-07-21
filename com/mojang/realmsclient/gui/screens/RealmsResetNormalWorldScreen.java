@@ -8,7 +8,7 @@ import net.minecraft.realms.RealmsScreen;
 import org.lwjgl.input.Keyboard;
 
 public class RealmsResetNormalWorldScreen extends RealmsScreen {
-   private RealmsResetWorldScreen lastScreen;
+   private final RealmsResetWorldScreen lastScreen;
    private RealmsEditBox seedEdit;
    private Boolean generateStructures = true;
    private Integer levelTypeIndex = 0;
@@ -117,6 +117,6 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
    private String generateStructuresTitle() {
       return getLocalizedString("selectWorld.mapFeatures")
          + " "
-         + (this.generateStructures ? getLocalizedString("mco.configure.world.on") : getLocalizedString("mco.configure.world.off"));
+         + getLocalizedString(this.generateStructures ? "mco.configure.world.on" : "mco.configure.world.off");
    }
 }

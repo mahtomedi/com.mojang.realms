@@ -36,7 +36,7 @@ import org.apache.logging.log4j.Logger;
 
 public class RealmsClient {
    public static RealmsClient.Environment currentEnvironment = RealmsClient.Environment.PRODUCTION;
-   private static boolean initialized = false;
+   private static boolean initialized;
    private static final Logger LOGGER = LogManager.getLogger();
    private final String sessionId;
    private final String username;
@@ -57,7 +57,7 @@ public class RealmsClient {
    private static final String PATH_PUT_INTO_MINIGAMES_MODE = "/minigames/$MINIGAME_ID/$WORLD_ID";
    private static final String PATH_AVAILABLE = "/available";
    private static final String PATH_TEMPLATES = "/templates/$WORLD_TYPE";
-   private static final String PATH_WORLD_JOIN = "/$ID/join";
+   private static final String PATH_WORLD_JOIN = "/v1/$ID/join/pc";
    private static final String PATH_WORLD_GET = "/$ID";
    private static final String PATH_WORLD_INVITES = "/$WORLD_ID";
    private static final String PATH_WORLD_UNINVITE = "/$WORLD_ID/invite/$UUID";
@@ -78,7 +78,7 @@ public class RealmsClient {
    private static final String PATH_CLIENT_COMPATIBLE = "/client/compatible";
    private static final String PATH_TOS_AGREED = "/tos/agreed";
    private static final String PATH_STAGE_AVAILABLE = "/stageAvailable";
-   private static Gson gson = new Gson();
+   private static final Gson gson = new Gson();
 
    public static RealmsClient createRealmsClient() {
       String username = Realms.userName();
@@ -92,9 +92,9 @@ public class RealmsClient {
             }
 
             if (realmsEnvironment != null) {
-               if (realmsEnvironment.equals("LOCAL")) {
+               if ("LOCAL".equals(realmsEnvironment)) {
                   switchToLocal();
-               } else if (realmsEnvironment.equals("STAGE")) {
+               } else if ("STAGE".equals(realmsEnvironment)) {
                   switchToStage();
                }
             }
@@ -149,7 +149,7 @@ public class RealmsClient {
    }
 
    public RealmsServerAddress join(long worldId) throws RealmsServiceException, IOException {
-      String asciiUrl = this.url("worlds" + "/$ID/join".replace("$ID", "" + worldId));
+      String asciiUrl = this.url("worlds" + "/v1/$ID/join/pc".replace("$ID", "" + worldId));
       String json = this.execute(Request.get(asciiUrl, 5000, 30000));
       return RealmsServerAddress.parse(json);
    }
@@ -329,8 +329,8 @@ public class RealmsClient {
 
       GsonBuilder builder = new GsonBuilder();
       builder.excludeFieldsWithoutExposeAnnotation();
-      Gson the_gson = builder.create();
-      String content = the_gson.toJson(oldUploadInfo);
+      Gson theGson = builder.create();
+      String content = theGson.toJson(oldUploadInfo);
       return UploadInfo.parse(this.execute(Request.put(asciiUrl, content)));
    }
 

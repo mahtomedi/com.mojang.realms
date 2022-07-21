@@ -28,9 +28,9 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
    private int column1_x;
    private int column_width;
    private int column2_x;
-   private RealmsWorldOptions options;
-   private RealmsServer.WorldType worldType;
-   private int activeSlot;
+   private final RealmsWorldOptions options;
+   private final RealmsServer.WorldType worldType;
+   private final int activeSlot;
    private int difficultyIndex;
    private int gameModeIndex;
    private Boolean pvp;
@@ -47,7 +47,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
    private RealmsSliderButton spawnProtectionButton;
    private RealmsButton commandBlocksButton;
    private RealmsButton forceGameModeButton;
-   private boolean notNormal = false;
+   private boolean notNormal;
    String[] difficulties;
    String[] gameModes;
    String[][] gameModeHints;
@@ -150,7 +150,15 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
       this.createDifficultyAndGameMode();
       this.difficultyIndex = this.options.difficulty;
       this.gameModeIndex = this.options.gameMode;
-      if (!this.worldType.equals(RealmsServer.WorldType.NORMAL)) {
+      if (this.worldType.equals(RealmsServer.WorldType.NORMAL)) {
+         this.pvp = this.options.pvp;
+         this.spawnProtection = this.options.spawnProtection;
+         this.forceGameMode = this.options.forceGameMode;
+         this.spawnAnimals = this.options.spawnAnimals;
+         this.spawnMonsters = this.options.spawnMonsters;
+         this.spawnNPCs = this.options.spawnNPCs;
+         this.commandBlocks = this.options.commandBlocks;
+      } else {
          this.notNormal = true;
          this.pvp = true;
          this.spawnProtection = 0;
@@ -159,14 +167,6 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
          this.spawnMonsters = true;
          this.spawnNPCs = true;
          this.commandBlocks = true;
-      } else {
-         this.pvp = this.options.pvp;
-         this.spawnProtection = this.options.spawnProtection;
-         this.forceGameMode = this.options.forceGameMode;
-         this.spawnAnimals = this.options.spawnAnimals;
-         this.spawnMonsters = this.options.spawnMonsters;
-         this.spawnNPCs = this.options.spawnNPCs;
-         this.commandBlocks = this.options.commandBlocks;
       }
 
       this.nameEdit = this.newEditBox(11, this.column1_x + 2, RealmsConstants.row(1), this.column_width - 4, 20);
@@ -235,15 +235,13 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
    }
 
    private String pvpTitle() {
-      return getLocalizedString("mco.configure.world.pvp")
-         + ": "
-         + (this.pvp ? getLocalizedString("mco.configure.world.on") : getLocalizedString("mco.configure.world.off"));
+      return getLocalizedString("mco.configure.world.pvp") + ": " + getLocalizedString(this.pvp ? "mco.configure.world.on" : "mco.configure.world.off");
    }
 
    private String spawnAnimalsTitle() {
       return getLocalizedString("mco.configure.world.spawnAnimals")
          + ": "
-         + (this.spawnAnimals ? getLocalizedString("mco.configure.world.on") : getLocalizedString("mco.configure.world.off"));
+         + getLocalizedString(this.spawnAnimals ? "mco.configure.world.on" : "mco.configure.world.off");
    }
 
    private String spawnMonstersTitle() {
@@ -251,25 +249,25 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
          ? getLocalizedString("mco.configure.world.spawnMonsters") + ": " + getLocalizedString("mco.configure.world.off")
          : getLocalizedString("mco.configure.world.spawnMonsters")
             + ": "
-            + (this.spawnMonsters ? getLocalizedString("mco.configure.world.on") : getLocalizedString("mco.configure.world.off"));
+            + getLocalizedString(this.spawnMonsters ? "mco.configure.world.on" : "mco.configure.world.off");
    }
 
    private String spawnNPCsTitle() {
       return getLocalizedString("mco.configure.world.spawnNPCs")
          + ": "
-         + (this.spawnNPCs ? getLocalizedString("mco.configure.world.on") : getLocalizedString("mco.configure.world.off"));
+         + getLocalizedString(this.spawnNPCs ? "mco.configure.world.on" : "mco.configure.world.off");
    }
 
    private String commandBlocksTitle() {
       return getLocalizedString("mco.configure.world.commandBlocks")
          + ": "
-         + (this.commandBlocks ? getLocalizedString("mco.configure.world.on") : getLocalizedString("mco.configure.world.off"));
+         + getLocalizedString(this.commandBlocks ? "mco.configure.world.on" : "mco.configure.world.off");
    }
 
    private String forceGameModeTitle() {
       return getLocalizedString("mco.configure.world.forceGameMode")
          + ": "
-         + (this.forceGameMode ? getLocalizedString("mco.configure.world.on") : getLocalizedString("mco.configure.world.off"));
+         + getLocalizedString(this.forceGameMode ? "mco.configure.world.on" : "mco.configure.world.off");
    }
 
    public void render(int xm, int ym, float a) {

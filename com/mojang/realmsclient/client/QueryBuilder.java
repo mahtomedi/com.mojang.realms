@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class QueryBuilder {
-   private Map<String, String> queryParams = new HashMap();
+   private final Map<String, String> queryParams = new HashMap();
 
    public static QueryBuilder of(String key, String value) {
       QueryBuilder queryBuilder = new QueryBuilder();

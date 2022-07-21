@@ -1,22 +1,26 @@
 package com.mojang.realmsclient.util;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
 import com.mojang.realmsclient.RealmsMainScreen;
 import com.mojang.realmsclient.client.RealmsClient;
+import com.mojang.realmsclient.dto.Backup;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.RealmsServerAddress;
+import com.mojang.realmsclient.dto.WorldDownload;
 import com.mojang.realmsclient.dto.WorldTemplate;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.exception.RetryCallException;
 import com.mojang.realmsclient.gui.LongRunningTask;
 import com.mojang.realmsclient.gui.screens.RealmsConfigureWorldScreen;
+import com.mojang.realmsclient.gui.screens.RealmsDownloadLatestWorldScreen;
+import com.mojang.realmsclient.gui.screens.RealmsGenericErrorScreen;
+import com.mojang.realmsclient.gui.screens.RealmsLongConfirmationScreen;
 import com.mojang.realmsclient.gui.screens.RealmsLongRunningMcoTaskScreen;
 import com.mojang.realmsclient.gui.screens.RealmsResetWorldScreen;
+import com.mojang.realmsclient.gui.screens.RealmsResourcePackScreen;
 import com.mojang.realmsclient.gui.screens.RealmsTermsScreen;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import javax.annotation.Nullable;
+import java.util.concurrent.locks.ReentrantLock;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsConnect;
 import net.minecraft.realms.RealmsScreen;
@@ -81,6 +85,67 @@ public class RealmsTasks {
       }
    }
 
+   public static class DownloadTask extends LongRunningTask {
+      private final long worldId;
+      private final int slot;
+      private final RealmsScreen lastScreen;
+      private final String downloadName;
+
+      public DownloadTask(long worldId, int slot, String downloadName, RealmsScreen lastScreen) {
+         this.worldId = worldId;
+         this.slot = slot;
+         this.lastScreen = lastScreen;
+         this.downloadName = downloadName;
+      }
+
+      public void run() {
+         this.setTitle(RealmsScreen.getLocalizedString("mco.download.preparing"));
+         RealmsClient client = RealmsClient.createRealmsClient();
+         int i = 0;
+
+         while(i < 25) {
+            try {
+               if (this.aborted()) {
+                  return;
+               }
+
+               WorldDownload worldDownload = client.download(this.worldId, this.slot);
+               RealmsTasks.pause(1);
+               if (this.aborted()) {
+                  return;
+               }
+
+               Realms.setScreen(new RealmsDownloadLatestWorldScreen(this.lastScreen, worldDownload, this.downloadName));
+               return;
+            } catch (RetryCallException var4) {
+               if (this.aborted()) {
+                  return;
+               }
+
+               RealmsTasks.pause(var4.delaySeconds);
+               ++i;
+            } catch (RealmsServiceException var5) {
+               if (this.aborted()) {
+                  return;
+               }
+
+               RealmsTasks.LOGGER.error("Couldn't download world data");
+               Realms.setScreen(new RealmsGenericErrorScreen(var5, this.lastScreen));
+               return;
+            } catch (Exception var6) {
+               if (this.aborted()) {
+                  return;
+               }
+
+               RealmsTasks.LOGGER.error("Couldn't download world data", var6);
+               this.error(var6.getLocalizedMessage());
+               return;
+            }
+         }
+
+      }
+   }
+
    public static class OpenServerTask extends LongRunningTask {
       private final RealmsServer serverData;
       private final RealmsScreen returnScreen;
@@ -112,7 +177,7 @@ public class RealmsTasks {
 
                   this.serverData.state = RealmsServer.State.OPEN;
                   if (this.join) {
-                     ((RealmsMainScreen)this.mainScreen).play(this.serverData);
+                     ((RealmsMainScreen)this.mainScreen).play(this.serverData, this.returnScreen);
                   } else {
                      Realms.setScreen(this.returnScreen);
                   }
@@ -167,10 +232,12 @@ public class RealmsTasks {
    public static class RealmsGetServerDetailsTask extends LongRunningTask {
       private final RealmsServer server;
       private final RealmsScreen lastScreen;
+      private final ReentrantLock connectLock;
 
-      public RealmsGetServerDetailsTask(RealmsScreen lastScreen, RealmsServer server) {
+      public RealmsGetServerDetailsTask(RealmsScreen lastScreen, RealmsServer server, ReentrantLock connectLock) {
          this.lastScreen = lastScreen;
          this.server = server;
+         this.connectLock = connectLock;
       }
 
       public void run() {
@@ -179,30 +246,30 @@ public class RealmsTasks {
          boolean addressRetrieved = false;
          boolean hasError = false;
          int sleepTime = 5;
-         final RealmsServerAddress address = null;
+         RealmsServerAddress address = null;
          boolean tosNotAccepted = false;
 
          for(int i = 0; i < 40 && !this.aborted(); ++i) {
             try {
                address = client.join(this.server.id);
                addressRetrieved = true;
-            } catch (RetryCallException var10) {
-               sleepTime = var10.delaySeconds;
-            } catch (RealmsServiceException var11) {
-               if (var11.errorCode == 6002) {
+            } catch (RetryCallException var9) {
+               sleepTime = var9.delaySeconds;
+            } catch (RealmsServiceException var10) {
+               if (var10.errorCode == 6002) {
                   tosNotAccepted = true;
                } else {
                   hasError = true;
-                  this.error(var11.toString());
-                  RealmsTasks.LOGGER.error("Couldn't connect to world", var11);
+                  this.error(var10.toString());
+                  RealmsTasks.LOGGER.error("Couldn't connect to world", var10);
                }
                break;
-            } catch (IOException var12) {
-               RealmsTasks.LOGGER.error("Couldn't parse response connecting to world", var12);
-            } catch (Exception var13) {
+            } catch (IOException var11) {
+               RealmsTasks.LOGGER.error("Couldn't parse response connecting to world", var11);
+            } catch (Exception var12) {
                hasError = true;
-               RealmsTasks.LOGGER.error("Couldn't connect to world", var13);
-               this.error(var13.getLocalizedMessage());
+               RealmsTasks.LOGGER.error("Couldn't connect to world", var12);
+               this.error(var12.getLocalizedMessage());
                break;
             }
 
@@ -217,32 +284,19 @@ public class RealmsTasks {
             Realms.setScreen(new RealmsTermsScreen(this.lastScreen, this.server));
          } else if (!this.aborted() && !hasError) {
             if (addressRetrieved) {
-               if (this.server.resourcePackUrl != null && this.server.resourcePackHash != null) {
-                  try {
-                     Futures.addCallback(
-                        Realms.downloadResourcePack(this.server.resourcePackUrl, this.server.resourcePackHash),
-                        new FutureCallback<Object>() {
-                           public void onSuccess(@Nullable Object result) {
-                              RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(
-                                 RealmsGetServerDetailsTask.this.lastScreen,
-                                 new RealmsTasks.RealmsConnectTask(RealmsGetServerDetailsTask.this.lastScreen, address)
-                              );
-                              longRunningMcoTaskScreen.start();
-                              Realms.setScreen(longRunningMcoTaskScreen);
-                           }
-   
-                           public void onFailure(Throwable t) {
-                              Realms.clearResourcePack();
-                              RealmsTasks.LOGGER.error(t);
-                              RealmsGetServerDetailsTask.this.error("Failed to download resource pack!");
-                           }
-                        }
-                     );
-                  } catch (Exception var9) {
-                     Realms.clearResourcePack();
-                     RealmsTasks.LOGGER.error(var9);
-                     this.error("Failed to download resource pack!");
-                  }
+               if (address.resourcePackUrl != null && address.resourcePackHash != null) {
+                  String line2 = RealmsScreen.getLocalizedString("mco.configure.world.resourcepack.question.line1");
+                  String line3 = RealmsScreen.getLocalizedString("mco.configure.world.resourcepack.question.line2");
+                  Realms.setScreen(
+                     new RealmsLongConfirmationScreen(
+                        new RealmsResourcePackScreen(this.lastScreen, address, this.connectLock),
+                        RealmsLongConfirmationScreen.Type.Info,
+                        line2,
+                        line3,
+                        true,
+                        100
+                     )
+                  );
                } else {
                   RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(
                      this.lastScreen, new RealmsTasks.RealmsConnectTask(this.lastScreen, address)
@@ -324,10 +378,10 @@ public class RealmsTasks {
                   return;
                }
 
-               if (this.confirmationId != -1) {
-                  this.lastScreen.confirmResult(true, this.confirmationId);
-               } else {
+               if (this.confirmationId == -1) {
                   Realms.setScreen(this.lastScreen);
+               } else {
+                  this.lastScreen.confirmResult(true, this.confirmationId);
                }
 
                return;
@@ -345,6 +399,65 @@ public class RealmsTasks {
 
                RealmsTasks.LOGGER.error("Couldn't reset world");
                this.error(var5.toString());
+               return;
+            }
+         }
+
+      }
+   }
+
+   public static class RestoreTask extends LongRunningTask {
+      private final Backup backup;
+      private final long worldId;
+      private final RealmsConfigureWorldScreen lastScreen;
+
+      public RestoreTask(Backup backup, long worldId, RealmsConfigureWorldScreen lastScreen) {
+         this.backup = backup;
+         this.worldId = worldId;
+         this.lastScreen = lastScreen;
+      }
+
+      public void run() {
+         this.setTitle(RealmsScreen.getLocalizedString("mco.backup.restoring"));
+         RealmsClient client = RealmsClient.createRealmsClient();
+         int i = 0;
+
+         while(i < 25) {
+            try {
+               if (this.aborted()) {
+                  return;
+               }
+
+               client.restoreWorld(this.worldId, this.backup.backupId);
+               RealmsTasks.pause(1);
+               if (this.aborted()) {
+                  return;
+               }
+
+               Realms.setScreen(this.lastScreen.getNewScreen());
+               return;
+            } catch (RetryCallException var4) {
+               if (this.aborted()) {
+                  return;
+               }
+
+               RealmsTasks.pause(var4.delaySeconds);
+               ++i;
+            } catch (RealmsServiceException var5) {
+               if (this.aborted()) {
+                  return;
+               }
+
+               RealmsTasks.LOGGER.error("Couldn't restore backup", var5);
+               Realms.setScreen(new RealmsGenericErrorScreen(var5, this.lastScreen));
+               return;
+            } catch (Exception var6) {
+               if (this.aborted()) {
+                  return;
+               }
+
+               RealmsTasks.LOGGER.error("Couldn't restore backup", var6);
+               this.error(var6.getLocalizedMessage());
                return;
             }
          }

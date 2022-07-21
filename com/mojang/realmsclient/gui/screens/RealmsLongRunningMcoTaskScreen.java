@@ -17,8 +17,8 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements Erro
    private volatile String errorMessage;
    private volatile boolean aborted;
    private int animTicks;
-   private LongRunningTask task;
-   private int buttonLength = 212;
+   private final LongRunningTask task;
+   private final int buttonLength = 212;
    public static final String[] symbols = new String[]{
       "▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃",
       "_ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄",
@@ -68,9 +68,7 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements Erro
 
    public void init() {
       this.task.init();
-      this.buttonsAdd(
-         newButton(666, this.width() / 2 - this.buttonLength / 2, RealmsConstants.row(12), this.buttonLength, 20, getLocalizedString("gui.cancel"))
-      );
+      this.buttonsAdd(newButton(666, this.width() / 2 - 106, RealmsConstants.row(12), 212, 20, getLocalizedString("gui.cancel")));
    }
 
    public void buttonClicked(RealmsButton button) {
@@ -106,7 +104,7 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements Erro
       this.error = true;
       this.errorMessage = errorMessage;
       this.buttonsClear();
-      this.buttonsAdd(newButton(667, this.width() / 2 - this.buttonLength / 2, this.height() / 4 + 120 + 12, getLocalizedString("gui.back")));
+      this.buttonsAdd(newButton(667, this.width() / 2 - 106, this.height() / 4 + 120 + 12, getLocalizedString("gui.back")));
    }
 
    public void setTitle(String title) {

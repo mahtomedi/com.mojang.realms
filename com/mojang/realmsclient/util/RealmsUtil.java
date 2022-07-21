@@ -62,10 +62,10 @@ public class RealmsUtil {
    }
 
    public static boolean slotIsBrokenByUpdate(RealmsWorldOptions slot) {
-      return slot.adventureMap && slot.minecraftVersion.equals("1.8.9");
+      return slot.adventureMap && "1.8.9".equals(slot.minecraftVersion);
    }
 
    public static boolean mapIsBrokenByUpdate(RealmsServer serverData) {
-      return serverData.minecraftVersion != null && serverData.minecraftVersion.equals("1.8.9") && !serverData.worldType.equals(RealmsServer.WorldType.NORMAL);
+      return serverData.minecraftVersion != null && "1.8.9".equals(serverData.minecraftVersion) && !serverData.worldType.equals(RealmsServer.WorldType.NORMAL);
    }
 }

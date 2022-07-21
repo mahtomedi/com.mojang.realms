@@ -9,6 +9,7 @@ import com.mojang.realmsclient.util.RealmsUtil;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.util.concurrent.locks.ReentrantLock;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsScreen;
@@ -23,8 +24,8 @@ public class RealmsTermsScreen extends RealmsScreen {
    private final RealmsScreen lastScreen;
    private final RealmsServer realmsServer;
    private RealmsButton agreeButton;
-   private boolean onLink = false;
-   private String realmsToSUrl = "https://minecraft.net/realms/terms";
+   private boolean onLink;
+   private final String realmsToSUrl = "https://minecraft.net/realms/terms";
 
    public RealmsTermsScreen(RealmsScreen lastScreen, RealmsServer realmsServer) {
       this.lastScreen = lastScreen;
@@ -34,11 +35,11 @@ public class RealmsTermsScreen extends RealmsScreen {
    public void init() {
       Keyboard.enableRepeatEvents(true);
       this.buttonsClear();
-      int column1_x = this.width() / 4;
-      int column_width = this.width() / 4 - 2;
-      int column2_x = this.width() / 2 + 4;
-      this.buttonsAdd(this.agreeButton = newButton(1, column1_x, RealmsConstants.row(12), column_width, 20, getLocalizedString("mco.terms.buttons.agree")));
-      this.buttonsAdd(newButton(2, column2_x, RealmsConstants.row(12), column_width, 20, getLocalizedString("mco.terms.buttons.disagree")));
+      int column1X = this.width() / 4;
+      int columnWidth = this.width() / 4 - 2;
+      int column2X = this.width() / 2 + 4;
+      this.buttonsAdd(this.agreeButton = newButton(1, column1X, RealmsConstants.row(12), columnWidth, 20, getLocalizedString("mco.terms.buttons.agree")));
+      this.buttonsAdd(newButton(2, column2X, RealmsConstants.row(12), columnWidth, 20, getLocalizedString("mco.terms.buttons.disagree")));
    }
 
    public void removed() {
@@ -74,7 +75,7 @@ public class RealmsTermsScreen extends RealmsScreen {
       try {
          client.agreeToTos();
          RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(
-            this.lastScreen, new RealmsTasks.RealmsGetServerDetailsTask(this.lastScreen, this.realmsServer)
+            this.lastScreen, new RealmsTasks.RealmsGetServerDetailsTask(this.lastScreen, this.realmsServer, new ReentrantLock())
          );
          longRunningMcoTaskScreen.start();
          Realms.setScreen(longRunningMcoTaskScreen);
@@ -88,8 +89,8 @@ public class RealmsTermsScreen extends RealmsScreen {
       super.mouseClicked(x, y, buttonNum);
       if (this.onLink) {
          Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-         clipboard.setContents(new StringSelection(this.realmsToSUrl), null);
-         RealmsUtil.browseTo(this.realmsToSUrl);
+         clipboard.setContents(new StringSelection("https://minecraft.net/realms/terms"), null);
+         RealmsUtil.browseTo("https://minecraft.net/realms/terms");
       }
 
    }

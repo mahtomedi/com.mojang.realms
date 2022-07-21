@@ -47,15 +47,13 @@ import org.lwjgl.opengl.GL11;
 
 public class RealmsMainScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
-   private static boolean overrideConfigure = false;
-   private boolean dontSetConnectedToRealms = false;
+   private static boolean overrideConfigure;
+   private boolean dontSetConnectedToRealms;
    protected static final int BUTTON_BACK_ID = 0;
    protected static final int BUTTON_PLAY_ID = 1;
    private static final int LEAVE_ID = 2;
    private static final int BUTTON_BUY_ID = 3;
    private static final int BUTTON_TRY_ID = 4;
-   protected static final int RESOURCEPACK_ID = 100;
-   private RealmsServer resourcePackServer;
    private static final String ON_ICON_LOCATION = "realms:textures/gui/realms/on_icon.png";
    private static final String OFF_ICON_LOCATION = "realms:textures/gui/realms/off_icon.png";
    private static final String EXPIRED_ICON_LOCATION = "realms:textures/gui/realms/expired_icon.png";
@@ -79,41 +77,41 @@ public class RealmsMainScreen extends RealmsScreen {
       "realms:textures/gui/realms/images/four.png",
       "realms:textures/gui/realms/images/five.png"
    };
-   private static RealmsDataFetcher realmsDataFetcher = new RealmsDataFetcher();
+   private static final RealmsDataFetcher realmsDataFetcher = new RealmsDataFetcher();
    private static int lastScrollYPosition = -1;
-   private RealmsScreen lastScreen;
+   private final RealmsScreen lastScreen;
    private volatile RealmsMainScreen.ServerSelectionList serverSelectionList;
    private long selectedServerId = -1L;
    private RealmsButton playButton;
    private RealmsButton backButton;
    private String toolTip;
    private List<RealmsServer> realmsServers = Lists.newArrayList();
-   private volatile int numberOfPendingInvites = 0;
+   private volatile int numberOfPendingInvites;
    private int animTick;
-   private static volatile boolean hasParentalConsent = false;
-   private static volatile boolean checkedParentalConsent = false;
-   private static volatile boolean checkedClientCompatability = false;
-   private boolean hasFetchedServers = false;
-   private boolean popupOpenedByUser = false;
-   private boolean justClosedPopup = false;
+   private static volatile boolean hasParentalConsent;
+   private static volatile boolean checkedParentalConsent;
+   private static volatile boolean checkedClientCompatability;
+   private boolean hasFetchedServers;
+   private boolean popupOpenedByUser;
+   private boolean justClosedPopup;
    private volatile boolean trialsAvailable;
-   private volatile boolean createdTrial = false;
-   private volatile boolean showingPopup = false;
-   private int carouselIndex = 0;
-   private int carouselTick = 0;
-   boolean hasSwitchedCarouselImage = false;
-   private static RealmsScreen realmsGenericErrorScreen = null;
-   private static boolean regionsPinged = false;
-   private int mindex = 0;
-   private char[] mchars = new char[]{'3', '2', '1', '4', '5', '6'};
-   private int sindex = 0;
-   private char[] schars = new char[]{'9', '8', '7', '1', '2', '3'};
-   private int clicks = 0;
-   private int lindex = 0;
-   private char[] lchars = new char[]{'9', '8', '7', '4', '5', '6'};
-   private static ReentrantLock connectLock = new ReentrantLock();
-   private boolean expiredHover = false;
-   private boolean mapOnlySupportsVersionHover = false;
+   private volatile boolean createdTrial;
+   private volatile boolean showingPopup;
+   private int carouselIndex;
+   private int carouselTick;
+   boolean hasSwitchedCarouselImage;
+   private static RealmsScreen realmsGenericErrorScreen;
+   private static boolean regionsPinged;
+   private int mindex;
+   private final char[] mchars = new char[]{'3', '2', '1', '4', '5', '6'};
+   private int sindex;
+   private final char[] schars = new char[]{'9', '8', '7', '1', '2', '3'};
+   private int clicks;
+   private int lindex;
+   private final char[] lchars = new char[]{'9', '8', '7', '4', '5', '6'};
+   private ReentrantLock connectLock = new ReentrantLock();
+   private boolean expiredHover;
+   private boolean mapOnlySupportsVersionHover;
 
    public RealmsMainScreen(RealmsScreen lastScreen) {
       this.lastScreen = lastScreen;
@@ -150,10 +148,8 @@ public class RealmsMainScreen extends RealmsScreen {
          return false;
       } else if (this.popupOpenedByUser) {
          return true;
-      } else if (this.trialsAvailable && !this.createdTrial && this.realmsServers.isEmpty()) {
-         return true;
       } else {
-         return this.realmsServers.isEmpty();
+         return this.trialsAvailable && !this.createdTrial && this.realmsServers.isEmpty() ? true : this.realmsServers.isEmpty();
       }
    }
 
@@ -161,7 +157,7 @@ public class RealmsMainScreen extends RealmsScreen {
       if (realmsGenericErrorScreen != null) {
          Realms.setScreen(realmsGenericErrorScreen);
       } else {
-         connectLock = new ReentrantLock();
+         this.connectLock = new ReentrantLock();
          if (checkedClientCompatability && !this.hasParentalConsent()) {
             this.checkParentalConsent();
          }
@@ -342,7 +338,7 @@ public class RealmsMainScreen extends RealmsScreen {
                if (this.isSelfOwnedServer(server) && RealmsUtil.mapIsBrokenByUpdate(server)) {
                   this.navigateToBrokenWorldScreen(server);
                } else {
-                  this.play(server);
+                  this.play(server, this);
                }
                break;
             case 2:
@@ -449,7 +445,7 @@ public class RealmsMainScreen extends RealmsScreen {
                      RealmsMainScreen.realmsDataFetcher.forceUpdate();
                   }
                } catch (RealmsServiceException var3) {
-                  RealmsMainScreen.LOGGER.error("Couldn't connect to Realms: " + var3.toString());
+                  RealmsMainScreen.LOGGER.error("Couldn't connect to Realms: " + var3);
                } catch (IOException var4) {
                   RealmsMainScreen.LOGGER.error("Couldn't parse response connecting to Realms: " + var4.getMessage());
                }
@@ -474,7 +470,7 @@ public class RealmsMainScreen extends RealmsScreen {
                      RealmsMainScreen.realmsDataFetcher.forceUpdate();
                   }
                } catch (RealmsServiceException var3) {
-                  RealmsMainScreen.LOGGER.error("Couldn't connect to Realms: " + var3.toString());
+                  RealmsMainScreen.LOGGER.error("Couldn't connect to Realms: " + var3);
                } catch (IOException var4) {
                   RealmsMainScreen.LOGGER.error("Couldn't parse response connecting to Realms: " + var4.getMessage());
                }
@@ -574,16 +570,6 @@ public class RealmsMainScreen extends RealmsScreen {
          }
 
          Realms.setScreen(this);
-      } else if (id == 100) {
-         if (!result) {
-            if (connectLock.isHeldByCurrentThread()) {
-               connectLock.unlock();
-            }
-
-            Realms.setScreen(this);
-         } else {
-            this.connectToServer(this.resourcePackServer);
-         }
       }
 
    }
@@ -625,15 +611,15 @@ public class RealmsMainScreen extends RealmsScreen {
          case 200:
             if (this.selectedServerId != -1L && !this.shouldShowPopup()) {
                RealmsServer server = this.findServer(this.selectedServerId);
-               int the_index = this.realmsServers.indexOf(server);
-               if (the_index == 0) {
+               int theIndex = this.realmsServers.indexOf(server);
+               if (theIndex == 0) {
                   this.serverSelectionList.scroll(0 - this.serverSelectionList.getScroll());
                   return;
                }
 
-               if (server != null && the_index > 0) {
-                  int new_index = the_index - 1;
-                  RealmsServer newServer = (RealmsServer)this.realmsServers.get(new_index);
+               if (server != null && theIndex > 0) {
+                  int newIndex = theIndex - 1;
+                  RealmsServer newServer = (RealmsServer)this.realmsServers.get(newIndex);
                   if (newServer != null) {
                      this.selectedServerId = newServer.id;
                      int maxScroll = Math.max(0, this.serverSelectionList.getMaxPosition() - (this.height() - 40 - 32 - 4));
@@ -641,9 +627,9 @@ public class RealmsMainScreen extends RealmsScreen {
                      int scroll = this.serverSelectionList.getScroll();
                      int hiddenItems = (int)Math.ceil((double)((float)scroll / 36.0F));
                      int scrollPerItem = maxScroll / this.realmsServers.size();
-                     int positionNeeded = scrollPerItem * new_index;
+                     int positionNeeded = scrollPerItem * newIndex;
                      int proposedScroll = positionNeeded - this.serverSelectionList.getScroll();
-                     if (new_index < hiddenItems || new_index > hiddenItems + maxItemsInView) {
+                     if (newIndex < hiddenItems || newIndex > hiddenItems + maxItemsInView) {
                         this.serverSelectionList.scroll(proposedScroll);
                      }
 
@@ -660,17 +646,17 @@ public class RealmsMainScreen extends RealmsScreen {
          case 208:
             if (this.selectedServerId != -1L && !this.shouldShowPopup()) {
                RealmsServer server = this.findServer(this.selectedServerId);
-               int the_index = this.realmsServers.indexOf(server);
+               int theIndex = this.realmsServers.indexOf(server);
                int maxScroll = Math.max(0, this.serverSelectionList.getMaxPosition() - (this.height() - 40 - 32));
-               if (the_index == this.realmsServers.size() - 1) {
+               if (theIndex == this.realmsServers.size() - 1) {
                   this.serverSelectionList.scroll(maxScroll - this.serverSelectionList.getScroll() + 36);
                   return;
                }
 
-               if (server != null && the_index > -1 && the_index < this.realmsServers.size() - 1) {
-                  int new_index = the_index + 1;
-                  RealmsServer newServer = (RealmsServer)this.realmsServers.get(new_index);
-                  if (new_index == this.realmsServers.size() - 1) {
+               if (server != null && theIndex > -1 && theIndex < this.realmsServers.size() - 1) {
+                  int newIndex = theIndex + 1;
+                  RealmsServer newServer = (RealmsServer)this.realmsServers.get(newIndex);
+                  if (newIndex == this.realmsServers.size() - 1) {
                      this.selectedServerId = newServer.id;
                      this.serverSelectionList.scroll(maxScroll - this.serverSelectionList.getScroll() + 36);
                      return;
@@ -682,13 +668,13 @@ public class RealmsMainScreen extends RealmsScreen {
                      int scroll = this.serverSelectionList.getScroll();
                      int hiddenItems = (int)Math.ceil((double)((float)scroll / 36.0F));
                      int scrollPerItem = maxScroll / this.realmsServers.size();
-                     int positionNeeded = scrollPerItem * new_index;
+                     int positionNeeded = scrollPerItem * newIndex;
                      int proposedScroll = positionNeeded - this.serverSelectionList.getScroll();
                      if (proposedScroll > 0) {
                         proposedScroll += scrollPerItem;
                      }
 
-                     if (new_index < hiddenItems || new_index >= hiddenItems + maxItemsInView) {
+                     if (newIndex < hiddenItems || newIndex >= hiddenItems + maxItemsInView) {
                         this.serverSelectionList.scroll(proposedScroll);
                      }
 
@@ -717,10 +703,10 @@ public class RealmsMainScreen extends RealmsScreen {
                ++this.sindex;
                if (this.sindex == this.schars.length) {
                   this.sindex = 0;
-                  if (!RealmsClient.currentEnvironment.equals(RealmsClient.Environment.STAGE)) {
-                     this.switchToStage();
-                  } else {
+                  if (RealmsClient.currentEnvironment.equals(RealmsClient.Environment.STAGE)) {
                      this.switchToProd();
+                  } else {
+                     this.switchToStage();
                   }
                }
             } else {
@@ -731,10 +717,10 @@ public class RealmsMainScreen extends RealmsScreen {
                ++this.lindex;
                if (this.lindex == this.lchars.length) {
                   this.lindex = 0;
-                  if (!RealmsClient.currentEnvironment.equals(RealmsClient.Environment.LOCAL)) {
-                     this.switchToLocal();
-                  } else {
+                  if (RealmsClient.currentEnvironment.equals(RealmsClient.Environment.LOCAL)) {
                      this.switchToProd();
+                  } else {
+                     this.switchToLocal();
                   }
                }
             } else {
@@ -863,7 +849,7 @@ public class RealmsMainScreen extends RealmsScreen {
       GL11.glPushMatrix();
       int otherxo = 0;
       int otheryo = 32;
-      RealmsScreen.blit(otherxo, otheryo, 0.0F, 0.0F, this.width(), this.height() - 40 - 32, 310.0F, 166.0F);
+      RealmsScreen.blit(0, 32, 0.0F, 0.0F, this.width(), this.height() - 40 - 32, 310.0F, 166.0F);
       GL11.glPopMatrix();
       GL11.glDisable(3042);
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -953,7 +939,7 @@ public class RealmsMainScreen extends RealmsScreen {
 
       if (hovering) {
          int rx = xm + 12;
-         String message = pendingInvitesCount == 0 ? getLocalizedString("mco.invites.nopending") : getLocalizedString("mco.invites.pending");
+         String message = getLocalizedString(pendingInvitesCount == 0 ? "mco.invites.nopending" : "mco.invites.pending");
          int width = this.fontWidth(message);
          this.fillGradient(rx - 3, ym - 3, rx + width + 3, ym + 8 + 3, -1073741824, -1073741824);
          this.fontDrawShadow(message, rx, ym, -1);
@@ -976,14 +962,14 @@ public class RealmsMainScreen extends RealmsScreen {
       return x1 <= xm && xm <= x2 && y1 <= ym && ym <= y2;
    }
 
-   public void play(RealmsServer server) {
+   public void play(RealmsServer server, RealmsScreen cancelScreen) {
       if (server != null) {
          try {
-            if (!connectLock.tryLock(1L, TimeUnit.SECONDS)) {
+            if (!this.connectLock.tryLock(1L, TimeUnit.SECONDS)) {
                return;
             }
 
-            if (connectLock.getHoldCount() > 1) {
+            if (this.connectLock.getHoldCount() > 1) {
                return;
             }
          } catch (InterruptedException var4) {
@@ -991,22 +977,14 @@ public class RealmsMainScreen extends RealmsScreen {
          }
 
          this.dontSetConnectedToRealms = true;
-         if (server.resourcePackUrl != null && server.resourcePackHash != null) {
-            this.resourcePackServer = server;
-            this.saveListScrollPosition();
-            String line2 = getLocalizedString("mco.configure.world.resourcepack.question.line1");
-            String line3 = getLocalizedString("mco.configure.world.resourcepack.question.line2");
-            Realms.setScreen(new RealmsLongConfirmationScreen(this, RealmsLongConfirmationScreen.Type.Info, line2, line3, true, 100));
-         } else {
-            this.connectToServer(server);
-         }
+         this.connectToServer(server, cancelScreen);
       }
 
    }
 
-   private void connectToServer(RealmsServer server) {
+   private void connectToServer(RealmsServer server, RealmsScreen cancelScreen) {
       RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(
-         this, new RealmsTasks.RealmsGetServerDetailsTask(this, server)
+         cancelScreen, new RealmsTasks.RealmsGetServerDetailsTask(cancelScreen, server, this.connectLock)
       );
       longRunningMcoTaskScreen.start();
       Realms.setScreen(longRunningMcoTaskScreen);
@@ -1119,9 +1097,9 @@ public class RealmsMainScreen extends RealmsScreen {
          int width = 0;
 
          for(String s : msg.split("\n")) {
-            int the_width = this.fontWidth(s);
-            if (the_width > width) {
-               width = the_width;
+            int theWidth = this.fontWidth(s);
+            if (theWidth > width) {
+               width = theWidth;
             }
          }
 
@@ -1166,7 +1144,7 @@ public class RealmsMainScreen extends RealmsScreen {
       GL11.glTranslatef((float)(this.width() / 2 - 25), 20.0F, 0.0F);
       GL11.glRotatef(-20.0F, 0.0F, 0.0F, 1.0F);
       GL11.glScalef(1.5F, 1.5F, 1.5F);
-      this.drawString(text, 0, 0, 8388479);
+      this.drawString("LOCAL!", 0, 0, 8388479);
       GL11.glPopMatrix();
    }
 
@@ -1177,11 +1155,11 @@ public class RealmsMainScreen extends RealmsScreen {
       GL11.glTranslatef((float)(this.width() / 2 - 25), 20.0F, 0.0F);
       GL11.glRotatef(-20.0F, 0.0F, 0.0F, 1.0F);
       GL11.glScalef(1.5F, 1.5F, 1.5F);
-      this.drawString(text, 0, 0, -256);
+      this.drawString("STAGE!", 0, 0, -256);
       GL11.glPopMatrix();
    }
 
-   public RealmsScreen newScreen() {
+   public RealmsMainScreen newScreen() {
       return new RealmsMainScreen(this.lastScreen);
    }
 
@@ -1233,7 +1211,7 @@ public class RealmsMainScreen extends RealmsScreen {
                if (RealmsMainScreen.this.isSelfOwnedServer(server) && RealmsUtil.mapIsBrokenByUpdate(server)) {
                   RealmsMainScreen.this.navigateToBrokenWorldScreen(server);
                } else {
-                  RealmsMainScreen.this.play(RealmsMainScreen.this.findServer(RealmsMainScreen.this.selectedServerId));
+                  RealmsMainScreen.this.play(RealmsMainScreen.this.findServer(RealmsMainScreen.this.selectedServerId), RealmsMainScreen.this);
                }
             }
 
@@ -1263,7 +1241,7 @@ public class RealmsMainScreen extends RealmsScreen {
       protected void renderItem(int i, int x, int y, int h, Tezzelator t, int mouseX, int mouseY) {
          if (RealmsMainScreen.this.shouldShowMessageInList()) {
             if (i == 0) {
-               this.renderTrialItem(i, x, y);
+               this.renderTrialItem(0, x, y);
                return;
             }
 
@@ -1383,29 +1361,29 @@ public class RealmsMainScreen extends RealmsScreen {
             int dx = 225;
             int dy = 2;
             if (serverData.expired) {
-               RealmsMainScreen.this.drawExpired(x + dx - 14, y + dy, this.xm(), this.ym());
+               RealmsMainScreen.this.drawExpired(x + 225 - 14, y + 2, this.xm(), this.ym());
             } else if ((
                   serverData.state != RealmsServer.State.CLOSED
                      || RealmsUtil.mapIsBrokenByUpdate(serverData) && RealmsMainScreen.this.isSelfOwnedServer(serverData)
                )
                && (!RealmsUtil.mapIsBrokenByUpdate(serverData) || RealmsMainScreen.this.isSelfOwnedServer(serverData))) {
                if (RealmsMainScreen.this.isSelfOwnedServer(serverData) && serverData.daysLeft < 7) {
-                  RealmsMainScreen.this.drawExpiring(x + dx - 14, y + dy, this.xm(), this.ym(), serverData.daysLeft);
+                  RealmsMainScreen.this.drawExpiring(x + 225 - 14, y + 2, this.xm(), this.ym(), serverData.daysLeft);
                } else if (serverData.state == RealmsServer.State.OPEN
                   || RealmsUtil.mapIsBrokenByUpdate(serverData) && RealmsMainScreen.this.isSelfOwnedServer(serverData)) {
-                  RealmsMainScreen.this.drawOpen(x + dx - 14, y + dy, this.xm(), this.ym());
+                  RealmsMainScreen.this.drawOpen(x + 225 - 14, y + 2, this.xm(), this.ym());
                }
             } else {
-               RealmsMainScreen.this.drawClose(x + dx - 14, y + dy, this.xm(), this.ym());
+               RealmsMainScreen.this.drawClose(x + 225 - 14, y + 2, this.xm(), this.ym());
             }
 
             if (!RealmsMainScreen.this.isSelfOwnedServer(serverData) && !RealmsMainScreen.overrideConfigure) {
-               RealmsMainScreen.this.drawLeave(x + dx, y + dy, this.xm(), this.ym());
+               RealmsMainScreen.this.drawLeave(x + 225, y + 2, this.xm(), this.ym());
             } else {
-               RealmsMainScreen.this.drawConfigure(x + dx, y + dy, this.xm(), this.ym());
+               RealmsMainScreen.this.drawConfigure(x + 225, y + 2, this.xm(), this.ym());
             }
 
-            if (!serverData.serverPing.nrOfPlayers.equals("0")) {
+            if (!"0".equals(serverData.serverPing.nrOfPlayers)) {
                String coloredNumPlayers = ChatFormatting.GRAY + "" + serverData.serverPing.nrOfPlayers;
                RealmsMainScreen.this.drawString(coloredNumPlayers, x + 207 - RealmsMainScreen.this.fontWidth(coloredNumPlayers), y + 3, 8421504);
                if (this.xm() >= x + 207 - RealmsMainScreen.this.fontWidth(coloredNumPlayers)
@@ -1440,7 +1418,7 @@ public class RealmsMainScreen extends RealmsScreen {
                if (this.xm() >= buttonX
                   && this.xm() < buttonX + buttonWidth
                   && this.ym() > buttonY
-                  && this.ym() <= buttonY + buttonHeight & this.ym() < RealmsMainScreen.this.height() - 40
+                  && this.ym() <= buttonY + 16 & this.ym() < RealmsMainScreen.this.height() - 40
                   && this.ym() > 32
                   && !RealmsMainScreen.this.shouldShowPopup()) {
                   hovered = true;
@@ -1448,27 +1426,13 @@ public class RealmsMainScreen extends RealmsScreen {
                }
 
                int yImage = hovered ? 2 : 1;
-               RealmsScreen.blit(buttonX, buttonY, 0.0F, (float)(46 + yImage * 20), buttonWidth / 2, buttonHeight / 2, 256.0F, 256.0F);
+               RealmsScreen.blit(buttonX, buttonY, 0.0F, (float)(46 + yImage * 20), buttonWidth / 2, 8, 256.0F, 256.0F);
                RealmsScreen.blit(
-                  buttonX + buttonWidth / 2,
-                  buttonY,
-                  (float)(200 - buttonWidth / 2),
-                  (float)(46 + yImage * 20),
-                  buttonWidth / 2,
-                  buttonHeight / 2,
-                  256.0F,
-                  256.0F
+                  buttonX + buttonWidth / 2, buttonY, (float)(200 - buttonWidth / 2), (float)(46 + yImage * 20), buttonWidth / 2, 8, 256.0F, 256.0F
                );
-               RealmsScreen.blit(buttonX, buttonY + buttonHeight / 2, 0.0F, (float)(46 + yImage * 20 + 12), buttonWidth / 2, buttonHeight / 2, 256.0F, 256.0F);
+               RealmsScreen.blit(buttonX, buttonY + 8, 0.0F, (float)(46 + yImage * 20 + 12), buttonWidth / 2, 8, 256.0F, 256.0F);
                RealmsScreen.blit(
-                  buttonX + buttonWidth / 2,
-                  buttonY + buttonHeight / 2,
-                  (float)(200 - buttonWidth / 2),
-                  (float)(46 + yImage * 20 + 12),
-                  buttonWidth / 2,
-                  buttonHeight / 2,
-                  256.0F,
-                  256.0F
+                  buttonX + buttonWidth / 2, buttonY + 8, (float)(200 - buttonWidth / 2), (float)(46 + yImage * 20 + 12), buttonWidth / 2, 8, 256.0F, 256.0F
                );
                GL11.glPopMatrix();
                GL11.glDisable(3042);
@@ -1481,7 +1445,7 @@ public class RealmsMainScreen extends RealmsScreen {
                   int motdColor = 13413468;
                   String miniGameStr = RealmsScreen.getLocalizedString("mco.selectServer.minigame") + " ";
                   int mgWidth = RealmsMainScreen.this.fontWidth(miniGameStr);
-                  RealmsMainScreen.this.drawString(miniGameStr, x + 2, y + 12, motdColor);
+                  RealmsMainScreen.this.drawString(miniGameStr, x + 2, y + 12, 13413468);
                   RealmsMainScreen.this.drawString(serverData.getMinigameName(), x + 2 + mgWidth, y + 12, 7105644);
                } else {
                   RealmsMainScreen.this.drawString(serverData.getDescription(), x + 2, y + 12, 7105644);

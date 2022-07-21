@@ -25,8 +25,8 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
    private static final String ACCEPT_ICON_LOCATION = "realms:textures/gui/realms/accept_icon.png";
    private static final String REJECT_ICON_LOCATION = "realms:textures/gui/realms/reject_icon.png";
    private final RealmsScreen lastScreen;
-   private String toolTip = null;
-   private boolean loaded = false;
+   private String toolTip;
+   private boolean loaded;
    private RealmsPendingInvitesScreen.PendingInvitationList pendingList;
    private List<PendingInvite> pendingInvites = Lists.newArrayList();
 

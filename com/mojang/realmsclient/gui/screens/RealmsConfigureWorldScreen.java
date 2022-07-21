@@ -33,13 +33,13 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
    private static final String SLOT_FRAME_LOCATION = "realms:textures/gui/realms/slot_frame.png";
    private static final String EMPTY_FRAME_LOCATION = "realms:textures/gui/realms/empty_frame.png";
    private String toolTip;
-   private final RealmsScreen lastScreen;
+   private final RealmsMainScreen lastScreen;
    private RealmsServer serverData;
-   private volatile long serverId;
+   private final long serverId;
    private int left_x;
    private int right_x;
-   private int default_button_width = 80;
-   private int default_button_offset = 5;
+   private final int default_button_width = 80;
+   private final int default_button_offset = 5;
    private static final int BUTTON_BACK_ID = 0;
    private static final int BUTTON_PLAYERS_ID = 2;
    private static final int BUTTON_SETTINGS_ID = 3;
@@ -61,10 +61,10 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
    private boolean stateChanged;
    private int hoveredSlot = -1;
    private int animTick;
-   private int clicks = 0;
-   private boolean hoveredActiveSlot = false;
+   private int clicks;
+   private boolean hoveredActiveSlot;
 
-   public RealmsConfigureWorldScreen(RealmsScreen lastScreen, long serverId) {
+   public RealmsConfigureWorldScreen(RealmsMainScreen lastScreen, long serverId) {
       this.lastScreen = lastScreen;
       this.serverId = serverId;
    }
@@ -83,60 +83,39 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
       Keyboard.enableRepeatEvents(true);
       this.buttonsClear();
       this.buttonsAdd(
-         this.playersButton = newButton(
-            2, this.centerButton(0, 3), RealmsConstants.row(0), this.default_button_width + 20, 20, getLocalizedString("mco.configure.world.buttons.players")
-         )
+         this.playersButton = newButton(2, this.centerButton(0, 3), RealmsConstants.row(0), 100, 20, getLocalizedString("mco.configure.world.buttons.players"))
       );
       this.buttonsAdd(
          this.settingsButton = newButton(
-            3, this.centerButton(1, 3), RealmsConstants.row(0), this.default_button_width + 20, 20, getLocalizedString("mco.configure.world.buttons.settings")
+            3, this.centerButton(1, 3), RealmsConstants.row(0), 100, 20, getLocalizedString("mco.configure.world.buttons.settings")
          )
       );
       this.buttonsAdd(
          this.subscriptionButton = newButton(
-            4,
-            this.centerButton(2, 3),
-            RealmsConstants.row(0),
-            this.default_button_width + 20,
-            20,
-            getLocalizedString("mco.configure.world.buttons.subscription")
+            4, this.centerButton(2, 3), RealmsConstants.row(0), 100, 20, getLocalizedString("mco.configure.world.buttons.subscription")
          )
       );
       this.buttonsAdd(
          this.optionsButton = new RealmsHideableButton(
-            5, this.leftButton(0), RealmsConstants.row(13) - 5, this.default_button_width + 10, 20, getLocalizedString("mco.configure.world.buttons.options")
+            5, this.leftButton(0), RealmsConstants.row(13) - 5, 90, 20, getLocalizedString("mco.configure.world.buttons.options")
          )
       );
       this.buttonsAdd(
          this.backupButton = new RealmsHideableButton(
-            6, this.leftButton(1), RealmsConstants.row(13) - 5, this.default_button_width + 10, 20, getLocalizedString("mco.configure.world.backup")
+            6, this.leftButton(1), RealmsConstants.row(13) - 5, 90, 20, getLocalizedString("mco.configure.world.backup")
          )
       );
       this.buttonsAdd(
          this.resetWorldButton = new RealmsHideableButton(
-            7,
-            this.leftButton(2),
-            RealmsConstants.row(13) - 5,
-            this.default_button_width + 10,
-            20,
-            getLocalizedString("mco.configure.world.buttons.resetworld")
+            7, this.leftButton(2), RealmsConstants.row(13) - 5, 90, 20, getLocalizedString("mco.configure.world.buttons.resetworld")
          )
       );
       this.buttonsAdd(
          this.switchMinigameButton = new RealmsHideableButton(
-            8,
-            this.leftButton(0),
-            RealmsConstants.row(13) - 5,
-            this.default_button_width + 20,
-            20,
-            getLocalizedString("mco.configure.world.buttons.switchminigame")
+            8, this.leftButton(0), RealmsConstants.row(13) - 5, 100, 20, getLocalizedString("mco.configure.world.buttons.switchminigame")
          )
       );
-      this.buttonsAdd(
-         newButton(
-            0, this.right_x - this.default_button_width + 8, RealmsConstants.row(13) - 5, this.default_button_width - 10, 20, getLocalizedString("gui.back")
-         )
-      );
+      this.buttonsAdd(newButton(0, this.right_x - 80 + 8, RealmsConstants.row(13) - 5, 70, 20, getLocalizedString("gui.back")));
       this.backupButton.active(true);
       if (this.serverData == null) {
          this.hideMinigameButtons();
@@ -156,13 +135,11 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
    }
 
    private int leftButton(int i) {
-      return this.left_x + i * (this.default_button_width + 10 + this.default_button_offset);
+      return this.left_x + i * 95;
    }
 
    private int centerButton(int i, int total) {
-      return this.width() / 2
-         - (total * (this.default_button_width + 20 + this.default_button_offset) - this.default_button_offset) / 2
-         + i * (this.default_button_width + 20 + this.default_button_offset);
+      return this.width() / 2 - (total * 105 - 5) / 2 + i * 105;
    }
 
    public void tick() {
@@ -190,7 +167,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
          int titleWidth = this.fontWidth(getLocalizedString("mco.configure.world.title"));
          this.drawCenteredString(getLocalizedString("mco.configure.world.title"), this.width() / 2, 12, 16777215);
          this.drawCenteredString(name, this.width() / 2, 24, nameColor);
-         int statusX = Math.min(this.centerButton(2, 3) + this.default_button_width - 11, this.width() / 2 + nameWidth / 2 + titleWidth / 2 + 10);
+         int statusX = Math.min(this.centerButton(2, 3) + 80 - 11, this.width() / 2 + nameWidth / 2 + titleWidth / 2 + 10);
          this.drawServerStatus(statusX, 7, xm, ym);
 
          for(Entry<Integer, RealmsWorldOptions> entry : this.serverData.slots.entrySet()) {
@@ -227,7 +204,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
          if (this.isMinigame()) {
             this.drawString(
                getLocalizedString("mco.configure.current.minigame") + ": " + this.serverData.getMinigameName(),
-               this.left_x + this.default_button_width + 20 + this.default_button_offset * 2,
+               this.left_x + 80 + 20 + 10,
                RealmsConstants.row(13),
                16777215
             );
@@ -300,7 +277,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
 
    private void backButtonClicked() {
       if (this.stateChanged) {
-         ((RealmsMainScreen)this.lastScreen).removeSelection();
+         this.lastScreen.removeSelection();
       }
 
       Realms.setScreen(this.lastScreen);
@@ -398,9 +375,9 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
             && this.hoveredActiveSlot
             && (this.serverData.state == RealmsServer.State.OPEN || this.serverData.state == RealmsServer.State.CLOSED)) {
             if (this.serverData.state == RealmsServer.State.OPEN) {
-               ((RealmsMainScreen)this.lastScreen).play(this.serverData);
+               this.lastScreen.play(this.serverData, new RealmsConfigureWorldScreen(this.lastScreen.newScreen(), this.serverId));
             } else {
-               this.openTheWorld(true, this);
+               this.openTheWorld(true, new RealmsConfigureWorldScreen(this.lastScreen.newScreen(), this.serverId));
             }
          }
 
@@ -501,25 +478,36 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
    }
 
    private void drawSlotFrame(int x, int y, int xm, int ym, boolean active, String text, int i, long imageId, String image, boolean empty) {
-      if (xm >= x
-         && xm <= x + 80
-         && ym >= y
-         && ym <= y + 80
-         && (!this.isMinigame() && this.serverData.activeSlot != i || this.isMinigame() && i != 4)
-         && (i != 4 || !this.serverData.expired)) {
-         this.hoveredSlot = i;
-         this.toolTip = i == 4 ? getLocalizedString("mco.configure.world.slot.tooltip.minigame") : getLocalizedString("mco.configure.world.slot.tooltip");
+      label97:
+      if (xm >= x && xm <= x + 80 && ym >= y && ym <= y + 80) {
+         if (this.isMinigame()) {
+            if (i == 4) {
+               break label97;
+            }
+         } else if (this.serverData.activeSlot == i) {
+            break label97;
+         }
+
+         if (i != 4 || !this.serverData.expired) {
+            this.hoveredSlot = i;
+            this.toolTip = getLocalizedString(i == 4 ? "mco.configure.world.slot.tooltip.minigame" : "mco.configure.world.slot.tooltip");
+         }
       }
 
-      if (xm >= x
-         && xm <= x + 80
-         && ym >= y
-         && ym <= y + 80
-         && (!this.isMinigame() && this.serverData.activeSlot == i || this.isMinigame() && i == 4)
-         && !this.serverData.expired
-         && (this.serverData.state == RealmsServer.State.OPEN || this.serverData.state == RealmsServer.State.CLOSED)) {
-         this.hoveredActiveSlot = true;
-         this.toolTip = getLocalizedString("mco.configure.world.slot.tooltip.active");
+      label83:
+      if (xm >= x && xm <= x + 80 && ym >= y && ym <= y + 80) {
+         if (this.isMinigame()) {
+            if (i != 4) {
+               break label83;
+            }
+         } else if (this.serverData.activeSlot != i) {
+            break label83;
+         }
+
+         if (!this.serverData.expired && (this.serverData.state == RealmsServer.State.OPEN || this.serverData.state == RealmsServer.State.CLOSED)) {
+            this.hoveredActiveSlot = true;
+            this.toolTip = getLocalizedString("mco.configure.world.slot.tooltip.active");
+         }
       }
 
       if (empty) {
@@ -598,7 +586,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
    }
 
    public void saveSettings(String name, String desc) {
-      String description = desc != null && !desc.trim().equals("") ? desc : null;
+      String description = desc != null && !desc.trim().isEmpty() ? desc : null;
       RealmsClient client = RealmsClient.createRealmsClient();
 
       try {

@@ -30,13 +30,13 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
    private static final String EMPTY_FRAME_LOCATION = "realms:textures/gui/realms/empty_frame.png";
    private final RealmsScreen lastScreen;
    private RealmsServer serverData;
-   private volatile long serverId;
+   private final long serverId;
    private String title = getLocalizedString("mco.brokenworld.title");
    private String message = getLocalizedString("mco.brokenworld.message.line1") + "\\n" + getLocalizedString("mco.brokenworld.message.line2");
    private int left_x;
    private int right_x;
-   private int default_button_width = 80;
-   private int default_button_offset = 5;
+   private final int default_button_width = 80;
+   private final int default_button_offset = 5;
    private static final int BUTTON_BACK_ID = 0;
    private static final List<Integer> playButtonIds = Arrays.asList(1, 2, 3);
    private static final List<Integer> resetButtonIds = Arrays.asList(4, 5, 6);
@@ -68,11 +68,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
       this.buttonsClear();
       this.left_x = this.width() / 2 - 150;
       this.right_x = this.width() / 2 + 190;
-      this.buttonsAdd(
-         newButton(
-            0, this.right_x - this.default_button_width + 8, RealmsConstants.row(13) - 5, this.default_button_width - 10, 20, getLocalizedString("gui.back")
-         )
-      );
+      this.buttonsAdd(newButton(0, this.right_x - 80 + 8, RealmsConstants.row(13) - 5, 70, 20, getLocalizedString("gui.back")));
       if (this.serverData == null) {
          this.fetchServerData(this.serverId);
       } else {
@@ -90,9 +86,9 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
             canPlay ? (Integer)playButtonIds.get(entry.getKey() - 1) : (Integer)downloadButtonIds.get(entry.getKey() - 1),
             this.getFramePositionX(entry.getKey()),
             RealmsConstants.row(8),
-            this.default_button_width,
+            80,
             20,
-            canPlay ? getLocalizedString("mco.brokenworld.play") : getLocalizedString("mco.brokenworld.download")
+            getLocalizedString(canPlay ? "mco.brokenworld.play" : "mco.brokenworld.download")
          );
          if (this.slotsThatHasBeenDownloaded.contains(entry.getKey())) {
             downloadButton.active(false);
@@ -105,7 +101,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
                resetButtonIds.get(entry.getKey() - 1),
                this.getFramePositionX(entry.getKey()),
                RealmsConstants.row(10),
-               this.default_button_width,
+               80,
                20,
                getLocalizedString("mco.brokenworld.reset")
             )
@@ -268,7 +264,8 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
                         Realms.setScreen(openWorldLongRunningTaskScreen);
                      } else {
                         try {
-                           ((RealmsMainScreen)RealmsBrokenWorldScreen.this.lastScreen).play(client.getOwnWorld(RealmsBrokenWorldScreen.this.serverId));
+                           ((RealmsMainScreen)RealmsBrokenWorldScreen.this.lastScreen)
+                              .play(client.getOwnWorld(RealmsBrokenWorldScreen.this.serverId), RealmsBrokenWorldScreen.this);
                         } catch (RealmsServiceException var4) {
                            RealmsBrokenWorldScreen.LOGGER.error("Couldn't get own world");
                            Realms.setScreen(RealmsBrokenWorldScreen.this.lastScreen);
@@ -331,10 +328,10 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
 
       RealmsScreen.blit(x + 3, y + 3, 0.0F, 0.0F, 74, 74, 74.0F, 74.0F);
       bind("realms:textures/gui/realms/slot_frame.png");
-      if (!active) {
-         GL11.glColor4f(0.56F, 0.56F, 0.56F, 1.0F);
-      } else {
+      if (active) {
          GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+      } else {
+         GL11.glColor4f(0.56F, 0.56F, 0.56F, 1.0F);
       }
 
       RealmsScreen.blit(x, y, 0.0F, 0.0F, 80, 80, 80.0F, 80.0F);

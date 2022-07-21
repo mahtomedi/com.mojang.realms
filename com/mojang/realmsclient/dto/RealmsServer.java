@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import net.minecraft.realms.Realms;
@@ -31,7 +32,6 @@ public class RealmsServer extends ValueObject {
    public String ownerUUID;
    public List<PlayerInfo> players;
    public Map<Integer, RealmsWorldOptions> slots;
-   public String ip;
    public boolean expired;
    public boolean expiredTrial;
    public int daysLeft;
@@ -40,8 +40,6 @@ public class RealmsServer extends ValueObject {
    public String minigameName;
    public int minigameId;
    public String minigameImage;
-   public String resourcePackUrl;
-   public String resourcePackHash;
    public String minecraftVersion;
    public RealmsServerPing serverPing = new RealmsServerPing();
 
@@ -111,7 +109,6 @@ public class RealmsServer extends ValueObject {
          }
 
          server.daysLeft = JsonUtils.getIntOr("daysLeft", node, 0);
-         server.ip = JsonUtils.getStringOr("ip", node, null);
          server.expired = JsonUtils.getBooleanOr("expired", node, false);
          server.expiredTrial = JsonUtils.getBooleanOr("expiredTrial", node, false);
          server.worldType = getWorldType(JsonUtils.getStringOr("worldType", node, RealmsServer.WorldType.NORMAL.name()));
@@ -126,8 +123,6 @@ public class RealmsServer extends ValueObject {
          server.activeSlot = JsonUtils.getIntOr("activeSlot", node, -1);
          server.minigameId = JsonUtils.getIntOr("minigameId", node, -1);
          server.minigameImage = JsonUtils.getStringOr("minigameImage", node, null);
-         server.resourcePackUrl = JsonUtils.getStringOr("resourcePackUrl", node, null);
-         server.resourcePackHash = JsonUtils.getStringOr("resourcePackHash", node, null);
          server.minecraftVersion = JsonUtils.getStringOr("minecraftVersion", node, null);
       } catch (Exception var3) {
          LOGGER.error("Could not parse McoServer: " + var3.getMessage());
@@ -137,11 +132,17 @@ public class RealmsServer extends ValueObject {
    }
 
    private static void sortInvited(RealmsServer server) {
-      Collections.sort(server.players, new Comparator<PlayerInfo>() {
-         public int compare(PlayerInfo o1, PlayerInfo o2) {
-            return ComparisonChain.start().compare(o2.getAccepted(), o1.getAccepted()).compare(o1.getName().toLowerCase(), o2.getName().toLowerCase()).result();
+      Collections.sort(
+         server.players,
+         new Comparator<PlayerInfo>() {
+            public int compare(PlayerInfo o1, PlayerInfo o2) {
+               return ComparisonChain.start()
+                  .compare(o2.getAccepted(), o1.getAccepted())
+                  .compare(o1.getName().toLowerCase(Locale.ROOT), o2.getName().toLowerCase(Locale.ROOT))
+                  .result();
+            }
          }
-      });
+      );
    }
 
    private static List<PlayerInfo> parseInvited(JsonArray jsonArray) {
@@ -155,6 +156,7 @@ public class RealmsServer extends ValueObject {
             playerInfo.setUuid(JsonUtils.getStringOr("uuid", node, null));
             playerInfo.setOperator(JsonUtils.getBooleanOr("operator", node, false));
             playerInfo.setAccepted(JsonUtils.getBooleanOr("accepted", node, false));
+            playerInfo.setOnline(JsonUtils.getBooleanOr("online", node, false));
             invited.add(playerInfo);
          } catch (Exception var6) {
          }
@@ -273,7 +275,6 @@ public class RealmsServer extends ValueObject {
       server.owner = this.owner;
       server.players = this.players;
       server.slots = this.cloneSlots(this.slots);
-      server.ip = this.ip;
       server.expired = this.expired;
       server.expiredTrial = this.expiredTrial;
       server.daysLeft = this.daysLeft;
@@ -286,8 +287,6 @@ public class RealmsServer extends ValueObject {
       server.activeSlot = this.activeSlot;
       server.minigameId = this.minigameId;
       server.minigameImage = this.minigameImage;
-      server.resourcePackUrl = this.resourcePackUrl;
-      server.resourcePackHash = this.resourcePackHash;
       return server;
    }
 

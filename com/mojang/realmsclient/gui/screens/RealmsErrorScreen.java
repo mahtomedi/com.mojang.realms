@@ -7,15 +7,17 @@ import net.minecraft.realms.RealmsScreen;
 public class RealmsErrorScreen extends RealmsScreen {
    private String title;
    private String message;
+   private RealmsScreen lastScreen;
 
-   public RealmsErrorScreen(String title, String message) {
+   public RealmsErrorScreen(String title, String message, RealmsScreen lastScreen) {
       this.title = title;
       this.message = message;
+      this.lastScreen = lastScreen;
    }
 
    public void init() {
       super.init();
-      this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 100, 140, getLocalizedString("gui.cancel")));
+      this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 100, 140, getLocalizedString("gui.back")));
    }
 
    public void render(int xm, int ym, float a) {
@@ -29,6 +31,6 @@ public class RealmsErrorScreen extends RealmsScreen {
    }
 
    public void buttonClicked(RealmsButton button) {
-      Realms.setScreen(null);
+      Realms.setScreen(this.lastScreen);
    }
 }

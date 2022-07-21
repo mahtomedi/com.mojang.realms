@@ -53,7 +53,7 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
          this.type = subscription.type;
       } catch (RealmsServiceException var5) {
          LOGGER.error("Couldn't get subscription");
-         Realms.setScreen(new RealmsGenericErrorScreen(var5, this));
+         Realms.setScreen(new RealmsGenericErrorScreen(var5, this.lastScreen));
       } catch (IOException var6) {
          LOGGER.error("Couldn't parse response subscribing");
       }

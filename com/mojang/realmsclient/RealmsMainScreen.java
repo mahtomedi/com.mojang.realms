@@ -43,13 +43,13 @@ public class RealmsMainScreen extends RealmsScreen {
    protected static final int CONFIGURE_BUTTON_ID = 3;
    protected static final int GET_MORE_INFO_BUTTON_ID = 4;
    protected static final int LEAVE_BUTTON_ID = 5;
-   private static final String ON_ICON_LOCATION = "textures/gui/realms/on_icon.png";
-   private static final String OFF_ICON_LOCATION = "textures/gui/realms/off_icon.png";
-   private static final String EXPIRED_ICON_LOCATION = "textures/gui/realms/expired_icon.png";
-   private static final String INVITATION_ICONS_LOCATION = "textures/gui/realms/invitation_icons.png";
-   private static final String INVITE_ICON_LOCATION = "textures/gui/realms/invite_icon.png";
-   private static final String WORLDICON_LOCATION = "textures/gui/realms/world_icon.png";
-   private static final String LOGO_LOCATION = "textures/gui/title/realms.png";
+   private static final String ON_ICON_LOCATION = "realms:textures/gui/realms/on_icon.png";
+   private static final String OFF_ICON_LOCATION = "realms:textures/gui/realms/off_icon.png";
+   private static final String EXPIRED_ICON_LOCATION = "realms:textures/gui/realms/expired_icon.png";
+   private static final String INVITATION_ICONS_LOCATION = "realms:textures/gui/realms/invitation_icons.png";
+   private static final String INVITE_ICON_LOCATION = "realms:textures/gui/realms/invite_icon.png";
+   private static final String WORLDICON_LOCATION = "realms:textures/gui/realms/world_icon.png";
+   private static final String LOGO_LOCATION = "realms:textures/gui/title/realms.png";
    private static RealmsDataFetcher realmsDataFetcher = new RealmsDataFetcher();
    private static RealmsServerStatusPinger statusPinger = new RealmsServerStatusPinger();
    private static final ThreadPoolExecutor THREAD_POOL = new ScheduledThreadPoolExecutor(
@@ -250,12 +250,9 @@ public class RealmsMainScreen extends RealmsScreen {
    private void configureClicked() {
       McoServer selectedServer = this.findServer(this.selectedServerId);
       if (selectedServer != null && Realms.getName().equals(selectedServer.owner)) {
-         McoServer server = this.getOwnWorld(selectedServer.id);
-         if (server != null) {
-            this.stopRealmsFetcherAndPinger();
-            this.saveListScrollPosition();
-            Realms.setScreen(new ConfigureWorldScreen(this, selectedServer.id));
-         }
+         this.stopRealmsFetcherAndPinger();
+         this.saveListScrollPosition();
+         Realms.setScreen(new ConfigureWorldScreen(this, selectedServer.id));
       }
 
    }
@@ -381,7 +378,7 @@ public class RealmsMainScreen extends RealmsScreen {
    }
 
    private void drawRealmsLogo(int x, int y) {
-      RealmsScreen.bind("textures/gui/title/realms.png");
+      RealmsScreen.bind("realms:textures/gui/title/realms.png");
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glPushMatrix();
       GL11.glScalef(0.5F, 0.5F, 0.5F);
@@ -430,7 +427,7 @@ public class RealmsMainScreen extends RealmsScreen {
          this.fillGradient(baseX - 2, 29, baseX + 18, 30, color, color);
       }
 
-      RealmsScreen.bind("textures/gui/realms/invite_icon.png");
+      RealmsScreen.bind("realms:textures/gui/realms/invite_icon.png");
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glPushMatrix();
       RealmsScreen.blit(baseX, 6, hovering ? 16.0F : 0.0F, 0.0F, 15, 25, 31.0F, 25.0F);
@@ -438,7 +435,7 @@ public class RealmsMainScreen extends RealmsScreen {
       if (pendingInvitesCount != 0) {
          int spritePos = (Math.min(pendingInvitesCount, 6) - 1) * 8;
          int yOff = (int)(Math.max(0.0F, Math.max(RealmsMth.sin((float)(10 + this.animTick) * 0.57F), RealmsMth.cos((float)this.animTick * 0.35F))) * -6.0F);
-         RealmsScreen.bind("textures/gui/realms/invitation_icons.png");
+         RealmsScreen.bind("realms:textures/gui/realms/invitation_icons.png");
          GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
          GL11.glPushMatrix();
          RealmsScreen.blit(baseX + 4, 16 + yOff, (float)spritePos, 0.0F, 8, 8, 48.0F, 8.0F);
@@ -488,7 +485,7 @@ public class RealmsMainScreen extends RealmsScreen {
    }
 
    private void drawExpired(int x, int y, int xm, int ym) {
-      RealmsScreen.bind("textures/gui/realms/expired_icon.png");
+      RealmsScreen.bind("realms:textures/gui/realms/expired_icon.png");
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glPushMatrix();
       GL11.glScalef(0.5F, 0.5F, 0.5F);
@@ -502,7 +499,7 @@ public class RealmsMainScreen extends RealmsScreen {
 
    private void drawExpiring(int x, int y, int xm, int ym, int daysLeft) {
       if (this.animTick % 20 < 10) {
-         RealmsScreen.bind("textures/gui/realms/on_icon.png");
+         RealmsScreen.bind("realms:textures/gui/realms/on_icon.png");
          GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
          GL11.glPushMatrix();
          GL11.glScalef(0.5F, 0.5F, 0.5F);
@@ -523,7 +520,7 @@ public class RealmsMainScreen extends RealmsScreen {
    }
 
    private void drawOpen(int x, int y, int xm, int ym) {
-      RealmsScreen.bind("textures/gui/realms/on_icon.png");
+      RealmsScreen.bind("realms:textures/gui/realms/on_icon.png");
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glPushMatrix();
       GL11.glScalef(0.5F, 0.5F, 0.5F);
@@ -536,7 +533,7 @@ public class RealmsMainScreen extends RealmsScreen {
    }
 
    private void drawClose(int x, int y, int xm, int ym) {
-      RealmsScreen.bind("textures/gui/realms/off_icon.png");
+      RealmsScreen.bind("realms:textures/gui/realms/off_icon.png");
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glPushMatrix();
       GL11.glScalef(0.5F, 0.5F, 0.5F);
@@ -549,7 +546,7 @@ public class RealmsMainScreen extends RealmsScreen {
    }
 
    private void drawLocked(int x, int y, int xm, int ym) {
-      RealmsScreen.bind("textures/gui/realms/off_icon.png");
+      RealmsScreen.bind("realms:textures/gui/realms/off_icon.png");
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glPushMatrix();
       GL11.glScalef(0.5F, 0.5F, 0.5F);
@@ -673,7 +670,7 @@ public class RealmsMainScreen extends RealmsScreen {
          }
 
          if (serverData.state == McoServer.State.UNINITIALIZED) {
-            RealmsScreen.bind("textures/gui/realms/world_icon.png");
+            RealmsScreen.bind("realms:textures/gui/realms/world_icon.png");
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
             GL11.glEnable(3008);
             GL11.glPushMatrix();

@@ -9,22 +9,25 @@ public class McoOptions {
    public Boolean spawnMonsters;
    public Boolean spawnNPCs;
    public Integer spawnProtection;
+   public Boolean commandBlocks;
    private static boolean pvpDefault = true;
    private static boolean spawnAnimalsDefault = true;
    private static boolean spawnMonstersDefault = true;
    private static boolean spawnNPCsDefault = true;
    private static int spawnProtectionDefault = 0;
+   private static boolean commandBlocksDefault = false;
 
-   public McoOptions(Boolean pvp, Boolean spawnAnimals, Boolean spawnMonsters, Boolean spawnNPCs, Integer spawnProtection) {
+   public McoOptions(Boolean pvp, Boolean spawnAnimals, Boolean spawnMonsters, Boolean spawnNPCs, Integer spawnProtection, Boolean commandBlocks) {
       this.pvp = pvp;
       this.spawnAnimals = spawnAnimals;
       this.spawnMonsters = spawnMonsters;
       this.spawnNPCs = spawnNPCs;
       this.spawnProtection = spawnProtection;
+      this.commandBlocks = commandBlocks;
    }
 
    public static McoOptions getDefaults() {
-      return new McoOptions(pvpDefault, spawnAnimalsDefault, spawnMonstersDefault, spawnNPCsDefault, spawnProtectionDefault);
+      return new McoOptions(pvpDefault, spawnAnimalsDefault, spawnMonstersDefault, spawnNPCsDefault, spawnProtectionDefault, commandBlocksDefault);
    }
 
    public static McoOptions parse(JsonObject jsonObject) {
@@ -33,7 +36,8 @@ public class McoOptions {
          JsonUtils.getBooleanOr("spawnAnimals", jsonObject, spawnAnimalsDefault),
          JsonUtils.getBooleanOr("spawnMonsters", jsonObject, spawnMonstersDefault),
          JsonUtils.getBooleanOr("spawnNPCs", jsonObject, spawnNPCsDefault),
-         JsonUtils.getIntOr("spawnProtection", jsonObject, spawnProtectionDefault)
+         JsonUtils.getIntOr("spawnProtection", jsonObject, spawnProtectionDefault),
+         JsonUtils.getBooleanOr("commandBlocks", jsonObject, commandBlocksDefault)
       );
    }
 
@@ -57,6 +61,10 @@ public class McoOptions {
 
       if (this.spawnProtection != spawnProtectionDefault) {
          jsonObject.addProperty("spawnProtection", this.spawnProtection);
+      }
+
+      if (this.commandBlocks != commandBlocksDefault) {
+         jsonObject.addProperty("commandBlocks", this.commandBlocks);
       }
 
       return jsonObject.toString();

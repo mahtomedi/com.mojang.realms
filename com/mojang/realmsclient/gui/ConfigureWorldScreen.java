@@ -18,13 +18,13 @@ import org.lwjgl.opengl.GL11;
 
 public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmResultListener {
    private static final Logger LOGGER = LogManager.getLogger();
-   private static final String TOGGLE_ON_ICON_LOCATION = "textures/gui/realms/toggle_on_icon.png";
-   private static final String TOGGLE_OFF_ICON_LOCATION = "textures/gui/realms/toggle_off_icon.png";
-   private static final String OFF_ICON_LOCATION = "textures/gui/realms/off_icon.png";
-   private static final String EXPIRED_ICON_LOCATION = "textures/gui/realms/expired_icon.png";
-   private static final String OP_ICON_LOCATION = "textures/gui/realms/op_icon.png";
-   private static final String USER_ICON_LOCATION = "textures/gui/realms/user_icon.png";
-   private static final String CROSS_ICON_LOCATION = "textures/gui/realms/cross_icon.png";
+   private static final String TOGGLE_ON_ICON_LOCATION = "realms:textures/gui/realms/toggle_on_icon.png";
+   private static final String TOGGLE_OFF_ICON_LOCATION = "realms:textures/gui/realms/toggle_off_icon.png";
+   private static final String OFF_ICON_LOCATION = "realms:textures/gui/realms/off_icon.png";
+   private static final String EXPIRED_ICON_LOCATION = "realms:textures/gui/realms/expired_icon.png";
+   private static final String OP_ICON_LOCATION = "realms:textures/gui/realms/op_icon.png";
+   private static final String USER_ICON_LOCATION = "realms:textures/gui/realms/user_icon.png";
+   private static final String CROSS_ICON_LOCATION = "realms:textures/gui/realms/cross_icon.png";
    private String toolTip;
    private final RealmsScreen lastScreen;
    private McoServer serverData;
@@ -322,7 +322,14 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
       }
 
       this.drawCenteredString(getLocalizedString("mco.configure.world.title"), this.width() / 2, 17, 16777215);
-      this.drawString(getLocalizedString("mco.configure.world.invited"), this.column1_x, this.row(1), 10526880);
+      if (this.serverData != null && this.serverData.players != null) {
+         this.drawString(
+            getLocalizedString("mco.configure.world.invited") + " (" + this.serverData.players.size() + "/20)", this.column1_x, this.row(1), 10526880
+         );
+      } else {
+         this.drawString(getLocalizedString("mco.configure.world.invited"), this.column1_x, this.row(1), 10526880);
+      }
+
       super.render(xm, ym, a);
       if (this.serverData != null) {
          String name = this.serverData.getName();
@@ -368,7 +375,7 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
    }
 
    private void drawRemoveIcon(int x, int y, int xm, int ym) {
-      bind("textures/gui/realms/cross_icon.png");
+      bind("realms:textures/gui/realms/cross_icon.png");
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glPushMatrix();
       RealmsScreen.blit(x, y, 0.0F, 0.0F, 8, 7, 8.0F, 7.0F);
@@ -380,7 +387,7 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
    }
 
    private void drawOpped(int x, int y, int xm, int ym) {
-      bind("textures/gui/realms/op_icon.png");
+      bind("realms:textures/gui/realms/op_icon.png");
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glPushMatrix();
       RealmsScreen.blit(x, y, 0.0F, 0.0F, 8, 8, 8.0F, 8.0F);
@@ -392,7 +399,7 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
    }
 
    private void drawNormal(int x, int y, int xm, int ym) {
-      bind("textures/gui/realms/user_icon.png");
+      bind("realms:textures/gui/realms/user_icon.png");
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glPushMatrix();
       RealmsScreen.blit(x, y, 0.0F, 0.0F, 8, 8, 8.0F, 8.0F);
@@ -404,7 +411,7 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
    }
 
    private void drawExpired(int x, int y, int xm, int ym) {
-      bind("textures/gui/realms/expired_icon.png");
+      bind("realms:textures/gui/realms/expired_icon.png");
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glPushMatrix();
       GL11.glScalef(0.5F, 0.5F, 0.5F);
@@ -417,7 +424,7 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
    }
 
    private void drawOpen(int x, int y, int xm, int ym) {
-      bind("textures/gui/realms/toggle_on_icon.png");
+      bind("realms:textures/gui/realms/toggle_on_icon.png");
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glPushMatrix();
       GL11.glScalef(0.5F, 0.5F, 0.5F);
@@ -432,7 +439,7 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
    }
 
    private void drawClose(int x, int y, int xm, int ym) {
-      bind("textures/gui/realms/toggle_off_icon.png");
+      bind("realms:textures/gui/realms/toggle_off_icon.png");
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glPushMatrix();
       GL11.glScalef(0.5F, 0.5F, 0.5F);
@@ -447,7 +454,7 @@ public class ConfigureWorldScreen extends RealmsScreen implements RealmsConfirmR
    }
 
    private void drawLocked(int x, int y, int xm, int ym) {
-      bind("textures/gui/realms/off_icon.png");
+      bind("realms:textures/gui/realms/off_icon.png");
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glPushMatrix();
       GL11.glScalef(0.5F, 0.5F, 0.5F);

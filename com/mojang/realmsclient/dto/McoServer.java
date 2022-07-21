@@ -202,7 +202,12 @@ public class McoServer extends ValueObject {
       server.owner = this.owner;
       server.players = this.players;
       server.options = new McoOptions(
-         this.options.pvp, this.options.spawnAnimals, this.options.spawnMonsters, this.options.spawnNPCs, this.options.spawnProtection
+         this.options.pvp,
+         this.options.spawnAnimals,
+         this.options.spawnMonsters,
+         this.options.spawnNPCs,
+         this.options.spawnProtection,
+         this.options.commandBlocks
       );
       server.ip = this.ip;
       server.expired = this.expired;

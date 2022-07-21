@@ -133,7 +133,9 @@ public class EditOnlineWorldScreen extends RealmsScreen implements RealmsConfirm
       Realms.setScreen(this);
    }
 
-   public void saveServerData(int difficuly, int gameMode, boolean pvp, boolean spawnNPCs, boolean spawnAnimals, boolean spawnMonsters, int spawnProtection) {
+   public void saveServerData(
+      int difficuly, int gameMode, boolean pvp, boolean spawnNPCs, boolean spawnAnimals, boolean spawnMonsters, int spawnProtection, boolean commandBlocks
+   ) {
       this.serverData.difficulty = difficuly;
       this.serverData.gameMode = gameMode;
       this.serverData.options.pvp = pvp;
@@ -141,6 +143,7 @@ public class EditOnlineWorldScreen extends RealmsScreen implements RealmsConfirm
       this.serverData.options.spawnAnimals = spawnAnimals;
       this.serverData.options.spawnMonsters = spawnMonsters;
       this.serverData.options.spawnProtection = spawnProtection;
+      this.serverData.options.commandBlocks = commandBlocks;
    }
 
    public void render(int xm, int ym, float a) {

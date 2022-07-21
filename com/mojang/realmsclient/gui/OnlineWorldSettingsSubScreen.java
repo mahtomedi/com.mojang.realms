@@ -16,6 +16,7 @@ public class OnlineWorldSettingsSubScreen extends RealmsScreen {
    private static final int SPAWN_MONSTERS_BUTTON_ID = 6;
    private static final int SPAWN_NPCS_BUTTON_ID = 7;
    private static final int SPAWN_PROTECTION_BUTTON_ID = 8;
+   private static final int COMMANDBLOCKS_BUTTON_ID = 9;
    protected final EditOnlineWorldScreen parent;
    private int column1_x;
    private int column_width;
@@ -28,11 +29,13 @@ public class OnlineWorldSettingsSubScreen extends RealmsScreen {
    private Boolean spawnAnimals;
    private Boolean spawnMonsters;
    private Integer spawnProtection;
+   private Boolean commandBlocks;
    private RealmsButton pvpButton;
    private RealmsButton spawnAnimalsButton;
    private RealmsButton spawnMonstersButton;
    private RealmsButton spawnNPCsButton;
    private RealmsSliderButton spawnProtectionButton;
+   private RealmsButton commandBlocksButton;
    String[] difficulties;
    String[] gameModes;
    String[][] gameModeHints;
@@ -50,7 +53,16 @@ public class OnlineWorldSettingsSubScreen extends RealmsScreen {
       if (button.active()) {
          if (button.id() == 0) {
             this.parent
-               .saveServerData(this.difficultyIndex, this.gameModeIndex, this.pvp, this.spawnNPCs, this.spawnAnimals, this.spawnMonsters, this.spawnProtection);
+               .saveServerData(
+                  this.difficultyIndex,
+                  this.gameModeIndex,
+                  this.pvp,
+                  this.spawnNPCs,
+                  this.spawnAnimals,
+                  this.spawnMonsters,
+                  this.spawnProtection,
+                  this.commandBlocks
+               );
             this.parent.confirmResult(true, 0);
          } else if (button.id() == 1) {
             this.parent.confirmResult(false, 1);
@@ -74,6 +86,9 @@ public class OnlineWorldSettingsSubScreen extends RealmsScreen {
          } else if (button.id() == 6) {
             this.spawnMonsters = !this.spawnMonsters;
             button.msg(this.spawnMonstersTitle());
+         } else if (button.id() == 9) {
+            this.commandBlocks = !this.commandBlocks;
+            button.msg(this.commandBlocksTitle());
          }
 
       }
@@ -98,6 +113,7 @@ public class OnlineWorldSettingsSubScreen extends RealmsScreen {
       this.spawnMonsters = this.serverData.options.spawnMonsters;
       this.spawnNPCs = this.serverData.options.spawnNPCs;
       this.spawnProtection = this.serverData.options.spawnProtection;
+      this.commandBlocks = this.serverData.options.commandBlocks;
       this.buttonsAdd(this.pvpButton = newButton(4, this.column1_x, this.height() / 4 + 0, this.column_width, 20, this.pvpTitle()));
       this.buttonsAdd(newButton(2, this.column1_x, this.height() / 4 + 24, this.column_width, 20, this.difficultyTitle()));
       this.buttonsAdd(
@@ -109,12 +125,14 @@ public class OnlineWorldSettingsSubScreen extends RealmsScreen {
       this.buttonsAdd(this.spawnAnimalsButton = newButton(5, this.column2_x, this.height() / 4 + 0, this.column_width, 20, this.spawnAnimalsTitle()));
       this.buttonsAdd(this.spawnMonstersButton = newButton(6, this.column2_x, this.height() / 4 + 24, this.column_width, 20, this.spawnMonstersTitle()));
       this.buttonsAdd(this.spawnNPCsButton = newButton(7, this.column2_x, this.height() / 4 + 48, this.column_width, 20, this.spawnNPCsTitle()));
+      this.buttonsAdd(this.commandBlocksButton = newButton(9, this.column2_x, this.height() / 4 + 72, this.column_width, 20, this.commandBlocksTitle()));
       if (!this.serverData.worldType.equals(McoServer.WorldType.NORMAL)) {
          this.pvpButton.active(false);
          this.spawnAnimalsButton.active(false);
          this.spawnNPCsButton.active(false);
          this.spawnMonstersButton.active(false);
          this.spawnProtectionButton.active(false);
+         this.commandBlocksButton.active(false);
       }
 
       if (this.difficultyIndex == 0) {
@@ -178,6 +196,12 @@ public class OnlineWorldSettingsSubScreen extends RealmsScreen {
       return getLocalizedString("mco.configure.world.spawnNPCs")
          + ": "
          + (this.spawnNPCs ? getLocalizedString("mco.configure.world.on") : getLocalizedString("mco.configure.world.off"));
+   }
+
+   private String commandBlocksTitle() {
+      return getLocalizedString("mco.configure.world.commandBlocks")
+         + ": "
+         + (this.commandBlocks ? getLocalizedString("mco.configure.world.on") : getLocalizedString("mco.configure.world.off"));
    }
 
    public void render(int xm, int ym, float a) {

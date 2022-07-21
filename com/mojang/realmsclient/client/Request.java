@@ -118,20 +118,26 @@ public abstract class Request<T extends Request> {
          }
 
          in.close();
-      } catch (Exception var6) {
+         return;
+      } catch (Exception var10) {
          try {
             InputStream errorStream = this.connection.getErrorStream();
             int ret = 0;
-            if (errorStream == null) {
+            if (errorStream != null) {
+               while(errorStream.read(bytes) > 0) {
+               }
+
+               errorStream.close();
                return;
             }
-
-            while(errorStream.read(bytes) > 0) {
-            }
-
-            errorStream.close();
-         } catch (IOException var5) {
+         } catch (IOException var9) {
+            return;
          }
+      } finally {
+         if (this.connection != null) {
+            this.connection.disconnect();
+         }
+
       }
 
    }

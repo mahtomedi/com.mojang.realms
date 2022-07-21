@@ -23,9 +23,10 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 public class WorldManagementScreen extends RealmsScreen {
+   private boolean showUpload = true;
    private static final Logger LOGGER = LogManager.getLogger();
-   private static final String PLUS_ICON_LOCATION = "textures/gui/realms/plus_icon.png";
-   private static final String RESTORE_ICON_LOCATION = "textures/gui/realms/restore_icon.png";
+   private static final String PLUS_ICON_LOCATION = "realms:textures/gui/realms/plus_icon.png";
+   private static final String RESTORE_ICON_LOCATION = "realms:textures/gui/realms/restore_icon.png";
    private static int lastScrollPosition = -1;
    private final ConfigureWorldScreen lastScreen;
    private final RealmsScreen onlineScreen;
@@ -37,10 +38,12 @@ public class WorldManagementScreen extends RealmsScreen {
    private static final int RESTORE_BUTTON_ID = 1;
    private static final int DOWNLOAD_BUTTON_ID = 2;
    private static final int RESET_BUTTON_ID = 3;
+   private static final int UPLOAD_BUTTON_ID = 4;
    private static final int MINUTES = 60;
    private static final int HOURS = 3600;
    private static final int DAYS = 86400;
    private RealmsButton downloadButton;
+   private RealmsButton uploadButton;
    private RealmsButton resetButton;
    private Boolean noBackups = false;
    private McoServer serverData;
@@ -109,8 +112,14 @@ public class WorldManagementScreen extends RealmsScreen {
 
    private void postInit() {
       this.buttonsAdd(this.resetButton = newButton(3, this.width() - 125, 35, 100, 20, getLocalizedString("mco.backup.button.reset")));
-      this.buttonsAdd(this.downloadButton = newButton(2, this.width() - 125, 60, 100, 20, getLocalizedString("mco.backup.button.download")));
+      this.buttonsAdd(
+         this.downloadButton = newButton(2, this.width() - 125, this.showUpload ? 85 : 60, 100, 20, getLocalizedString("mco.backup.button.download"))
+      );
       this.buttonsAdd(newButton(0, this.width() - 125, this.height() - 35, 85, 20, getLocalizedString("gui.back")));
+      if (this.showUpload) {
+         this.buttonsAdd(this.uploadButton = newButton(4, this.width() - 125, 60, 100, 20, getLocalizedString("mco.backup.button.upload")));
+      }
+
    }
 
    public void tick() {
@@ -125,6 +134,8 @@ public class WorldManagementScreen extends RealmsScreen {
             this.downloadClicked();
          } else if (button.id() == 3) {
             Realms.setScreen(new ResetWorldScreen(this.lastScreen, this.onlineScreen, this, this.serverData));
+         } else if (button.id() == 4 && this.showUpload) {
+            Realms.setScreen(new RealmsSelectFileToUploadScreen(this.serverData.id, this));
          } else {
             this.backupSelectionList.buttonClicked(button);
          }
@@ -215,6 +226,10 @@ public class WorldManagementScreen extends RealmsScreen {
       }
 
       this.downloadButton.active(!this.noBackups);
+      if (this.showUpload) {
+         this.uploadButton.active(!this.serverData.expired);
+      }
+
       this.resetButton.active(!this.serverData.expired);
       super.render(xm, ym, a);
       if (this.toolTip != null) {
@@ -373,7 +388,7 @@ public class WorldManagementScreen extends RealmsScreen {
       }
 
       private void drawRestore(int x, int y, int xm, int ym) {
-         RealmsScreen.bind("textures/gui/realms/restore_icon.png");
+         RealmsScreen.bind("realms:textures/gui/realms/restore_icon.png");
          GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
          GL11.glPushMatrix();
          GL11.glScalef(0.5F, 0.5F, 0.5F);
@@ -386,7 +401,7 @@ public class WorldManagementScreen extends RealmsScreen {
       }
 
       private void drawInfo(int x, int y, int xm, int ym) {
-         RealmsScreen.bind("textures/gui/realms/plus_icon.png");
+         RealmsScreen.bind("realms:textures/gui/realms/plus_icon.png");
          GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
          GL11.glPushMatrix();
          GL11.glScalef(0.5F, 0.5F, 0.5F);

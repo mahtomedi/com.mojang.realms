@@ -307,14 +307,16 @@ public class ActivityScreen extends RealmsScreen {
       public void renderBackground() {
       }
 
+      public int getMaxPosition() {
+         return this.getItemCount() * (ActivityScreen.this.fontLineHeight() + 1) + ActivityScreen.this.height() - 110;
+      }
+
       protected void renderItem(int i, int x, int y, int h, Tezzelator t, int mouseX, int mouseY) {
          if (ActivityScreen.this.activityMap != null && ActivityScreen.this.activityMap.size() > 0) {
-            ActivityScreen.this.drawString(
-               ((ActivityScreen.ActivityRow)ActivityScreen.this.activityMap.get(i)).name, (int)((double)this.width() * 0.035), y, 16777215
-            );
+            ActivityScreen.this.drawString(((ActivityScreen.ActivityRow)ActivityScreen.this.activityMap.get(i)).name, 20, y, 16777215);
             int keyWidth = ActivityScreen.this.fontWidth * ((ActivityScreen.ActivityRow)ActivityScreen.this.activityMap.get(i)).name.length();
             if (keyWidth > ActivityScreen.this.maxKeyWidth) {
-               ActivityScreen.this.maxKeyWidth = keyWidth;
+               ActivityScreen.this.maxKeyWidth = keyWidth + 5;
             }
 
             int keyRightPadding = 15;
@@ -421,8 +423,8 @@ public class ActivityScreen extends RealmsScreen {
 
             RealmsScreen.bindFace(((ActivityScreen.ActivityRow)ActivityScreen.this.activityMap.get(i)).name);
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-            RealmsScreen.blit((int)((double)this.width() * 0.01), y, 8.0F, 8.0F, 8, 8, 8, 8, 64.0F, 32.0F);
-            RealmsScreen.blit((int)((double)this.width() * 0.01), y + 1, 40.0F, 8.0F, 8, 8, 8, 8, 64.0F, 32.0F);
+            RealmsScreen.blit(10, y, 8.0F, 8.0F, 8, 8, 8, 8, 64.0F, 32.0F);
+            RealmsScreen.blit(10, y, 40.0F, 8.0F, 8, 8, 8, 8, 64.0F, 32.0F);
          }
 
       }

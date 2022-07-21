@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+import net.minecraft.client.renderer.system.GlStateManager;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsDefaultVertexFormat;
@@ -25,7 +26,6 @@ import net.minecraft.realms.RealmsScrolledSelectionList;
 import net.minecraft.realms.Tezzelator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.opengl.GL11;
 
 public class RealmsActivityScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
@@ -209,28 +209,28 @@ public class RealmsActivityScreen extends RealmsScreen {
 
       if (this.activityMap != null && this.activityMap.size() > 0) {
          Tezzelator t = Tezzelator.instance;
-         GL11.glDisable(3553);
+         GlStateManager.disableTexture();
          t.begin(7, RealmsDefaultVertexFormat.POSITION_COLOR);
          t.vertex((double)this.activityPoint, (double)(this.height() - 40), 0.0).color(128, 128, 128, 255).endVertex();
          t.vertex((double)(this.activityPoint + 1), (double)(this.height() - 40), 0.0).color(128, 128, 128, 255).endVertex();
          t.vertex((double)(this.activityPoint + 1), 30.0, 0.0).color(128, 128, 128, 255).endVertex();
          t.vertex((double)this.activityPoint, 30.0, 0.0).color(128, 128, 128, 255).endVertex();
          t.end();
-         GL11.glEnable(3553);
+         GlStateManager.enableTexture();
 
          for(RealmsActivityScreen.Day day : this.dayList) {
             int daysIndex = this.dayList.indexOf(day) + 1;
             this.drawString(
                day.day, this.activityPoint + (daysIndex - 1) * this.dayWidth + (this.dayWidth - this.fontWidth(day.day)) / 2 + 2, this.height() - 52, 16777215
             );
-            GL11.glDisable(3553);
+            GlStateManager.disableTexture();
             t.begin(7, RealmsDefaultVertexFormat.POSITION_COLOR);
             t.vertex((double)(this.activityPoint + daysIndex * this.dayWidth), (double)(this.height() - 40), 0.0).color(128, 128, 128, 255).endVertex();
             t.vertex((double)(this.activityPoint + daysIndex * this.dayWidth + 1), (double)(this.height() - 40), 0.0).color(128, 128, 128, 255).endVertex();
             t.vertex((double)(this.activityPoint + daysIndex * this.dayWidth + 1), 30.0, 0.0).color(128, 128, 128, 255).endVertex();
             t.vertex((double)(this.activityPoint + daysIndex * this.dayWidth), 30.0, 0.0).color(128, 128, 128, 255).endVertex();
             t.end();
-            GL11.glEnable(3553);
+            GlStateManager.enableTexture();
          }
       }
 
@@ -406,14 +406,14 @@ public class RealmsActivityScreen extends RealmsScreen {
             int r = row.color.r;
             int g = row.color.g;
             int b = row.color.b;
-            GL11.glDisable(3553);
+            GlStateManager.disableTexture();
             t.begin(7, RealmsDefaultVertexFormat.POSITION_COLOR);
             t.vertex((double)(RealmsActivityScreen.this.activityPoint - 8), (double)y + 6.5, 0.0).color(r, g, b, 255).endVertex();
             t.vertex((double)(RealmsActivityScreen.this.activityPoint - 3), (double)y + 6.5, 0.0).color(r, g, b, 255).endVertex();
             t.vertex((double)(RealmsActivityScreen.this.activityPoint - 3), (double)y + 1.5, 0.0).color(r, g, b, 255).endVertex();
             t.vertex((double)(RealmsActivityScreen.this.activityPoint - 8), (double)y + 1.5, 0.0).color(r, g, b, 255).endVertex();
             t.end();
-            GL11.glEnable(3553);
+            GlStateManager.enableTexture();
             List<RealmsActivityScreen.ActivityRender> toRender = new ArrayList();
 
             for(RealmsActivityScreen.Activity activity : row.activities) {
@@ -458,14 +458,14 @@ public class RealmsActivityScreen extends RealmsScreen {
             }
 
             for(RealmsActivityScreen.ActivityRender render : toRender) {
-               GL11.glDisable(3553);
+               GlStateManager.disableTexture();
                t.begin(7, RealmsDefaultVertexFormat.POSITION_COLOR);
                t.vertex(render.start, (double)y + 6.5, 0.0).color(r, g, b, 255).endVertex();
                t.vertex(render.start + render.width, (double)y + 6.5, 0.0).color(r, g, b, 255).endVertex();
                t.vertex(render.start + render.width, (double)y + 1.5, 0.0).color(r, g, b, 255).endVertex();
                t.vertex(render.start, (double)y + 1.5, 0.0).color(r, g, b, 255).endVertex();
                t.end();
-               GL11.glEnable(3553);
+               GlStateManager.enableTexture();
                if ((double)mouseX >= render.start
                   && (double)mouseX <= render.start + render.width
                   && (double)mouseY >= (double)y + 1.5
@@ -476,7 +476,7 @@ public class RealmsActivityScreen extends RealmsScreen {
 
             RealmsScreen.bind("realms:textures/gui/realms/user_icon.png");
             RealmsTextureManager.withBoundFace(((RealmsActivityScreen.ActivityRow)RealmsActivityScreen.this.activityMap.get(i)).uuid, () -> {
-               GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+               GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                RealmsScreen.blit(10, y, 8.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);
                RealmsScreen.blit(10, y, 40.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);
             });

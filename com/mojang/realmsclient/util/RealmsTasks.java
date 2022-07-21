@@ -64,7 +64,7 @@ public class RealmsTasks {
                if (closeResult) {
                   this.configureScreen.stateChanged();
                   this.serverData.state = RealmsServer.State.CLOSED;
-                  Realms.setScreen(this.configureScreen);
+                  this.longRunningMcoTaskScreen.threadSafeSetScreen(this.configureScreen);
                   break;
                }
             } catch (RetryCallException var4) {
@@ -116,7 +116,7 @@ public class RealmsTasks {
                   return;
                }
 
-               Realms.setScreen(new RealmsDownloadLatestWorldScreen(this.lastScreen, worldDownload, this.downloadName));
+               this.longRunningMcoTaskScreen.threadSafeSetScreen(new RealmsDownloadLatestWorldScreen(this.lastScreen, worldDownload, this.downloadName));
                return;
             } catch (RetryCallException var4) {
                if (this.aborted()) {
@@ -131,7 +131,7 @@ public class RealmsTasks {
                }
 
                RealmsTasks.LOGGER.error("Couldn't download world data");
-               Realms.setScreen(new RealmsGenericErrorScreen(var5, this.lastScreen));
+               this.longRunningMcoTaskScreen.threadSafeSetScreen(new RealmsGenericErrorScreen(var5, this.lastScreen));
                return;
             } catch (Exception var6) {
                if (this.aborted()) {
@@ -180,7 +180,7 @@ public class RealmsTasks {
                   if (this.join) {
                      ((RealmsMainScreen)this.mainScreen).play(this.serverData, this.returnScreen);
                   } else {
-                     Realms.setScreen(this.returnScreen);
+                     this.longRunningMcoTaskScreen.threadSafeSetScreen(this.returnScreen);
                   }
                   break;
                }
@@ -287,7 +287,7 @@ public class RealmsTasks {
          }
 
          if (tosNotAccepted) {
-            Realms.setScreen(new RealmsTermsScreen(this.lastScreen, this.mainScreen, this.server));
+            this.longRunningMcoTaskScreen.threadSafeSetScreen(new RealmsTermsScreen(this.lastScreen, this.mainScreen, this.server));
          } else if (brokenWorld) {
             if (this.server.ownerUUID.equals(Realms.getUUID())) {
                RealmsBrokenWorldScreen brokenWorldScreen = new RealmsBrokenWorldScreen(this.lastScreen, this.mainScreen, this.server.id);
@@ -295,37 +295,39 @@ public class RealmsTasks {
                   brokenWorldScreen.setTitle(RealmsScreen.getLocalizedString("mco.brokenworld.minigame.title"));
                }
 
-               Realms.setScreen(brokenWorldScreen);
+               this.longRunningMcoTaskScreen.threadSafeSetScreen(brokenWorldScreen);
             } else {
-               Realms.setScreen(
-                  new RealmsGenericErrorScreen(
-                     RealmsScreen.getLocalizedString("mco.brokenworld.nonowner.title"),
-                     RealmsScreen.getLocalizedString("mco.brokenworld.nonowner.error"),
-                     this.lastScreen
-                  )
-               );
+               this.longRunningMcoTaskScreen
+                  .threadSafeSetScreen(
+                     new RealmsGenericErrorScreen(
+                        RealmsScreen.getLocalizedString("mco.brokenworld.nonowner.title"),
+                        RealmsScreen.getLocalizedString("mco.brokenworld.nonowner.error"),
+                        this.lastScreen
+                     )
+                  );
             }
          } else if (!this.aborted() && !hasError) {
             if (addressRetrieved) {
                if (address.resourcePackUrl != null && address.resourcePackHash != null) {
                   String line2 = RealmsScreen.getLocalizedString("mco.configure.world.resourcepack.question.line1");
                   String line3 = RealmsScreen.getLocalizedString("mco.configure.world.resourcepack.question.line2");
-                  Realms.setScreen(
-                     new RealmsLongConfirmationScreen(
-                        new RealmsResourcePackScreen(this.lastScreen, address, this.connectLock),
-                        RealmsLongConfirmationScreen.Type.Info,
-                        line2,
-                        line3,
-                        true,
-                        100
-                     )
-                  );
+                  this.longRunningMcoTaskScreen
+                     .threadSafeSetScreen(
+                        new RealmsLongConfirmationScreen(
+                           new RealmsResourcePackScreen(this.lastScreen, address, this.connectLock),
+                           RealmsLongConfirmationScreen.Type.Info,
+                           line2,
+                           line3,
+                           true,
+                           100
+                        )
+                     );
                } else {
                   RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(
                      this.lastScreen, new RealmsTasks.RealmsConnectTask(this.lastScreen, address)
                   );
                   longRunningMcoTaskScreen.start();
-                  Realms.setScreen(longRunningMcoTaskScreen);
+                  longRunningMcoTaskScreen.threadSafeSetScreen(longRunningMcoTaskScreen);
                }
             } else {
                this.error(RealmsScreen.getLocalizedString("mco.errorMessage.connectionFailure"));
@@ -402,7 +404,7 @@ public class RealmsTasks {
                }
 
                if (this.confirmationId == -1) {
-                  Realms.setScreen(this.lastScreen);
+                  this.longRunningMcoTaskScreen.threadSafeSetScreen(this.lastScreen);
                } else {
                   this.lastScreen.confirmResult(true, this.confirmationId);
                }
@@ -457,7 +459,7 @@ public class RealmsTasks {
                   return;
                }
 
-               Realms.setScreen(this.lastScreen.getNewScreen());
+               this.longRunningMcoTaskScreen.threadSafeSetScreen(this.lastScreen.getNewScreen());
                return;
             } catch (RetryCallException var4) {
                if (this.aborted()) {
@@ -472,7 +474,7 @@ public class RealmsTasks {
                }
 
                RealmsTasks.LOGGER.error("Couldn't restore backup", var5);
-               Realms.setScreen(new RealmsGenericErrorScreen(var5, this.lastScreen));
+               this.longRunningMcoTaskScreen.threadSafeSetScreen(new RealmsGenericErrorScreen(var5, this.lastScreen));
                return;
             } catch (Exception var6) {
                if (this.aborted()) {
@@ -511,7 +513,7 @@ public class RealmsTasks {
                }
 
                if (client.putIntoMinigameMode(this.worldId, this.worldTemplate.id)) {
-                  Realms.setScreen(this.lastScreen);
+                  this.longRunningMcoTaskScreen.threadSafeSetScreen(this.lastScreen);
                   break;
                }
             } catch (RetryCallException var5) {
@@ -611,7 +613,7 @@ public class RealmsTasks {
                   RealmsScreen.getLocalizedString("mco.create.world.skip")
                );
                resetWorldScreen.setResetTitle(RealmsScreen.getLocalizedString("mco.create.world.reset.title"));
-               Realms.setScreen(resetWorldScreen);
+               this.longRunningMcoTaskScreen.threadSafeSetScreen(resetWorldScreen);
             } else {
                this.error(RealmsScreen.getLocalizedString("mco.trial.unavailable"));
             }
@@ -652,7 +654,7 @@ public class RealmsTasks {
 
          try {
             client.initializeWorld(this.worldId, this.name, this.motd);
-            Realms.setScreen(this.lastScreen);
+            this.longRunningMcoTaskScreen.threadSafeSetScreen(this.lastScreen);
          } catch (RealmsServiceException var4) {
             RealmsTasks.LOGGER.error("Couldn't create world");
             this.error(var4.toString());

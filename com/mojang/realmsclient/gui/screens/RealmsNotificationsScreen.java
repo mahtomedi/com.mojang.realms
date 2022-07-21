@@ -6,9 +6,9 @@ import com.mojang.realmsclient.gui.RealmsDataFetcher;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import net.minecraft.client.renderer.system.GlStateManager;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsScreen;
-import org.lwjgl.opengl.GL11;
 
 public class RealmsNotificationsScreen extends RealmsScreen {
    private static final String INVITE_ICON_LOCATION = "realms:textures/gui/realms/invite_icon.png";
@@ -104,34 +104,34 @@ public class RealmsNotificationsScreen extends RealmsScreen {
       int iconOffset = 0;
       if (hasUnreadNews) {
          RealmsScreen.bind("realms:textures/gui/realms/news_notification_mainscreen.png");
-         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-         GL11.glPushMatrix();
-         GL11.glScalef(0.4F, 0.4F, 0.4F);
+         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+         GlStateManager.pushMatrix();
+         GlStateManager.scalef(0.4F, 0.4F, 0.4F);
          RealmsScreen.blit((int)((double)(baseX + 2 - iconOffset) * 2.5), (int)((double)baseY * 2.5), 0.0F, 0.0F, 40, 40, 40.0F, 40.0F);
-         GL11.glPopMatrix();
+         GlStateManager.popMatrix();
          iconOffset += 14;
       }
 
       if (pendingInvitesCount != 0) {
          RealmsScreen.bind("realms:textures/gui/realms/invite_icon.png");
-         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-         GL11.glPushMatrix();
+         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+         GlStateManager.pushMatrix();
          RealmsScreen.blit(baseX - iconOffset, baseY - 6, 0.0F, 0.0F, 15, 25, 31.0F, 25.0F);
-         GL11.glPopMatrix();
+         GlStateManager.popMatrix();
          iconOffset += 16;
       }
 
       if (trialAvailable) {
          RealmsScreen.bind("realms:textures/gui/realms/trial_icon.png");
-         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-         GL11.glPushMatrix();
+         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+         GlStateManager.pushMatrix();
          int ySprite = 0;
          if ((System.currentTimeMillis() / 800L & 1L) == 1L) {
             ySprite = 8;
          }
 
          RealmsScreen.blit(baseX + 4 - iconOffset, baseY + 4, 0.0F, (float)ySprite, 8, 8, 8.0F, 16.0F);
-         GL11.glPopMatrix();
+         GlStateManager.popMatrix();
       }
 
    }

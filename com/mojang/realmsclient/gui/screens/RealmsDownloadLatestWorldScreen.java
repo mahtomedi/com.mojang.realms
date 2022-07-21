@@ -5,6 +5,7 @@ import com.mojang.realmsclient.dto.WorldDownload;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import net.minecraft.client.renderer.system.GlStateManager;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsDefaultVertexFormat;
@@ -12,7 +13,6 @@ import net.minecraft.realms.RealmsScreen;
 import net.minecraft.realms.Tezzelator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.opengl.GL11;
 
 public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
@@ -144,8 +144,8 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
    private void drawProgressBar() {
       double percentage = this.downloadStatus.bytesWritten.doubleValue() / this.downloadStatus.totalBytes.doubleValue() * 100.0;
       this.progress = String.format(Locale.ROOT, "%.1f", percentage);
-      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-      GL11.glDisable(3553);
+      GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+      GlStateManager.disableTexture();
       Tezzelator t = Tezzelator.instance;
       t.begin(7, RealmsDefaultVertexFormat.POSITION_COLOR);
       double base = (double)(this.width() / 2 - 100);
@@ -159,7 +159,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
       t.vertex(base + 200.0 * percentage / 100.0, 80.0, 0.0).color(128, 128, 128, 255).endVertex();
       t.vertex(base, 80.0, 0.0).color(128, 128, 128, 255).endVertex();
       t.end();
-      GL11.glEnable(3553);
+      GlStateManager.enableTexture();
       this.drawCenteredString(this.progress + " %", this.width() / 2, 84, 16777215);
    }
 

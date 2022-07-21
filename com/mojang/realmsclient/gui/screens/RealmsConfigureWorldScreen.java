@@ -13,13 +13,13 @@ import com.mojang.realmsclient.util.RealmsTextureManager;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Map.Entry;
+import net.minecraft.client.renderer.system.GlStateManager;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsMth;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.opengl.GL11;
 
 public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTemplate> {
    private static final Logger LOGGER = LogManager.getLogger();
@@ -310,7 +310,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
                }
             } catch (RealmsServiceException var3) {
                RealmsConfigureWorldScreen.LOGGER.error("Couldn't get own world");
-               Realms.setScreen(new RealmsGenericErrorScreen(var3.getMessage(), RealmsConfigureWorldScreen.this.lastScreen));
+               RealmsConfigureWorldScreen.this.threadSafeSetScreen(new RealmsGenericErrorScreen(var3.getMessage(), RealmsConfigureWorldScreen.this.lastScreen));
             } catch (IOException var4) {
                RealmsConfigureWorldScreen.LOGGER.error("Couldn't parse response getting own world");
             }
@@ -430,10 +430,10 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
 
    private void drawExpired(int x, int y, int xm, int ym) {
       RealmsScreen.bind("realms:textures/gui/realms/expired_icon.png");
-      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-      GL11.glPushMatrix();
+      GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+      GlStateManager.pushMatrix();
       RealmsScreen.blit(x, y, 0.0F, 0.0F, 10, 28, 10.0F, 28.0F);
-      GL11.glPopMatrix();
+      GlStateManager.popMatrix();
       if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 27) {
          this.toolTip = getLocalizedString("mco.selectServer.expired");
       }
@@ -442,15 +442,15 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
 
    private void drawExpiring(int x, int y, int xm, int ym, int daysLeft) {
       RealmsScreen.bind("realms:textures/gui/realms/expires_soon_icon.png");
-      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-      GL11.glPushMatrix();
+      GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+      GlStateManager.pushMatrix();
       if (this.animTick % 20 < 10) {
          RealmsScreen.blit(x, y, 0.0F, 0.0F, 10, 28, 20.0F, 28.0F);
       } else {
          RealmsScreen.blit(x, y, 10.0F, 0.0F, 10, 28, 20.0F, 28.0F);
       }
 
-      GL11.glPopMatrix();
+      GlStateManager.popMatrix();
       if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 27) {
          if (daysLeft <= 0) {
             this.toolTip = getLocalizedString("mco.selectServer.expires.soon");
@@ -465,10 +465,10 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
 
    private void drawOpen(int x, int y, int xm, int ym) {
       RealmsScreen.bind("realms:textures/gui/realms/on_icon.png");
-      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-      GL11.glPushMatrix();
+      GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+      GlStateManager.pushMatrix();
       RealmsScreen.blit(x, y, 0.0F, 0.0F, 10, 28, 10.0F, 28.0F);
-      GL11.glPopMatrix();
+      GlStateManager.popMatrix();
       if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 27) {
          this.toolTip = getLocalizedString("mco.selectServer.open");
       }
@@ -477,10 +477,10 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
 
    private void drawClose(int x, int y, int xm, int ym) {
       RealmsScreen.bind("realms:textures/gui/realms/off_icon.png");
-      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-      GL11.glPushMatrix();
+      GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+      GlStateManager.pushMatrix();
       RealmsScreen.blit(x, y, 0.0F, 0.0F, 10, 28, 10.0F, 28.0F);
-      GL11.glPopMatrix();
+      GlStateManager.popMatrix();
       if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 27) {
          this.toolTip = getLocalizedString("mco.selectServer.closed");
       }
@@ -539,20 +539,20 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
       }
 
       if (!active) {
-         GL11.glColor4f(0.56F, 0.56F, 0.56F, 1.0F);
+         GlStateManager.color4f(0.56F, 0.56F, 0.56F, 1.0F);
       } else if (active) {
          float c = 0.9F + 0.1F * RealmsMth.cos((float)this.animTick * 0.2F);
-         GL11.glColor4f(c, c, c, 1.0F);
+         GlStateManager.color4f(c, c, c, 1.0F);
       }
 
       RealmsScreen.blit(x + 3, y + 3, 0.0F, 0.0F, 74, 74, 74.0F, 74.0F);
       bind("realms:textures/gui/realms/slot_frame.png");
       if (this.hoveredSlot == i) {
-         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
       } else if (!active) {
-         GL11.glColor4f(0.56F, 0.56F, 0.56F, 1.0F);
+         GlStateManager.color4f(0.56F, 0.56F, 0.56F, 1.0F);
       } else {
-         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
       }
 
       RealmsScreen.blit(x, y, 0.0F, 0.0F, 80, 80, 80.0F, 80.0F);

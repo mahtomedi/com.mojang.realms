@@ -12,6 +12,7 @@ import com.mojang.realmsclient.util.TextRenderingUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import net.minecraft.client.renderer.system.GlStateManager;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsClickableScrolledSelectionList;
@@ -20,7 +21,6 @@ import net.minecraft.realms.RealmsScreen;
 import net.minecraft.realms.Tezzelator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.opengl.GL11;
 
 public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
@@ -457,8 +457,8 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
       public void renderSelected(int width, int y, int h, Tezzelator t) {
          int x0 = this.getScrollbarPosition() - 290;
          int x1 = this.getScrollbarPosition() - 10;
-         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-         GL11.glDisable(3553);
+         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+         GlStateManager.disableTexture();
          t.begin(7, RealmsDefaultVertexFormat.POSITION_TEX_COLOR);
          t.vertex((double)x0, (double)(y + h + 2), 0.0).tex(0.0, 1.0).color(128, 128, 128, 255).endVertex();
          t.vertex((double)x1, (double)(y + h + 2), 0.0).tex(1.0, 1.0).color(128, 128, 128, 255).endVertex();
@@ -469,7 +469,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
          t.vertex((double)(x1 - 1), (double)(y - 1), 0.0).tex(1.0, 0.0).color(0, 0, 0, 255).endVertex();
          t.vertex((double)(x0 + 1), (double)(y - 1), 0.0).tex(0.0, 0.0).color(0, 0, 0, 255).endVertex();
          t.end();
-         GL11.glEnable(3553);
+         GlStateManager.enableTexture();
       }
 
       private void renderWorldTemplateItem(int i, int x, int y, int h, int mouseX, int mouseY) {
@@ -489,10 +489,10 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 
       private void drawImage(int x, int y, int xm, int ym, WorldTemplate worldTemplate) {
          RealmsTextureManager.bindWorldTemplate(worldTemplate.id, worldTemplate.image);
-         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
          RealmsScreen.blit(x + 1, y + 1, 0.0F, 0.0F, 38, 38, 38.0F, 38.0F);
          RealmsScreen.bind("realms:textures/gui/realms/slot_frame.png");
-         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
          RealmsScreen.blit(x, y, 0.0F, 0.0F, 40, 40, 40.0F, 40.0F);
       }
 
@@ -518,20 +518,20 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 
          if (!"".equals(link)) {
             RealmsScreen.bind("realms:textures/gui/realms/link_icons.png");
-            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-            GL11.glPushMatrix();
-            GL11.glScalef(1.0F, 1.0F, 1.0F);
+            GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            GlStateManager.pushMatrix();
+            GlStateManager.scalef(1.0F, 1.0F, 1.0F);
             RealmsScreen.blit(x + offset, y, linkHovered ? 15.0F : 0.0F, 0.0F, 15, 15, 30.0F, 15.0F);
-            GL11.glPopMatrix();
+            GlStateManager.popMatrix();
          }
 
          if (!"".equals(trailerLink)) {
             RealmsScreen.bind("realms:textures/gui/realms/trailer_icons.png");
-            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-            GL11.glPushMatrix();
-            GL11.glScalef(1.0F, 1.0F, 1.0F);
+            GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            GlStateManager.pushMatrix();
+            GlStateManager.scalef(1.0F, 1.0F, 1.0F);
             RealmsScreen.blit(x + offset + ("".equals(link) ? 0 : 17), y, trailerHovered ? 15.0F : 0.0F, 0.0F, 15, 15, 30.0F, 15.0F);
-            GL11.glPopMatrix();
+            GlStateManager.popMatrix();
          }
 
          if (linkHovered && !"".equals(link)) {

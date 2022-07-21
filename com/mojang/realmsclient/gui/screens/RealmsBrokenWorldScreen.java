@@ -14,13 +14,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
+import net.minecraft.client.renderer.system.GlStateManager;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsMth;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.opengl.GL11;
 
 public class RealmsBrokenWorldScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
@@ -201,7 +201,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
                RealmsBrokenWorldScreen.this.addButtons();
             } catch (RealmsServiceException var3) {
                RealmsBrokenWorldScreen.LOGGER.error("Couldn't get own world");
-               Realms.setScreen(new RealmsGenericErrorScreen(var3.getMessage(), RealmsBrokenWorldScreen.this.lastScreen));
+               RealmsBrokenWorldScreen.this.threadSafeSetScreen(new RealmsGenericErrorScreen(var3.getMessage(), RealmsBrokenWorldScreen.this.lastScreen));
             } catch (IOException var4) {
                RealmsBrokenWorldScreen.LOGGER.error("Couldn't parse response getting own world");
             }
@@ -234,7 +234,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
                            RealmsBrokenWorldScreen.this, openServerTask
                         );
                         openWorldLongRunningTaskScreen.start();
-                        Realms.setScreen(openWorldLongRunningTaskScreen);
+                        RealmsBrokenWorldScreen.this.threadSafeSetScreen(openWorldLongRunningTaskScreen);
                      } else {
                         try {
                            RealmsBrokenWorldScreen.this.mainScreen
@@ -242,10 +242,10 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
                               .play(client.getOwnWorld(RealmsBrokenWorldScreen.this.serverId), RealmsBrokenWorldScreen.this);
                         } catch (RealmsServiceException var4) {
                            RealmsBrokenWorldScreen.LOGGER.error("Couldn't get own world");
-                           Realms.setScreen(RealmsBrokenWorldScreen.this.lastScreen);
+                           RealmsBrokenWorldScreen.this.threadSafeSetScreen(RealmsBrokenWorldScreen.this.lastScreen);
                         } catch (IOException var5) {
                            RealmsBrokenWorldScreen.LOGGER.error("Couldn't parse response getting own world");
-                           Realms.setScreen(RealmsBrokenWorldScreen.this.lastScreen);
+                           RealmsBrokenWorldScreen.this.threadSafeSetScreen(RealmsBrokenWorldScreen.this.lastScreen);
                         }
                      }
    
@@ -294,18 +294,18 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
       }
 
       if (!active) {
-         GL11.glColor4f(0.56F, 0.56F, 0.56F, 1.0F);
+         GlStateManager.color4f(0.56F, 0.56F, 0.56F, 1.0F);
       } else if (active) {
          float c = 0.9F + 0.1F * RealmsMth.cos((float)this.animTick * 0.2F);
-         GL11.glColor4f(c, c, c, 1.0F);
+         GlStateManager.color4f(c, c, c, 1.0F);
       }
 
       RealmsScreen.blit(x + 3, y + 3, 0.0F, 0.0F, 74, 74, 74.0F, 74.0F);
       bind("realms:textures/gui/realms/slot_frame.png");
       if (active) {
-         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
       } else {
-         GL11.glColor4f(0.56F, 0.56F, 0.56F, 1.0F);
+         GlStateManager.color4f(0.56F, 0.56F, 0.56F, 1.0F);
       }
 
       RealmsScreen.blit(x, y, 0.0F, 0.0F, 80, 80, 80.0F, 80.0F);

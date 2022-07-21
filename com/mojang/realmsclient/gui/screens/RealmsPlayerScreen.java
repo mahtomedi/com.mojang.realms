@@ -7,6 +7,7 @@ import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.gui.RealmsConstants;
 import com.mojang.realmsclient.util.RealmsTextureManager;
+import net.minecraft.client.renderer.system.GlStateManager;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsClickableScrolledSelectionList;
@@ -15,7 +16,6 @@ import net.minecraft.realms.RealmsScreen;
 import net.minecraft.realms.Tezzelator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.opengl.GL11;
 
 public class RealmsPlayerScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
@@ -179,11 +179,11 @@ public class RealmsPlayerScreen extends RealmsScreen {
       }
 
       int bottomBorder = RealmsConstants.row(12) + 20;
-      GL11.glDisable(2896);
-      GL11.glDisable(2912);
+      GlStateManager.disableLighting();
+      GlStateManager.disableFog();
       Tezzelator t = Tezzelator.instance;
       bind("textures/gui/options_background.png");
-      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+      GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
       float s = 32.0F;
       t.begin(7, RealmsDefaultVertexFormat.POSITION_TEX_COLOR);
       t.vertex(0.0, (double)this.height(), 0.0).tex(0.0, (double)((float)(this.height() - bottomBorder) / 32.0F + 0.0F)).color(64, 64, 64, 255).endVertex();
@@ -225,10 +225,10 @@ public class RealmsPlayerScreen extends RealmsScreen {
    private void drawRemoveIcon(int x, int y, int xm, int ym) {
       boolean hovered = xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9 && ym < RealmsConstants.row(12) + 20 && ym > RealmsConstants.row(1);
       bind("realms:textures/gui/realms/cross_player_icon.png");
-      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-      GL11.glPushMatrix();
+      GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+      GlStateManager.pushMatrix();
       RealmsScreen.blit(x, y, 0.0F, hovered ? 7.0F : 0.0F, 8, 7, 8.0F, 14.0F);
-      GL11.glPopMatrix();
+      GlStateManager.popMatrix();
       if (hovered) {
          this.toolTip = getLocalizedString("mco.configure.world.invites.remove.tooltip");
       }
@@ -238,10 +238,10 @@ public class RealmsPlayerScreen extends RealmsScreen {
    private void drawOpped(int x, int y, int xm, int ym) {
       boolean hovered = xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9 && ym < RealmsConstants.row(12) + 20 && ym > RealmsConstants.row(1);
       bind("realms:textures/gui/realms/op_icon.png");
-      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-      GL11.glPushMatrix();
+      GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+      GlStateManager.pushMatrix();
       RealmsScreen.blit(x, y, 0.0F, hovered ? 8.0F : 0.0F, 8, 8, 8.0F, 16.0F);
-      GL11.glPopMatrix();
+      GlStateManager.popMatrix();
       if (hovered) {
          this.toolTip = getLocalizedString("mco.configure.world.invites.ops.tooltip");
       }
@@ -251,10 +251,10 @@ public class RealmsPlayerScreen extends RealmsScreen {
    private void drawNormal(int x, int y, int xm, int ym) {
       boolean hovered = xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9 && ym < RealmsConstants.row(12) + 20 && ym > RealmsConstants.row(1);
       bind("realms:textures/gui/realms/user_icon.png");
-      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-      GL11.glPushMatrix();
+      GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+      GlStateManager.pushMatrix();
       RealmsScreen.blit(x, y, 0.0F, hovered ? 8.0F : 0.0F, 8, 8, 8.0F, 16.0F);
-      GL11.glPopMatrix();
+      GlStateManager.popMatrix();
       if (hovered) {
          this.toolTip = getLocalizedString("mco.configure.world.invites.normal.tooltip");
       }
@@ -346,7 +346,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
             RealmsScreen.getLocalizedString("mco.configure.world.activityfeed.disabled"), RealmsPlayerScreen.this.column2_x, RealmsConstants.row(5), 10526880
          );
          RealmsTextureManager.withBoundFace(invited.getUuid(), () -> {
-            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+            GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             RealmsScreen.blit(RealmsPlayerScreen.this.column1_x + 2 + 2, y + 1, 8.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);
             RealmsScreen.blit(RealmsPlayerScreen.this.column1_x + 2 + 2, y + 1, 40.0F, 8.0F, 8, 8, 8, 8, 64.0F, 64.0F);
          });

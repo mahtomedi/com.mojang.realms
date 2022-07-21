@@ -8,12 +8,12 @@ import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.gui.RealmsConstants;
 import com.mojang.realmsclient.util.RealmsTasks;
 import com.mojang.realmsclient.util.RealmsTextureManager;
+import net.minecraft.client.renderer.system.GlStateManager;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.opengl.GL11;
 
 public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTemplate> {
    private static final Logger LOGGER = LogManager.getLogger();
@@ -235,17 +235,17 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTempla
       }
 
       if (hovered) {
-         GL11.glColor4f(0.56F, 0.56F, 0.56F, 1.0F);
+         GlStateManager.color4f(0.56F, 0.56F, 0.56F, 1.0F);
       } else {
-         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
       }
 
       RealmsScreen.blit(x + 2, y + 2, 0.0F, 0.0F, 56, 56, 56.0F, 56.0F);
       bind("realms:textures/gui/realms/slot_frame.png");
       if (hovered) {
-         GL11.glColor4f(0.56F, 0.56F, 0.56F, 1.0F);
+         GlStateManager.color4f(0.56F, 0.56F, 0.56F, 1.0F);
       } else {
-         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
       }
 
       RealmsScreen.blit(x, y, 0.0F, 0.0F, 60, 60, 60.0F, 60.0F);

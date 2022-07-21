@@ -30,6 +30,7 @@ import java.net.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
 import net.minecraft.realms.Realms;
+import net.minecraft.realms.RealmsBridge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -227,7 +228,7 @@ public class RealmsClient {
 
    public void restoreWorld(long worldId, String backupId) throws RealmsServiceException {
       String asciiUrl = this.url("worlds" + "/$WORLD_ID/backups".replace("$WORLD_ID", String.valueOf(worldId)), "backupId=" + backupId);
-      this.execute(Request.put(asciiUrl, "", 40000, 600000));
+      this.execute(Request.put(asciiUrl, "", 40000, 40000));
    }
 
    public WorldTemplatePaginatedList fetchWorldTemplates(int page, int pageSize, RealmsServer.WorldType type) throws RealmsServiceException {
@@ -384,7 +385,7 @@ public class RealmsClient {
    private String execute(Request<?> r) throws RealmsServiceException {
       r.cookie("sid", this.sessionId);
       r.cookie("user", this.username);
-      r.cookie("version", "1.13.2");
+      r.cookie("version", RealmsBridge.getVersionString());
       String realmsVersion = RealmsVersion.getVersion();
       if (realmsVersion != null) {
          r.cookie("realms_version", realmsVersion);

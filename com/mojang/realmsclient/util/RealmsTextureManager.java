@@ -18,24 +18,20 @@ import java.util.Map;
 import java.util.UUID;
 import javax.imageio.ImageIO;
 import javax.xml.bind.DatatypeConverter;
+import net.minecraft.client.renderer.system.GLX;
+import net.minecraft.client.renderer.system.GlStateManager;
+import net.minecraft.client.renderer.system.TextureUtil;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.opengl.ARBMultitexture;
-import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GLCapabilities;
 
 public class RealmsTextureManager {
    private static final Map<String, RealmsTextureManager.RealmsTexture> textures = new HashMap();
    private static final Map<String, Boolean> skinFetchStatus = new HashMap();
    private static final Map<String, String> fetchedSkins = new HashMap();
-   private static Boolean useMultitextureArb;
-   public static int GL_TEXTURE0 = -1;
    private static final Logger LOGGER = LogManager.getLogger();
    private static final String STEVE_LOCATION = "minecraft:textures/entity/steve.png";
    private static final String ALEX_LOCATION = "minecraft:textures/entity/alex.png";
@@ -45,26 +41,15 @@ public class RealmsTextureManager {
          RealmsScreen.bind("textures/gui/presets/isles.png");
       } else {
          int textureId = getTextureId(id, image);
-         GL11.glBindTexture(3553, textureId);
+         GlStateManager.bindTexture(textureId);
       }
    }
 
    public static void withBoundFace(String uuid, Runnable r) {
-      withTextureRestore(() -> {
+      GLX.withTextureRestore(() -> {
          bindFace(uuid);
          r.run();
       });
-   }
-
-   private static void withTextureRestore(Runnable r) {
-      GL11.glPushAttrib(270336);
-
-      try {
-         r.run();
-      } finally {
-         GL11.glPopAttrib();
-      }
-
    }
 
    private static void bindDefaultFace(UUID uuid) {
@@ -74,14 +59,13 @@ public class RealmsTextureManager {
    private static void bindFace(final String uuid) {
       UUID actualUuid = UUIDTypeAdapter.fromString(uuid);
       if (textures.containsKey(uuid)) {
-         int textureId = ((RealmsTextureManager.RealmsTexture)textures.get(uuid)).textureId;
-         GL11.glBindTexture(3553, textureId);
+         GlStateManager.bindTexture(((RealmsTextureManager.RealmsTexture)textures.get(uuid)).textureId);
       } else if (skinFetchStatus.containsKey(uuid)) {
          if (!skinFetchStatus.get(uuid)) {
             bindDefaultFace(actualUuid);
          } else if (fetchedSkins.containsKey(uuid)) {
             int textureId = getTextureId(uuid, (String)fetchedSkins.get(uuid));
-            GL11.glBindTexture(3553, textureId);
+            GlStateManager.bindTexture(textureId);
          } else {
             bindDefaultFace(actualUuid);
          }
@@ -152,10 +136,10 @@ public class RealmsTextureManager {
             return texture.textureId;
          }
 
-         GL11.glDeleteTextures(texture.textureId);
+         GlStateManager.deleteTexture(texture.textureId);
          textureId = texture.textureId;
       } else {
-         textureId = GL11.glGenTextures();
+         textureId = GlStateManager.genTexture();
       }
 
       IntBuffer buf = null;
@@ -183,47 +167,11 @@ public class RealmsTextureManager {
          var12.printStackTrace();
       }
 
-      if (GL_TEXTURE0 == -1) {
-         if (getUseMultiTextureArb()) {
-            GL_TEXTURE0 = 33984;
-         } else {
-            GL_TEXTURE0 = 33984;
-         }
-      }
-
-      glActiveTexture(GL_TEXTURE0);
-      GL11.glBindTexture(3553, textureId);
-      GL11.glPixelStorei(3312, 0);
-      GL11.glPixelStorei(3313, 0);
-      GL11.glPixelStorei(3314, 0);
-      GL11.glPixelStorei(3315, 0);
-      GL11.glPixelStorei(3316, 0);
-      GL11.glPixelStorei(3317, 4);
-      GL11.glTexImage2D(3553, 0, 6408, width, height, 0, 32993, 33639, buf);
-      GL11.glTexParameteri(3553, 10242, 10497);
-      GL11.glTexParameteri(3553, 10243, 10497);
-      GL11.glTexParameteri(3553, 10240, 9728);
-      GL11.glTexParameteri(3553, 10241, 9729);
+      GlStateManager.activeTexture(GLX.GL_TEXTURE0);
+      GlStateManager.bindTexture(textureId);
+      TextureUtil.initTexture(buf, width, height);
       textures.put(id, new RealmsTextureManager.RealmsTexture(image, textureId));
       return textureId;
-   }
-
-   public static void glActiveTexture(int texture) {
-      if (getUseMultiTextureArb()) {
-         ARBMultitexture.glActiveTextureARB(texture);
-      } else {
-         GL13.glActiveTexture(texture);
-      }
-
-   }
-
-   public static boolean getUseMultiTextureArb() {
-      if (useMultitextureArb == null) {
-         GLCapabilities caps = GL.getCapabilities();
-         useMultitextureArb = caps.GL_ARB_multitexture && !caps.OpenGL13;
-      }
-
-      return useMultitextureArb;
    }
 
    public static class RealmsTexture {

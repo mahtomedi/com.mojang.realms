@@ -8,6 +8,7 @@ import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.util.RealmsTextureManager;
 import com.mojang.realmsclient.util.RealmsUtil;
 import java.util.List;
+import net.minecraft.client.renderer.system.GlStateManager;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsClickableScrolledSelectionList;
@@ -16,7 +17,6 @@ import net.minecraft.realms.RealmsScreen;
 import net.minecraft.realms.Tezzelator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.opengl.GL11;
 
 public class RealmsPendingInvitesScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
@@ -158,8 +158,8 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
       public void renderSelected(int width, int y, int h, Tezzelator t) {
          int x0 = this.getScrollbarPosition() - 290;
          int x1 = this.getScrollbarPosition() - 10;
-         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-         GL11.glDisable(3553);
+         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+         GlStateManager.disableTexture();
          t.begin(7, RealmsDefaultVertexFormat.POSITION_TEX_COLOR);
          t.vertex((double)x0, (double)(y + h + 2), 0.0).tex(0.0, 1.0).color(128, 128, 128, 255).endVertex();
          t.vertex((double)x1, (double)(y + h + 2), 0.0).tex(1.0, 1.0).color(128, 128, 128, 255).endVertex();
@@ -170,7 +170,7 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
          t.vertex((double)(x1 - 1), (double)(y - 1), 0.0).tex(1.0, 0.0).color(0, 0, 0, 255).endVertex();
          t.vertex((double)(x0 + 1), (double)(y - 1), 0.0).tex(0.0, 0.0).color(0, 0, 0, 255).endVertex();
          t.end();
-         GL11.glEnable(3553);
+         GlStateManager.enableTexture();
       }
 
       public void renderItem(int i, int x, int y, int h, int mouseX, int mouseY) {
@@ -191,7 +191,7 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
          this.drawAccept(dx, y, mouseX, mouseY);
          this.drawReject(dx + 20, y, mouseX, mouseY);
          RealmsTextureManager.withBoundFace(invite.worldOwnerUuid, () -> {
-            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+            GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             RealmsScreen.blit(x - 36, y, 8.0F, 8.0F, 8, 8, 32, 32, 64.0F, 64.0F);
             RealmsScreen.blit(x - 36, y, 40.0F, 8.0F, 8, 8, 32, 32, 64.0F, 64.0F);
          });
@@ -204,10 +204,10 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
          }
 
          RealmsScreen.bind("realms:textures/gui/realms/accept_icon.png");
-         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-         GL11.glPushMatrix();
+         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+         GlStateManager.pushMatrix();
          RealmsScreen.blit(x, y, hovered ? 19.0F : 0.0F, 0.0F, 18, 18, 37.0F, 18.0F);
-         GL11.glPopMatrix();
+         GlStateManager.popMatrix();
          if (hovered) {
             RealmsPendingInvitesScreen.this.toolTip = RealmsScreen.getLocalizedString("mco.invites.button.accept");
          }
@@ -221,10 +221,10 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
          }
 
          RealmsScreen.bind("realms:textures/gui/realms/reject_icon.png");
-         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-         GL11.glPushMatrix();
+         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+         GlStateManager.pushMatrix();
          RealmsScreen.blit(x, y, hovered ? 19.0F : 0.0F, 0.0F, 18, 18, 37.0F, 18.0F);
-         GL11.glPopMatrix();
+         GlStateManager.popMatrix();
          if (hovered) {
             RealmsPendingInvitesScreen.this.toolTip = RealmsScreen.getLocalizedString("mco.invites.button.reject");
          }

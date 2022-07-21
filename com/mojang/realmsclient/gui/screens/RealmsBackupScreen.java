@@ -11,13 +11,13 @@ import java.text.DateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import net.minecraft.client.renderer.system.GlStateManager;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsClickableScrolledSelectionList;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.opengl.GL11;
 
 public class RealmsBackupScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
@@ -299,11 +299,11 @@ public class RealmsBackupScreen extends RealmsScreen {
       private void drawRestore(int x, int y, int xm, int ym) {
          boolean hovered = xm >= x && xm <= x + 12 && ym >= y && ym <= y + 14 && ym < RealmsBackupScreen.this.height() - 15 && ym > 32;
          RealmsScreen.bind("realms:textures/gui/realms/restore_icon.png");
-         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-         GL11.glPushMatrix();
-         GL11.glScalef(0.5F, 0.5F, 0.5F);
+         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+         GlStateManager.pushMatrix();
+         GlStateManager.scalef(0.5F, 0.5F, 0.5F);
          RealmsScreen.blit(x * 2, y * 2, 0.0F, hovered ? 28.0F : 0.0F, 23, 28, 23.0F, 56.0F);
-         GL11.glPopMatrix();
+         GlStateManager.popMatrix();
          if (hovered) {
             RealmsBackupScreen.this.toolTip = RealmsScreen.getLocalizedString("mco.backup.button.restore");
          }
@@ -313,11 +313,11 @@ public class RealmsBackupScreen extends RealmsScreen {
       private void drawInfo(int x, int y, int xm, int ym) {
          boolean hovered = xm >= x && xm <= x + 8 && ym >= y && ym <= y + 8 && ym < RealmsBackupScreen.this.height() - 15 && ym > 32;
          RealmsScreen.bind("realms:textures/gui/realms/plus_icon.png");
-         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-         GL11.glPushMatrix();
-         GL11.glScalef(0.5F, 0.5F, 0.5F);
+         GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+         GlStateManager.pushMatrix();
+         GlStateManager.scalef(0.5F, 0.5F, 0.5F);
          RealmsScreen.blit(x * 2, y * 2, 0.0F, hovered ? 15.0F : 0.0F, 15, 15, 15.0F, 30.0F);
-         GL11.glPopMatrix();
+         GlStateManager.popMatrix();
          if (hovered) {
             RealmsBackupScreen.this.toolTip = RealmsScreen.getLocalizedString("mco.backup.changes.tooltip");
          }

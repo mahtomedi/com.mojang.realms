@@ -3,10 +3,10 @@ package com.mojang.realmsclient.gui.screens;
 import com.mojang.realmsclient.gui.RealmsConstants;
 import com.mojang.realmsclient.util.RealmsUtil;
 import java.util.List;
+import net.minecraft.client.renderer.system.GlStateManager;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsScreen;
-import org.lwjgl.opengl.GL11;
 
 public class RealmsParentalConsentScreen extends RealmsScreen {
    private final RealmsScreen nextScreen;
@@ -63,13 +63,13 @@ public class RealmsParentalConsentScreen extends RealmsScreen {
 
    private void renderLink(int xm, int ym, int top) {
       String text = getLocalizedString("mco.account.privacy.info");
-      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-      GL11.glPushMatrix();
+      GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+      GlStateManager.pushMatrix();
       int textWidth = this.fontWidth(text);
       int leftPadding = this.width() / 2 - textWidth / 2;
       int x2 = leftPadding + textWidth + 1;
       int y2 = top + this.fontLineHeight();
-      GL11.glTranslatef((float)leftPadding, (float)top, 0.0F);
+      GlStateManager.translatef((float)leftPadding, (float)top, 0.0F);
       if (leftPadding <= xm && xm <= x2 && top <= ym && ym <= y2) {
          this.onLink = true;
          this.drawString(text, 0, 0, 7107012);
@@ -78,6 +78,6 @@ public class RealmsParentalConsentScreen extends RealmsScreen {
          this.drawString(text, 0, 0, 3368635);
       }
 
-      GL11.glPopMatrix();
+      GlStateManager.popMatrix();
    }
 }

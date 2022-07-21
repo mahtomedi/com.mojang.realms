@@ -15,7 +15,9 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.zip.GZIPOutputStream;
+import net.minecraft.client.renderer.system.GlStateManager;
 import net.minecraft.realms.Realms;
+import net.minecraft.realms.RealmsBridge;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsDefaultVertexFormat;
 import net.minecraft.realms.RealmsLevelSummary;
@@ -26,7 +28,6 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.opengl.GL11;
 
 public class RealmsUploadScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
@@ -165,8 +166,8 @@ public class RealmsUploadScreen extends RealmsScreen {
       }
 
       this.progress = String.format(Locale.ROOT, "%.1f", percentage);
-      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-      GL11.glDisable(3553);
+      GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+      GlStateManager.disableTexture();
       double base = (double)(this.width() / 2 - 100);
       double diff = 0.5;
       Tezzelator t = Tezzelator.instance;
@@ -180,7 +181,7 @@ public class RealmsUploadScreen extends RealmsScreen {
       t.vertex(base + 200.0 * percentage / 100.0, 80.0, 0.0).color(128, 128, 128, 255).endVertex();
       t.vertex(base, 80.0, 0.0).color(128, 128, 128, 255).endVertex();
       t.end();
-      GL11.glEnable(3553);
+      GlStateManager.enableTexture();
       this.drawCenteredString(this.progress + " %", this.width() / 2, 84, 16777215);
    }
 
@@ -313,7 +314,7 @@ public class RealmsUploadScreen extends RealmsScreen {
                            uploadInfo,
                            Realms.getSessionId(),
                            Realms.getName(),
-                           "1.13.2",
+                           RealmsBridge.getVersionString(),
                            RealmsUploadScreen.this.uploadStatus
                         );
                         fileUpload.upload(
@@ -429,7 +430,6 @@ public class RealmsUploadScreen extends RealmsScreen {
       try {
          File file = File.createTempFile("realms-upload-file", ".tar.gz");
          tar = new TarArchiveOutputStream(new GZIPOutputStream(new FileOutputStream(file)));
-         tar.setLongFileMode(3);
          this.addFileToTarGz(tar, pathToDirectoryFile.getAbsolutePath(), "world", true);
          tar.finish();
          var4 = file;

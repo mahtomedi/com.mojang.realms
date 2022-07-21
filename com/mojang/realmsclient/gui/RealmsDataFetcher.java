@@ -163,10 +163,12 @@ public class RealmsDataFetcher {
             RealmsClient client = RealmsClient.createRealmsClient();
             if (client != null) {
                List<RealmsServer> servers = client.listWorlds().servers;
-               if (servers != null) {
+               if (servers != null && !servers.isEmpty()) {
                   RealmsDataFetcher.this.sort(servers);
                   RealmsDataFetcher.this.setServers(servers);
                   RealmsDataFetcher.this.fetchStatus.put(RealmsDataFetcher.Task.SERVER_LIST.toString(), true);
+               } else {
+                  RealmsDataFetcher.LOGGER.warn("Realms server list was null or empty");
                }
             }
          } catch (RealmsServiceException var3) {

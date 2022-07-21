@@ -23,7 +23,9 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
    private static final int CANCEL_BUTTON = 1;
    private static final int UPLOAD_BUTTON = 2;
    private final RealmsScreen lastScreen;
+   private final RealmsScreen configureScreen;
    private final long worldId;
+   private int slotId;
    private RealmsButton uploadButton;
    private final DateFormat DATE_FORMAT = new SimpleDateFormat();
    private List<RealmsLevelSummary> levelList = new ArrayList();
@@ -34,9 +36,11 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
    private String[] gameModesLang = new String[4];
    private String errorMessage = null;
 
-   public RealmsSelectFileToUploadScreen(long worldId, RealmsScreen lastScreen) {
+   public RealmsSelectFileToUploadScreen(long worldId, int slotId, RealmsScreen configureScreen, RealmsScreen lastScreen) {
+      this.configureScreen = configureScreen;
       this.lastScreen = lastScreen;
       this.worldId = worldId;
+      this.slotId = slotId;
    }
 
    private void loadLevelList() throws Exception {
@@ -53,7 +57,7 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
          this.loadLevelList();
       } catch (Exception var3) {
          LOGGER.error("Couldn't load level list", var3);
-         Realms.setScreen(new RealmsErrorScreen("Unable to load worlds", var3.getMessage()));
+         Realms.setScreen(new RealmsErrorScreen("Unable to load worlds", var3.getMessage(), this.lastScreen));
          return;
       }
 
@@ -65,8 +69,8 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
       this.gameModesLang[Realms.spectatorId()] = getLocalizedString("gameMode.spectator");
       int x1 = (this.width() / 2 - 170) / 2;
       int x2 = x1 + this.width() / 2;
-      this.buttonsAdd(this.uploadButton = newButton(2, x1, this.height() - 42, 170, 20, getLocalizedString("mco.upload.button.name")));
-      this.buttonsAdd(newButton(1, x2, this.height() - 42, 170, 20, getLocalizedString("gui.back")));
+      this.buttonsAdd(newButton(1, this.width() / 2 + 6, this.height() - 48, 153, 20, getLocalizedString("gui.cancel")));
+      this.buttonsAdd(this.uploadButton = newButton(2, this.width() / 2 - 154, this.height() - 48, 153, 20, getLocalizedString("mco.upload.button.name")));
       this.uploadButton.active(this.selectedWorld >= 0 && this.selectedWorld < this.levelList.size());
       this.worldSelectionList = new RealmsSelectFileToUploadScreen.WorldSelectionList();
    }
@@ -89,7 +93,7 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
    private void upload() {
       if (this.selectedWorld != -1 && !((RealmsLevelSummary)this.levelList.get(this.selectedWorld)).isHardcore()) {
          RealmsLevelSummary selectedLevel = (RealmsLevelSummary)this.levelList.get(this.selectedWorld);
-         Realms.setScreen(new RealmsUploadScreen(this.worldId, this.lastScreen, selectedLevel));
+         Realms.setScreen(new RealmsUploadScreen(this.worldId, this.slotId, this.configureScreen, selectedLevel));
       }
 
    }
@@ -106,6 +110,10 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
    }
 
    public void keyPressed(char eventCharacter, int eventKey) {
+      if (eventKey == 1) {
+         Realms.setScreen(this.lastScreen);
+      }
+
    }
 
    public void mouseEvent() {
@@ -141,6 +149,10 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
                   && !((RealmsLevelSummary)RealmsSelectFileToUploadScreen.this.levelList.get(RealmsSelectFileToUploadScreen.this.selectedWorld)).isHardcore()
             );
          RealmsSelectFileToUploadScreen.this.errorMessage = null;
+         if (doubleClick) {
+            RealmsSelectFileToUploadScreen.this.upload();
+         }
+
       }
 
       public boolean isSelectedItem(int item) {

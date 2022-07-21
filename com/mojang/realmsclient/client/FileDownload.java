@@ -10,6 +10,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsAnvilLevelStorageSource;
 import net.minecraft.realms.RealmsLevelSummary;
@@ -190,6 +192,7 @@ public class FileDownload {
    }
 
    private void untarGzipArchive(String name, File file, RealmsAnvilLevelStorageSource levelStorageSource) throws IOException {
+      Pattern namePattern = Pattern.compile(".*-([0-9]+)$");
       int number = 1;
 
       for(char replacer : RealmsSharedConstants.ILLEGAL_FILE_CHARACTERS) {
@@ -204,16 +207,40 @@ public class FileDownload {
 
       try {
          for(RealmsLevelSummary summary : levelStorageSource.getLevelList()) {
-            if (summary.getLevelName().toLowerCase().startsWith(name.toLowerCase())) {
-               ++number;
+            if (summary.getLevelId().toLowerCase().startsWith(name.toLowerCase())) {
+               Matcher matcher = namePattern.matcher(summary.getLevelId());
+               if (matcher.matches()) {
+                  if (Integer.valueOf(matcher.group(1)) > number) {
+                     number = Integer.valueOf(matcher.group(1));
+                  }
+               } else {
+                  ++number;
+               }
             }
          }
-      } catch (Exception var19) {
+      } catch (Exception var21) {
          this.error = true;
          return;
       }
 
-      name = name + (number == 1 ? "" : "-" + number);
+      String finalName;
+      if (levelStorageSource.isNewLevelIdAcceptable(name) && number <= 1) {
+         finalName = name;
+      } else {
+         finalName = name + (number == 1 ? "" : "-" + number);
+         if (!levelStorageSource.isNewLevelIdAcceptable(finalName)) {
+            boolean foundName = false;
+
+            while(!foundName) {
+               ++number;
+               finalName = name + (number == 1 ? "" : "-" + number);
+               if (levelStorageSource.isNewLevelIdAcceptable(finalName)) {
+                  foundName = true;
+               }
+            }
+         }
+      }
+
       TarArchiveInputStream tarIn = null;
       File saves = new File(Realms.getGameDirectoryPath(), "saves");
 
@@ -222,7 +249,7 @@ public class FileDownload {
          tarIn = new TarArchiveInputStream(new GzipCompressorInputStream(new BufferedInputStream(new FileInputStream(file))));
 
          for(TarArchiveEntry tarEntry = tarIn.getNextTarEntry(); tarEntry != null; tarEntry = tarIn.getNextTarEntry()) {
-            File destPath = new File(saves, tarEntry.getName().replace("world", name));
+            File destPath = new File(saves, tarEntry.getName().replace("world", finalName));
             if (tarEntry.isDirectory()) {
                destPath.mkdirs();
             } else {
@@ -236,10 +263,10 @@ public class FileDownload {
                }
 
                bout.close();
-               Object var28 = null;
+               Object var31 = null;
             }
          }
-      } catch (Exception var17) {
+      } catch (Exception var19) {
          this.error = true;
       } finally {
          if (tarIn != null) {
@@ -250,7 +277,7 @@ public class FileDownload {
             file.delete();
          }
 
-         levelStorageSource.renameLevel(name, name.trim());
+         levelStorageSource.renameLevel(finalName, finalName.trim());
          this.finished = true;
       }
 

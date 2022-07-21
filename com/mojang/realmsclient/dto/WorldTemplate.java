@@ -12,6 +12,7 @@ public class WorldTemplate extends ValueObject {
    public String version;
    public String author;
    public String link;
+   public boolean minigame = false;
 
    public static WorldTemplate parse(JsonObject node) {
       WorldTemplate template = new WorldTemplate();
@@ -27,5 +28,9 @@ public class WorldTemplate extends ValueObject {
       }
 
       return template;
+   }
+
+   public void setMinigame(boolean minigame) {
+      this.minigame = minigame;
    }
 }

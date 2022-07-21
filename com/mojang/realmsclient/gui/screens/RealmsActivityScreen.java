@@ -49,6 +49,7 @@ public class RealmsActivityScreen extends RealmsScreen {
    private int fontWidth;
    private int maxKeyWidth = 0;
    private Boolean noActivity = false;
+   private int BUTTON_BACK_ID = 0;
    private static LoadingCache<String, String> activitiesNameCache = CacheBuilder.newBuilder().build(new CacheLoader<String, String>() {
       public String load(String uuid) throws Exception {
          return Realms.uuidToName(uuid);
@@ -73,7 +74,7 @@ public class RealmsActivityScreen extends RealmsScreen {
       this.matrixHeight = this.height() - 40;
       this.fontWidth = this.fontWidth("A");
       this.list = new RealmsActivityScreen.DetailsList();
-      this.buttonsAdd(newButton(1, this.width() / 2 - 100, this.height() - 30, 200, 20, getLocalizedString("gui.back")));
+      this.buttonsAdd(newButton(this.BUTTON_BACK_ID, this.width() / 2 - 100, this.height() - 30, 200, 20, getLocalizedString("gui.back")));
    }
 
    private RealmsActivityScreen.Color getColor() {
@@ -172,7 +173,14 @@ public class RealmsActivityScreen extends RealmsScreen {
    }
 
    public void buttonClicked(RealmsButton button) {
-      if (button.id() == 1) {
+      if (button.id() == this.BUTTON_BACK_ID) {
+         Realms.setScreen(this.lastScreen);
+      }
+
+   }
+
+   public void keyPressed(char ch, int eventKey) {
+      if (eventKey == 1) {
          Realms.setScreen(this.lastScreen);
       }
 
@@ -321,7 +329,7 @@ public class RealmsActivityScreen extends RealmsScreen {
       }
 
       public int getMaxPosition() {
-         return this.getItemCount() * (RealmsActivityScreen.this.fontLineHeight() + 1) + 10;
+         return this.getItemCount() * (RealmsActivityScreen.this.fontLineHeight() + 1) + 15;
       }
 
       protected void renderItem(int i, int x, int y, int h, Tezzelator t, int mouseX, int mouseY) {

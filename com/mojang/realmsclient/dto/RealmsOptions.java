@@ -13,6 +13,7 @@ public class RealmsOptions {
    public Boolean forceGameMode;
    public Integer difficulty;
    public Integer gameMode;
+   public String slotName;
    private static boolean forceGameModeDefault = false;
    private static boolean pvpDefault = true;
    private static boolean spawnAnimalsDefault = true;
@@ -22,6 +23,7 @@ public class RealmsOptions {
    private static boolean commandBlocksDefault = false;
    private static int difficultyDefault = 1;
    private static int gameModeDefault = 0;
+   private static String slotNameDefault = null;
 
    public RealmsOptions(
       Boolean pvp,
@@ -32,7 +34,8 @@ public class RealmsOptions {
       Boolean commandBlocks,
       Integer difficulty,
       Integer gameMode,
-      Boolean forceGameMode
+      Boolean forceGameMode,
+      String slotName
    ) {
       this.pvp = pvp;
       this.spawnAnimals = spawnAnimals;
@@ -43,6 +46,7 @@ public class RealmsOptions {
       this.difficulty = difficulty;
       this.gameMode = gameMode;
       this.forceGameMode = forceGameMode;
+      this.slotName = slotName;
    }
 
    public static RealmsOptions getDefaults() {
@@ -55,7 +59,8 @@ public class RealmsOptions {
          commandBlocksDefault,
          difficultyDefault,
          gameModeDefault,
-         forceGameModeDefault
+         forceGameModeDefault,
+         slotNameDefault
       );
    }
 
@@ -69,8 +74,17 @@ public class RealmsOptions {
          JsonUtils.getBooleanOr("commandBlocks", jsonObject, commandBlocksDefault),
          JsonUtils.getIntOr("difficulty", jsonObject, difficultyDefault),
          JsonUtils.getIntOr("gameMode", jsonObject, gameModeDefault),
-         JsonUtils.getBooleanOr("forceGameMode", jsonObject, forceGameModeDefault)
+         JsonUtils.getBooleanOr("forceGameMode", jsonObject, forceGameModeDefault),
+         JsonUtils.getStringOr("slotName", jsonObject, slotNameDefault)
       );
+   }
+
+   public String getSlotName(int i) {
+      return this.slotName != null && !this.slotName.equals("") ? this.slotName : "World " + i;
+   }
+
+   public String getDefaultSlotName(int i) {
+      return "World " + i;
    }
 
    public String toJson() {
@@ -111,6 +125,25 @@ public class RealmsOptions {
          jsonObject.addProperty("forceGameMode", this.forceGameMode);
       }
 
+      if (this.slotName != slotNameDefault && !this.slotName.equals("")) {
+         jsonObject.addProperty("slotName", this.slotName);
+      }
+
       return jsonObject.toString();
+   }
+
+   public RealmsOptions clone() {
+      return new RealmsOptions(
+         this.pvp,
+         this.spawnAnimals,
+         this.spawnMonsters,
+         this.spawnNPCs,
+         this.spawnProtection,
+         this.commandBlocks,
+         this.difficulty,
+         this.gameMode,
+         this.forceGameMode,
+         this.slotName
+      );
    }
 }

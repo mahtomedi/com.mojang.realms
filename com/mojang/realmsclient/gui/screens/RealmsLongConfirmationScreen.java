@@ -1,5 +1,6 @@
 package com.mojang.realmsclient.gui.screens;
 
+import com.mojang.realmsclient.gui.RealmsConstants;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsScreen;
 
@@ -28,10 +29,10 @@ public class RealmsLongConfirmationScreen extends RealmsScreen {
 
    public void init() {
       if (this.yesNoQuestion) {
-         this.buttonsAdd(newButton(0, this.width() / 2 - 105, this.height() / 6 + 112, 100, 20, this.yesButton));
-         this.buttonsAdd(newButton(1, this.width() / 2 + 5, this.height() / 6 + 112, 100, 20, this.noButton));
+         this.buttonsAdd(newButton(0, this.width() / 2 - 105, RealmsConstants.row(8), 100, 20, this.yesButton));
+         this.buttonsAdd(newButton(1, this.width() / 2 + 5, RealmsConstants.row(8), 100, 20, this.noButton));
       } else {
-         this.buttonsAdd(newButton(0, this.width() / 2 - 50, this.height() / 6 + 112, 100, 20, this.okButton));
+         this.buttonsAdd(newButton(0, this.width() / 2 - 50, RealmsConstants.row(8), 100, 20, this.okButton));
       }
 
    }
@@ -49,9 +50,9 @@ public class RealmsLongConfirmationScreen extends RealmsScreen {
 
    public void render(int xm, int ym, float a) {
       this.renderBackground();
-      this.drawCenteredString(this.type.text, this.width() / 2, 70, this.type.colorCode);
-      this.drawCenteredString(this.line2, this.width() / 2, 90, 16777215);
-      this.drawCenteredString(this.line3, this.width() / 2, 110, 16777215);
+      this.drawCenteredString(this.type.text, this.width() / 2, RealmsConstants.row(2), this.type.colorCode);
+      this.drawCenteredString(this.line2, this.width() / 2, RealmsConstants.row(4), 16777215);
+      this.drawCenteredString(this.line3, this.width() / 2, RealmsConstants.row(6), 16777215);
       super.render(xm, ym, a);
    }
 

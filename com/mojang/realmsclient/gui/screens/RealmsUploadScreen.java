@@ -34,6 +34,7 @@ public class RealmsUploadScreen extends RealmsScreen {
    private final RealmsScreen lastScreen;
    private final RealmsLevelSummary selectedLevel;
    private final long worldId;
+   private final int slotId;
    private final UploadStatus uploadStatus;
    private volatile String errorMessage = null;
    private volatile String status = null;
@@ -52,8 +53,9 @@ public class RealmsUploadScreen extends RealmsScreen {
    private static final ReentrantLock uploadLock = new ReentrantLock();
    public static final long SIZE_LIMIT = 524288000L;
 
-   public RealmsUploadScreen(long worldId, RealmsScreen lastScreen, RealmsLevelSummary selectedLevel) {
+   public RealmsUploadScreen(long worldId, int slotId, RealmsScreen lastScreen, RealmsLevelSummary selectedLevel) {
       this.worldId = worldId;
+      this.slotId = slotId;
       this.lastScreen = lastScreen;
       this.selectedLevel = selectedLevel;
       this.uploadStatus = new UploadStatus();
@@ -234,6 +236,7 @@ public class RealmsUploadScreen extends RealmsScreen {
                      fileUpload.upload(
                         archive,
                         RealmsUploadScreen.this.worldId,
+                        RealmsUploadScreen.this.slotId,
                         uploadInfo,
                         Realms.getSessionId(),
                         Realms.getName(),
@@ -260,11 +263,18 @@ public class RealmsUploadScreen extends RealmsScreen {
                         RealmsUploadScreen.this.status = RealmsScreen.getLocalizedString("mco.upload.done");
                         RealmsUploadScreen.this.backButton.msg(RealmsScreen.getLocalizedString("gui.done"));
                         UploadTokenCache.invalidate(wid);
+                        return;
                      } else {
-                        RealmsUploadScreen.this.errorMessage = RealmsScreen.getLocalizedString("mco.upload.failed", new Object[]{fileUpload.getStatusCode()});
-                     }
+                        if (fileUpload.getStatusCode() == 400 && fileUpload.getErrorMessage() != null) {
+                           RealmsUploadScreen.this.errorMessage = RealmsScreen.getLocalizedString(
+                              "mco.upload.failed", new Object[]{fileUpload.getErrorMessage()}
+                           );
+                        } else {
+                           RealmsUploadScreen.this.errorMessage = RealmsScreen.getLocalizedString("mco.upload.failed", new Object[]{fileUpload.getStatusCode()});
+                        }
    
-                     return;
+                        return;
+                     }
                   }
                } catch (IOException var29) {
                   RealmsUploadScreen.this.errorMessage = RealmsScreen.getLocalizedString("mco.upload.failed", new Object[]{var29.getMessage()});

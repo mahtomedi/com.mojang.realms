@@ -131,10 +131,10 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 
       protected void renderItem(int i, int x, int y, int h, Tezzelator t, int mouseX, int mouseY) {
          String key = (String)RealmsBackupInfoScreen.this.keys.get(i);
-         RealmsBackupInfoScreen.this.drawString(key, this.width() / 2 - 40, y, 16777215);
+         RealmsBackupInfoScreen.this.drawString(key, this.width() / 2 - 40, y, 10526880);
          String metadataValue = (String)RealmsBackupInfoScreen.this.backup.changeList.get(key);
          RealmsBackupInfoScreen.this.drawString(
-            RealmsBackupInfoScreen.this.checkForSpecificMetadata(key, metadataValue), this.width() / 2 - 40, y + 12, 10526880
+            RealmsBackupInfoScreen.this.checkForSpecificMetadata(key, metadataValue), this.width() / 2 - 40, y + 12, 16777215
          );
       }
    }

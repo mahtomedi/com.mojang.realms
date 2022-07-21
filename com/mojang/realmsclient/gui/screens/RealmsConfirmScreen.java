@@ -1,6 +1,7 @@
 package com.mojang.realmsclient.gui.screens;
 
 import com.mojang.realmsclient.gui.RealmsConfirmResultListener;
+import com.mojang.realmsclient.gui.RealmsConstants;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsScreen;
 
@@ -32,8 +33,8 @@ public class RealmsConfirmScreen extends RealmsScreen {
    }
 
    public void init() {
-      this.buttonsAdd(newButton(0, this.width() / 2 - 105, this.height() / 6 + 96, 100, 20, this.yesButton));
-      this.buttonsAdd(newButton(1, this.width() / 2 + 5, this.height() / 6 + 96, 100, 20, this.noButton));
+      this.buttonsAdd(newButton(0, this.width() / 2 - 105, RealmsConstants.row(9), 100, 20, this.yesButton));
+      this.buttonsAdd(newButton(1, this.width() / 2 + 5, RealmsConstants.row(9), 100, 20, this.noButton));
    }
 
    public void buttonClicked(RealmsButton button) {
@@ -42,8 +43,8 @@ public class RealmsConfirmScreen extends RealmsScreen {
 
    public void render(int xm, int ym, float a) {
       this.renderBackground();
-      this.drawCenteredString(this.title1, this.width() / 2, 70, 16777215);
-      this.drawCenteredString(this.title2, this.width() / 2, 90, 16777215);
+      this.drawCenteredString(this.title1, this.width() / 2, RealmsConstants.row(3), 16777215);
+      this.drawCenteredString(this.title2, this.width() / 2, RealmsConstants.row(5), 16777215);
       super.render(xm, ym, a);
    }
 

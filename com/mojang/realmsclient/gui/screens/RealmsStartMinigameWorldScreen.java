@@ -1,20 +1,16 @@
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.WorldTemplate;
-import com.mojang.realmsclient.exception.RealmsServiceException;
-import com.mojang.realmsclient.gui.LongRunningTask;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
-import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 
 public class RealmsStartMinigameWorldScreen extends RealmsScreenWithCallback<WorldTemplate> {
    private static final Logger LOGGER = LogManager.getLogger();
-   private RealmsScreen lastScreen;
+   private RealmsConfigureWorldScreen lastScreen;
    private RealmsServer serverData;
    private final int START_BUTTON_ID = 1;
    private final int CANCEL_BUTTON = 2;
@@ -22,12 +18,9 @@ public class RealmsStartMinigameWorldScreen extends RealmsScreenWithCallback<Wor
    private WorldTemplate selectedWorldTemplate;
    private RealmsButton startButton;
 
-   public RealmsStartMinigameWorldScreen(RealmsScreen lastScreen, RealmsServer serverData) {
+   public RealmsStartMinigameWorldScreen(RealmsConfigureWorldScreen lastScreen, RealmsServer serverData) {
       this.lastScreen = lastScreen;
       this.serverData = serverData;
-   }
-
-   public void tick() {
    }
 
    public void init() {
@@ -66,21 +59,12 @@ public class RealmsStartMinigameWorldScreen extends RealmsScreenWithCallback<Wor
          if (button.id() == 2) {
             Realms.setScreen(this.lastScreen);
          } else if (button.id() == 1) {
-            this.startMinigame();
+            this.lastScreen.switchMinigame(this.selectedWorldTemplate);
          } else if (button.id() == WORLD_TEMPLATE_BUTTON) {
-            Realms.setScreen(new RealmsWorldTemplateScreen(this, this.selectedWorldTemplate, true));
+            Realms.setScreen(new RealmsSelectWorldTemplateScreen(this, this.selectedWorldTemplate, true));
          }
 
       }
-   }
-
-   private void startMinigame() {
-      RealmsStartMinigameWorldScreen.StartMinigameTask startMinigameTask = new RealmsStartMinigameWorldScreen.StartMinigameTask(
-         this.serverData.id, this.selectedWorldTemplate
-      );
-      RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(this.lastScreen, startMinigameTask);
-      longRunningMcoTaskScreen.start();
-      Realms.setScreen(longRunningMcoTaskScreen);
    }
 
    public void mouseClicked(int x, int y, int buttonNum) {
@@ -98,56 +82,6 @@ public class RealmsStartMinigameWorldScreen extends RealmsScreenWithCallback<Wor
 
    void callback(WorldTemplate worldTemplate) {
       this.selectedWorldTemplate = worldTemplate;
-   }
-
-   private class StartMinigameTask extends LongRunningTask {
-      private final long worldId;
-      private final WorldTemplate worldTemplate;
-
-      public StartMinigameTask(long worldId, WorldTemplate worldTemplate) {
-         this.worldId = worldId;
-         this.worldTemplate = worldTemplate;
-      }
-
-      public void run() {
-         RealmsClient client = RealmsClient.createRealmsClient();
-         String title = RealmsScreen.getLocalizedString("mco.minigame.world.starting.screen.title");
-         this.setTitle(title);
-
-         try {
-            if (this.aborted()) {
-               return;
-            }
-
-            Boolean result = client.putIntoMinigameMode(this.worldId, this.worldTemplate.id);
-            Thread.sleep(2000L);
-            if (result) {
-               RealmsServer serverData = RealmsStartMinigameWorldScreen.this.serverData;
-               serverData.worldType = RealmsServer.WorldType.MINIGAME;
-               serverData.motd = this.worldTemplate.id;
-            }
-
-            if (this.aborted()) {
-               return;
-            }
-
-            Realms.setScreen(RealmsStartMinigameWorldScreen.this.lastScreen);
-         } catch (RealmsServiceException var5) {
-            if (this.aborted()) {
-               return;
-            }
-
-            RealmsStartMinigameWorldScreen.LOGGER.error("Couldn't start mini game!");
-            this.error(var5.toString());
-         } catch (Exception var6) {
-            if (this.aborted()) {
-               return;
-            }
-
-            RealmsStartMinigameWorldScreen.LOGGER.error("Couldn't start mini game!");
-            this.error(var6.toString());
-         }
-
-      }
+      Realms.setScreen(this);
    }
 }

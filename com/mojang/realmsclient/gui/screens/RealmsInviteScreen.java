@@ -2,6 +2,7 @@ package com.mojang.realmsclient.gui.screens;
 
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
+import com.mojang.realmsclient.gui.RealmsConstants;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsEditBox;
@@ -14,19 +15,18 @@ public class RealmsInviteScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
    private RealmsEditBox profileName;
    private RealmsServer serverData;
-   private final RealmsScreen onlineScreen;
    private final RealmsConfigureWorldScreen configureScreen;
-   private final int BUTTON_INVITE = 0;
-   private final int BUTTON_CANCEL = 1;
+   private final RealmsScreen lastScreen;
+   private final int BUTTON_INVITE_ID = 0;
+   private final int BUTTON_CANCEL_ID = 1;
+   private RealmsButton inviteButton;
    private final int PROFILENAME_EDIT_BOX = 2;
-   private String defaultErrorMsg = "Could not invite the provided name";
    private String errorMsg;
    private boolean showError;
-   private RealmsButton inviteButton;
 
-   public RealmsInviteScreen(RealmsScreen onlineScreen, RealmsConfigureWorldScreen configureScreen, RealmsServer serverData) {
-      this.onlineScreen = onlineScreen;
+   public RealmsInviteScreen(RealmsConfigureWorldScreen configureScreen, RealmsScreen lastScreen, RealmsServer serverData) {
       this.configureScreen = configureScreen;
+      this.lastScreen = lastScreen;
       this.serverData = serverData;
    }
 
@@ -38,10 +38,10 @@ public class RealmsInviteScreen extends RealmsScreen {
       Keyboard.enableRepeatEvents(true);
       this.buttonsClear();
       this.buttonsAdd(
-         this.inviteButton = newButton(0, this.width() / 2 - 100, this.height() / 4 + 96 + 12, getLocalizedString("mco.configure.world.buttons.invite"))
+         this.inviteButton = newButton(0, this.width() / 2 - 100, RealmsConstants.row(10), getLocalizedString("mco.configure.world.buttons.invite"))
       );
-      this.buttonsAdd(newButton(1, this.width() / 2 - 100, this.height() / 4 + 120 + 12, getLocalizedString("gui.cancel")));
-      this.profileName = this.newEditBox(2, this.width() / 2 - 100, 66, 200, 20);
+      this.buttonsAdd(newButton(1, this.width() / 2 - 100, RealmsConstants.row(12), getLocalizedString("gui.cancel")));
+      this.profileName = this.newEditBox(2, this.width() / 2 - 100, RealmsConstants.row(2), 200, 20);
       this.profileName.setFocus(true);
    }
 
@@ -51,26 +51,31 @@ public class RealmsInviteScreen extends RealmsScreen {
 
    public void buttonClicked(RealmsButton button) {
       if (button.active()) {
-         if (button.id() == 1) {
-            Realms.setScreen(this.configureScreen);
-         } else if (button.id() == 0) {
-            RealmsClient client = RealmsClient.createRealmsClient();
-            if (this.profileName.getValue() == null || this.profileName.getValue().isEmpty()) {
-               return;
-            }
-
-            try {
-               RealmsServer realmsServer = client.invite(this.serverData.id, this.profileName.getValue());
-               if (realmsServer != null) {
-                  this.serverData.players = realmsServer.players;
-                  Realms.setScreen(new RealmsConfigureWorldScreen(this.onlineScreen, this.serverData.id));
-               } else {
-                  this.showError(this.defaultErrorMsg);
+         switch(button.id()) {
+            case 0:
+               RealmsClient client = RealmsClient.createRealmsClient();
+               if (this.profileName.getValue() == null || this.profileName.getValue().isEmpty()) {
+                  return;
                }
-            } catch (Exception var4) {
-               LOGGER.error("Couldn't invite user");
-               this.showError(this.defaultErrorMsg);
-            }
+
+               try {
+                  RealmsServer realmsServer = client.invite(this.serverData.id, this.profileName.getValue());
+                  if (realmsServer != null) {
+                     this.serverData.players = realmsServer.players;
+                     Realms.setScreen(new RealmsPlayerScreen(this.configureScreen, this.serverData));
+                  } else {
+                     this.showError(getLocalizedString("mco.configure.world.players.error"));
+                  }
+               } catch (Exception var4) {
+                  LOGGER.error("Couldn't invite user");
+                  this.showError(getLocalizedString("mco.configure.world.players.error"));
+               }
+               break;
+            case 1:
+               Realms.setScreen(this.lastScreen);
+               break;
+            default:
+               return;
          }
 
       }
@@ -96,7 +101,7 @@ public class RealmsInviteScreen extends RealmsScreen {
       }
 
       if (eventKey == 1) {
-         Realms.setScreen(this.configureScreen);
+         Realms.setScreen(this.lastScreen);
       }
 
    }
@@ -108,9 +113,9 @@ public class RealmsInviteScreen extends RealmsScreen {
 
    public void render(int xm, int ym, float a) {
       this.renderBackground();
-      this.drawString(getLocalizedString("mco.configure.world.invite.profile.name"), this.width() / 2 - 100, 53, 10526880);
+      this.drawString(getLocalizedString("mco.configure.world.invite.profile.name"), this.width() / 2 - 100, RealmsConstants.row(1), 10526880);
       if (this.showError) {
-         this.drawCenteredString(this.errorMsg, this.width() / 2, 100, 16711680);
+         this.drawCenteredString(this.errorMsg, this.width() / 2, RealmsConstants.row(5), 16711680);
       }
 
       this.profileName.render();

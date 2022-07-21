@@ -9,7 +9,10 @@ import com.mojang.realmsclient.util.JsonUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import net.minecraft.realms.RealmsServerPing;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -26,16 +29,19 @@ public class RealmsServer extends ValueObject {
    public String owner;
    public String ownerUUID;
    public List<PlayerInfo> players;
-   public RealmsOptions options;
+   public Map<Integer, RealmsOptions> slots;
    public String ip;
    public boolean expired;
    public int daysLeft;
    public RealmsServer.WorldType worldType;
+   public int activeSlot;
+   public String minigameName;
+   public int minigameId;
    public int protocol;
    public String status = "";
    public RealmsServerPing serverPing = new RealmsServerPing();
 
-   public String getMotd() {
+   public String getDescription() {
       return this.motd;
    }
 
@@ -43,11 +49,15 @@ public class RealmsServer extends ValueObject {
       return this.name;
    }
 
+   public String getMinigameName() {
+      return this.minigameName;
+   }
+
    public void setName(String name) {
       this.name = name;
    }
 
-   public void setMotd(String motd) {
+   public void setDescription(String motd) {
       this.motd = motd;
    }
 
@@ -80,19 +90,21 @@ public class RealmsServer extends ValueObject {
          server.expired = JsonUtils.getBooleanOr("expired", node, false);
          server.worldType = getWorldType(JsonUtils.getStringOr("worldType", node, RealmsServer.WorldType.NORMAL.name()));
          server.ownerUUID = JsonUtils.getStringOr("ownerUUID", node, "");
-         if (node.get("options") != null && !node.get("options").isJsonNull()) {
-            JsonParser parser = new JsonParser();
-            JsonElement element = parser.parse(node.get("options").getAsString());
-            if (element == null) {
-               server.options = RealmsOptions.getDefaults();
-            } else {
-               server.options = RealmsOptions.parse(element.getAsJsonObject());
-            }
+         if (node.get("slots") != null && node.get("slots").isJsonArray()) {
+            server.slots = parseSlots(node.get("slots").getAsJsonArray());
          } else {
-            server.options = RealmsOptions.getDefaults();
+            HashMap slots = new HashMap();
+            slots.put(1, RealmsOptions.getDefaults());
+            slots.put(2, RealmsOptions.getDefaults());
+            slots.put(3, RealmsOptions.getDefaults());
+            server.slots = slots;
          }
-      } catch (Exception var4) {
-         LOGGER.error("Could not parse McoServer: " + var4.getMessage());
+
+         server.minigameName = JsonUtils.getStringOr("minigameName", node, null);
+         server.activeSlot = JsonUtils.getIntOr("activeSlot", node, -1);
+         server.minigameId = JsonUtils.getIntOr("minigameId", node, -1);
+      } catch (Exception var3) {
+         LOGGER.error("Could not parse McoServer: " + var3.getMessage());
       }
 
       return server;
@@ -122,6 +134,36 @@ public class RealmsServer extends ValueObject {
       }
 
       return invited;
+   }
+
+   private static Map<Integer, RealmsOptions> parseSlots(JsonArray jsonArray) {
+      Map<Integer, RealmsOptions> slots = new HashMap();
+
+      for(JsonElement aJsonArray : jsonArray) {
+         try {
+            JsonObject node = aJsonArray.getAsJsonObject();
+            JsonParser parser = new JsonParser();
+            JsonElement element = parser.parse(node.get("options").getAsString());
+            RealmsOptions options;
+            if (element == null) {
+               options = RealmsOptions.getDefaults();
+            } else {
+               options = RealmsOptions.parse(element.getAsJsonObject());
+            }
+
+            int slot = JsonUtils.getIntOr("slotId", node, -1);
+            slots.put(slot, options);
+         } catch (Exception var9) {
+         }
+      }
+
+      for(int i = 1; i <= 3; ++i) {
+         if (!slots.containsKey(i)) {
+            slots.put(i, RealmsOptions.getDefaults());
+         }
+      }
+
+      return slots;
    }
 
    public static RealmsServer parse(String json) {
@@ -199,17 +241,7 @@ public class RealmsServer extends ValueObject {
       server.state = this.state;
       server.owner = this.owner;
       server.players = this.players;
-      server.options = new RealmsOptions(
-         this.options.pvp,
-         this.options.spawnAnimals,
-         this.options.spawnMonsters,
-         this.options.spawnNPCs,
-         this.options.spawnProtection,
-         this.options.commandBlocks,
-         this.options.difficulty,
-         this.options.gameMode,
-         this.options.forceGameMode
-      );
+      server.slots = this.cloneSlots(this.slots);
       server.ip = this.ip;
       server.expired = this.expired;
       server.daysLeft = this.daysLeft;
@@ -220,7 +252,20 @@ public class RealmsServer extends ValueObject {
       server.serverPing.lastPingSnapshot = this.serverPing.lastPingSnapshot;
       server.worldType = this.worldType;
       server.ownerUUID = this.ownerUUID;
+      server.minigameName = this.minigameName;
+      server.activeSlot = this.activeSlot;
+      server.minigameId = this.minigameId;
       return server;
+   }
+
+   public Map<Integer, RealmsOptions> cloneSlots(Map<Integer, RealmsOptions> slots) {
+      Map<Integer, RealmsOptions> newSlots = new HashMap();
+
+      for(Entry<Integer, RealmsOptions> entry : slots.entrySet()) {
+         newSlots.put(entry.getKey(), ((RealmsOptions)entry.getValue()).clone());
+      }
+
+      return newSlots;
    }
 
    public static class McoServerComparator implements Comparator<RealmsServer> {

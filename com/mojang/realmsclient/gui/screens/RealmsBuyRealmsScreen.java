@@ -3,10 +3,11 @@ package com.mojang.realmsclient.gui.screens;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsState;
 import com.mojang.realmsclient.exception.RealmsServiceException;
+import com.mojang.realmsclient.gui.RealmsConstants;
+import com.mojang.realmsclient.util.RealmsUtil;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.net.URI;
 import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsScreen;
@@ -17,7 +18,7 @@ import org.lwjgl.input.Keyboard;
 public class RealmsBuyRealmsScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
    private RealmsScreen lastScreen;
-   private static int BACK_BUTTON_ID = 111;
+   private static int BUTTON_BACK_ID = 0;
    private volatile RealmsState realmsStatus;
    private boolean onLink = false;
 
@@ -33,7 +34,7 @@ public class RealmsBuyRealmsScreen extends RealmsScreen {
       Keyboard.enableRepeatEvents(true);
       this.buttonsClear();
       int buttonLength = 212;
-      this.buttonsAdd(newButton(BACK_BUTTON_ID, this.width() / 2 - buttonLength / 2, 180, buttonLength, 20, getLocalizedString("gui.back")));
+      this.buttonsAdd(newButton(BUTTON_BACK_ID, this.width() / 2 - buttonLength / 2, RealmsConstants.row(12), buttonLength, 20, getLocalizedString("gui.back")));
       this.fetchMessage();
    }
 
@@ -44,7 +45,8 @@ public class RealmsBuyRealmsScreen extends RealmsScreen {
             try {
                RealmsBuyRealmsScreen.this.realmsStatus = client.fetchRealmsState();
             } catch (RealmsServiceException var2) {
-               RealmsBuyRealmsScreen.LOGGER.error("Could not get stat");
+               RealmsBuyRealmsScreen.LOGGER.error("Could not get state");
+               Realms.setScreen(new RealmsGenericErrorScreen(var2, RealmsBuyRealmsScreen.this.lastScreen));
             }
 
          }
@@ -57,7 +59,7 @@ public class RealmsBuyRealmsScreen extends RealmsScreen {
 
    public void buttonClicked(RealmsButton button) {
       if (button.active()) {
-         if (button.id() == BACK_BUTTON_ID) {
+         if (button.id() == BUTTON_BACK_ID) {
             Realms.setScreen(this.lastScreen);
          }
 
@@ -76,40 +78,26 @@ public class RealmsBuyRealmsScreen extends RealmsScreen {
       if (this.onLink) {
          Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
          clipboard.setContents(new StringSelection(this.realmsStatus.getBuyLink()), null);
-         this.browseTo(this.realmsStatus.getBuyLink());
-      }
-
-   }
-
-   private void browseTo(String uri) {
-      try {
-         URI link = new URI(uri);
-         Class<?> desktopClass = Class.forName("java.awt.Desktop");
-         Object o = desktopClass.getMethod("getDesktop").invoke(null);
-         desktopClass.getMethod("browse", URI.class).invoke(o, link);
-      } catch (Throwable var5) {
-         LOGGER.error("Couldn't open link");
+         RealmsUtil.browseTo(this.realmsStatus.getBuyLink());
       }
 
    }
 
    public void render(int xm, int ym, float a) {
       this.renderBackground();
-      this.drawCenteredString(getLocalizedString("mco.buy.realms.title"), this.width() / 2, 11, 16777215);
+      this.drawCenteredString(getLocalizedString("mco.buy.realms.title"), this.width() / 2, 17, 16777215);
       if (this.realmsStatus != null) {
          String[] lines = this.realmsStatus.getStatusMessage().split("\n");
-         int height = 52;
+         int i = 1;
 
          for(String line : lines) {
-            this.drawCenteredString(line, this.width() / 2, height, 10526880);
-            height += 18;
+            this.drawCenteredString(line, this.width() / 2, RealmsConstants.row(i), 10526880);
+            i += 2;
          }
 
          if (this.realmsStatus.getBuyLink() != null) {
             String buyLink = this.realmsStatus.getBuyLink();
-            int linkColor = 3368635;
-            int hoverColor = 7107012;
-            height += 18;
+            int height = RealmsConstants.row(i + 1);
             int textWidth = this.fontWidth(buyLink);
             int x1 = this.width() / 2 - textWidth / 2 - 1;
             int y1 = height - 1;
@@ -117,10 +105,10 @@ public class RealmsBuyRealmsScreen extends RealmsScreen {
             int y2 = height + 1 + this.fontLineHeight();
             if (x1 <= xm && xm <= x2 && y1 <= ym && ym <= y2) {
                this.onLink = true;
-               this.drawString("§n" + buyLink, this.width() / 2 - textWidth / 2, height, hoverColor);
+               this.drawString(buyLink, this.width() / 2 - textWidth / 2, height, 7107012);
             } else {
                this.onLink = false;
-               this.drawString(buyLink, this.width() / 2 - textWidth / 2, height, linkColor);
+               this.drawString(buyLink, this.width() / 2 - textWidth / 2, height, 3368635);
             }
          }
 

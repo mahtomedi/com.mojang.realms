@@ -1,5 +1,6 @@
 package com.mojang.realmsclient.client;
 
+import com.google.gson.JsonParser;
 import com.mojang.realmsclient.RealmsVersion;
 import com.mojang.realmsclient.dto.UploadInfo;
 import java.io.File;
@@ -14,6 +15,7 @@ import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.Args;
+import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,12 +27,14 @@ public class FileUpload {
    private volatile boolean finished = false;
    private HttpPost request;
    private int statusCode = -1;
+   private String errorMessage;
    private RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(120000).setConnectTimeout(120000).build();
    private Thread currentThread;
 
    public void upload(
       final File file,
       final long worldId,
+      final int slotId,
       final UploadInfo uploadInfo,
       final String sessionId,
       final String username,
@@ -40,7 +44,7 @@ public class FileUpload {
       if (this.currentThread == null) {
          this.currentThread = new Thread() {
             public void run() {
-               FileUpload.this.request = new HttpPost("http://" + uploadInfo.getUploadEndpoint() + ":" + "8080" + "/upload" + "/" + worldId);
+               FileUpload.this.request = new HttpPost("http://" + uploadInfo.getUploadEndpoint() + ":" + "8080" + "/upload" + "/" + worldId + "/" + slotId);
                CloseableHttpClient client = null;
 
                try {
@@ -77,15 +81,23 @@ public class FileUpload {
                   }
 
                   FileUpload.this.statusCode = statusCode;
-               } catch (Exception var14) {
-                  FileUpload.LOGGER.error("Caught exception while uploading: " + var14.getMessage());
+                  String json = EntityUtils.toString(response.getEntity(), "UTF-8");
+                  if (json != null) {
+                     try {
+                        JsonParser parser = new JsonParser();
+                        FileUpload.this.errorMessage = parser.parse(json).getAsJsonObject().get("errorMsg").getAsString();
+                     } catch (Exception var17) {
+                     }
+                  }
+               } catch (Exception var18) {
+                  FileUpload.LOGGER.error("Caught exception while uploading: " + var18.getMessage());
                } finally {
                   FileUpload.this.request.releaseConnection();
                   FileUpload.this.finished = true;
                   if (client != null) {
                      try {
                         client.close();
-                     } catch (IOException var13) {
+                     } catch (IOException var16) {
                         FileUpload.LOGGER.error("Failed to close Realms upload client");
                      }
                   }
@@ -112,6 +124,10 @@ public class FileUpload {
 
    public int getStatusCode() {
       return this.statusCode;
+   }
+
+   public String getErrorMessage() {
+      return this.errorMessage;
    }
 
    private static class CustomInputStreamEntity extends InputStreamEntity {

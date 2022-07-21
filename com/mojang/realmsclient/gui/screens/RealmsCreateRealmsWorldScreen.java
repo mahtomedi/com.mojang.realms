@@ -75,7 +75,7 @@ public class RealmsCreateRealmsWorldScreen extends RealmsScreenWithCallback<Worl
          } else if (button.id() == CREATE_BUTTON) {
             this.createWorld();
          } else if (button.id() == WORLD_TEMPLATE_BUTTON) {
-            Realms.setScreen(new RealmsWorldTemplateScreen(this, this.selectedWorldTemplate, false));
+            Realms.setScreen(new RealmsSelectWorldTemplateScreen(this, this.selectedWorldTemplate, false));
          }
 
       }
@@ -133,6 +133,7 @@ public class RealmsCreateRealmsWorldScreen extends RealmsScreenWithCallback<Worl
 
    public void callback(WorldTemplate worldTemplate) {
       this.selectedWorldTemplate = worldTemplate;
+      Realms.setScreen(this);
    }
 
    class WorldCreationTask extends LongRunningTask {

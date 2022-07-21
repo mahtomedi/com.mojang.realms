@@ -4,11 +4,12 @@ import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.Subscription;
 import com.mojang.realmsclient.exception.RealmsServiceException;
+import com.mojang.realmsclient.gui.RealmsConstants;
+import com.mojang.realmsclient.util.RealmsUtil;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.IOException;
-import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -20,7 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 
-public class RealmsSubscriptionScreen extends RealmsScreen {
+public class RealmsSubscriptionInfoScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
    private final RealmsScreen lastScreen;
    private final RealmsServer serverData;
@@ -28,16 +29,12 @@ public class RealmsSubscriptionScreen extends RealmsScreen {
    private int daysLeft;
    private String startDate;
    private Subscription.SubscriptionType type;
-   private final String baseUrl = "https://account.mojang.com";
-   private final String path = "/buy/realms";
+   private final String PURCHASE_LINK = "https://account.mojang.com/buy/realms";
    private boolean onLink;
 
-   public RealmsSubscriptionScreen(RealmsScreen lastScreen, RealmsServer serverData) {
+   public RealmsSubscriptionInfoScreen(RealmsScreen lastScreen, RealmsServer serverData) {
       this.lastScreen = lastScreen;
       this.serverData = serverData;
-   }
-
-   public void tick() {
    }
 
    public void init() {
@@ -56,7 +53,7 @@ public class RealmsSubscriptionScreen extends RealmsScreen {
          this.type = subscription.type;
       } catch (RealmsServiceException var5) {
          LOGGER.error("Couldn't get subscription");
-         Realms.setScreen(new RealmsGenericErrorScreen(var5, this));
+         Realms.setScreen(new RealmsGenericErrorScreen(var5, this.lastScreen));
       } catch (IOException var6) {
          LOGGER.error("Couldn't parse response subscribing");
       }
@@ -89,64 +86,43 @@ public class RealmsSubscriptionScreen extends RealmsScreen {
 
    }
 
-   private String getProfileUuid() {
-      String accessToken = Realms.getSessionId();
-      String[] tokens = accessToken.split(":");
-      return tokens.length == 3 ? tokens[2] : "";
-   }
-
-   private void browseTo(String uri) {
-      try {
-         URI link = new URI(uri);
-         Class<?> desktopClass = Class.forName("java.awt.Desktop");
-         Object o = desktopClass.getMethod("getDesktop").invoke(null);
-         desktopClass.getMethod("browse", URI.class).invoke(o, link);
-      } catch (Throwable var5) {
-         LOGGER.error("Couldn't open link");
-      }
-
-   }
-
    public void mouseClicked(int x, int y, int buttonNum) {
       super.mouseClicked(x, y, buttonNum);
       if (this.onLink) {
-         String extensionUrl = "https://account.mojang.com/buy/realms?sid=" + this.serverData.remoteSubscriptionId + "&pid=" + this.getProfileUuid();
+         String extensionUrl = "https://account.mojang.com/buy/realms?sid=" + this.serverData.remoteSubscriptionId + "&pid=" + Realms.getUUID();
          Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
          clipboard.setContents(new StringSelection(extensionUrl), null);
-         this.browseTo(extensionUrl);
+         RealmsUtil.browseTo(extensionUrl);
       }
 
    }
 
    public void render(int xm, int ym, float a) {
       this.renderBackground();
+      int center = this.width() / 2 - 100;
       this.drawCenteredString(getLocalizedString("mco.configure.world.subscription.title"), this.width() / 2, 17, 16777215);
-      this.drawString(getLocalizedString("mco.configure.world.subscription.start"), this.width() / 2 - 100, 53, 10526880);
-      this.drawString(this.startDate, this.width() / 2 - 100, 66, 16777215);
+      this.drawString(getLocalizedString("mco.configure.world.subscription.start"), center, RealmsConstants.row(0), 10526880);
+      this.drawString(this.startDate, center, RealmsConstants.row(1), 16777215);
       if (this.type == Subscription.SubscriptionType.NORMAL) {
-         this.drawString(getLocalizedString("mco.configure.world.subscription.daysleft"), this.width() / 2 - 100, 85, 10526880);
-         this.drawString(this.getDaysLeft(), this.width() / 2 - 100, 98, 16777215);
+         this.drawString(getLocalizedString("mco.configure.world.subscription.timeleft"), center, RealmsConstants.row(3), 10526880);
       } else if (this.type == Subscription.SubscriptionType.RECURRING) {
-         this.drawString(getLocalizedString("mco.configure.world.subscription.recurring.daysleft"), this.width() / 2 - 100, 85, 10526880);
-         this.drawString(this.daysLeftPresentation(this.daysLeft), this.width() / 2 - 100, 98, 16777215);
+         this.drawString(getLocalizedString("mco.configure.world.subscription.recurring.daysleft"), center, RealmsConstants.row(3), 10526880);
       }
 
-      this.drawString(getLocalizedString("mco.configure.world.subscription.extendHere"), this.width() / 2 - 100, 117, 10526880);
-      String buyLink = "https://account.mojang.com/buy/realms";
-      int linkColor = 3368635;
-      int hoverColor = 7107012;
-      int height = 130;
-      int textWidth = this.fontWidth(buyLink);
+      this.drawString(this.daysLeftPresentation(this.daysLeft), center, RealmsConstants.row(4), 16777215);
+      this.drawString(getLocalizedString("mco.configure.world.subscription.extendHere"), center, RealmsConstants.row(6), 10526880);
+      int height = RealmsConstants.row(7);
+      int textWidth = this.fontWidth("https://account.mojang.com/buy/realms");
       int x1 = this.width() / 2 - textWidth / 2 - 1;
       int y1 = height - 1;
       int x2 = x1 + textWidth + 1;
       int y2 = height + 1 + this.fontLineHeight();
       if (x1 <= xm && xm <= x2 && y1 <= ym && ym <= y2) {
          this.onLink = true;
-         this.drawString("§n" + buyLink, this.width() / 2 - textWidth / 2, height, hoverColor);
+         this.drawString("https://account.mojang.com/buy/realms", this.width() / 2 - textWidth / 2, height, 7107012);
       } else {
          this.onLink = false;
-         this.drawString(buyLink, this.width() / 2 - textWidth / 2, height, linkColor);
+         this.drawString("https://account.mojang.com/buy/realms", this.width() / 2 - textWidth / 2, height, 3368635);
       }
 
       super.render(xm, ym, a);
@@ -155,12 +131,35 @@ public class RealmsSubscriptionScreen extends RealmsScreen {
    private String daysLeftPresentation(int daysLeft) {
       if (daysLeft == -1) {
          return "Expired";
+      } else if (daysLeft <= 1) {
+         return getLocalizedString("mco.configure.world.subscription.less_than_a_day");
       } else {
-         return daysLeft > 1 ? daysLeft + " days" : getLocalizedString("mco.configure.world.subscription.less_than_a_day");
-      }
-   }
+         int months = daysLeft / 30;
+         int days = daysLeft % 30;
+         StringBuilder sb = new StringBuilder();
+         if (months > 0) {
+            sb.append(months).append(" ");
+            if (months == 1) {
+               sb.append(getLocalizedString("mco.configure.world.subscription.month").toLowerCase());
+            } else {
+               sb.append(getLocalizedString("mco.configure.world.subscription.months").toLowerCase());
+            }
+         }
 
-   private String getDaysLeft() {
-      return this.daysLeft >= 0 ? String.valueOf(this.daysLeft) : "Expired";
+         if (days > 0) {
+            if (sb.length() > 0) {
+               sb.append(", ");
+            }
+
+            sb.append(days).append(" ");
+            if (days == 1) {
+               sb.append(getLocalizedString("mco.configure.world.subscription.day").toLowerCase());
+            } else {
+               sb.append(getLocalizedString("mco.configure.world.subscription.days").toLowerCase());
+            }
+         }
+
+         return sb.toString();
+      }
    }
 }

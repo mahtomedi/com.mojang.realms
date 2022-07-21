@@ -2,6 +2,7 @@ package com.mojang.realmsclient.gui.screens;
 
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.Backup;
+import com.mojang.realmsclient.dto.RealmsOptions;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.exception.RetryCallException;
@@ -20,36 +21,30 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
-public class RealmsWorldManagementScreen extends RealmsScreen {
-   private boolean showUpload = true;
+public class RealmsBackupScreen extends RealmsScreen {
    private static final Logger LOGGER = LogManager.getLogger();
    private static final String PLUS_ICON_LOCATION = "realms:textures/gui/realms/plus_icon.png";
    private static final String RESTORE_ICON_LOCATION = "realms:textures/gui/realms/restore_icon.png";
    private static int lastScrollPosition = -1;
    private final RealmsConfigureWorldScreen lastScreen;
-   private final RealmsScreen onlineScreen;
    private List<Backup> backups = Collections.emptyList();
    private String toolTip = null;
-   private RealmsWorldManagementScreen.BackupSelectionList backupSelectionList;
+   private RealmsBackupScreen.BackupSelectionList backupSelectionList;
    private int selectedBackup = -1;
    private static final int BACK_BUTTON_ID = 0;
    private static final int RESTORE_BUTTON_ID = 1;
    private static final int DOWNLOAD_BUTTON_ID = 2;
-   private static final int RESET_BUTTON_ID = 3;
-   private static final int UPLOAD_BUTTON_ID = 4;
    private static final int MINUTES = 60;
    private static final int HOURS = 3600;
    private static final int DAYS = 86400;
    private RealmsButton downloadButton;
    private RealmsButton uploadButton;
-   private RealmsButton resetButton;
    private Boolean noBackups = false;
    private RealmsServer serverData;
    private static final String UPLOADED_KEY = "Uploaded";
 
-   public RealmsWorldManagementScreen(RealmsConfigureWorldScreen realmsConfigureWorldScreen, RealmsScreen onlineScreen, RealmsServer serverData) {
-      this.lastScreen = realmsConfigureWorldScreen;
-      this.onlineScreen = onlineScreen;
+   public RealmsBackupScreen(RealmsConfigureWorldScreen lastscreen, RealmsServer serverData) {
+      this.lastScreen = lastscreen;
       this.serverData = serverData;
    }
 
@@ -61,7 +56,7 @@ public class RealmsWorldManagementScreen extends RealmsScreen {
    public void init() {
       Keyboard.enableRepeatEvents(true);
       this.buttonsClear();
-      this.backupSelectionList = new RealmsWorldManagementScreen.BackupSelectionList();
+      this.backupSelectionList = new RealmsBackupScreen.BackupSelectionList();
       if (lastScrollPosition != -1) {
          this.backupSelectionList.scroll(lastScrollPosition);
       }
@@ -71,11 +66,11 @@ public class RealmsWorldManagementScreen extends RealmsScreen {
             RealmsClient client = RealmsClient.createRealmsClient();
 
             try {
-               RealmsWorldManagementScreen.this.backups = client.backupsFor(RealmsWorldManagementScreen.this.serverData.id).backups;
-               RealmsWorldManagementScreen.this.noBackups = RealmsWorldManagementScreen.this.backups.size() == 0;
-               RealmsWorldManagementScreen.this.generateChangeList();
+               RealmsBackupScreen.this.backups = client.backupsFor(RealmsBackupScreen.this.serverData.id).backups;
+               RealmsBackupScreen.this.noBackups = RealmsBackupScreen.this.backups.size() == 0;
+               RealmsBackupScreen.this.generateChangeList();
             } catch (RealmsServiceException var3) {
-               RealmsWorldManagementScreen.LOGGER.error("Couldn't request backups", var3);
+               RealmsBackupScreen.LOGGER.error("Couldn't request backups", var3);
             }
 
          }
@@ -114,15 +109,8 @@ public class RealmsWorldManagementScreen extends RealmsScreen {
    }
 
    private void postInit() {
-      this.buttonsAdd(this.resetButton = newButton(3, this.width() - 125, 35, 100, 20, getLocalizedString("mco.backup.button.reset")));
-      this.buttonsAdd(
-         this.downloadButton = newButton(2, this.width() - 125, this.showUpload ? 85 : 60, 100, 20, getLocalizedString("mco.backup.button.download"))
-      );
+      this.buttonsAdd(this.downloadButton = newButton(2, this.width() - 125, 32, 100, 20, getLocalizedString("mco.backup.button.download")));
       this.buttonsAdd(newButton(0, this.width() - 125, this.height() - 35, 85, 20, getLocalizedString("gui.back")));
-      if (this.showUpload) {
-         this.buttonsAdd(this.uploadButton = newButton(4, this.width() - 125, 60, 100, 20, getLocalizedString("mco.backup.button.upload")));
-      }
-
    }
 
    public void tick() {
@@ -135,10 +123,6 @@ public class RealmsWorldManagementScreen extends RealmsScreen {
             Realms.setScreen(this.lastScreen);
          } else if (button.id() == 2) {
             this.downloadClicked();
-         } else if (button.id() == 3) {
-            Realms.setScreen(new RealmsResetWorldScreen(this.lastScreen, this.onlineScreen, this, this.serverData));
-         } else if (button.id() == 4 && this.showUpload) {
-            Realms.setScreen(new RealmsSelectFileToUploadScreen(this.serverData.id, this));
          }
 
       }
@@ -152,7 +136,7 @@ public class RealmsWorldManagementScreen extends RealmsScreen {
    }
 
    private void restoreClicked(int selectedBackup) {
-      if (selectedBackup >= 0 && selectedBackup < this.backups.size()) {
+      if (selectedBackup >= 0 && selectedBackup < this.backups.size() && !this.serverData.expired) {
          this.selectedBackup = selectedBackup;
          Date backupDate = ((Backup)this.backups.get(selectedBackup)).lastModifiedDate;
          String datePresentation = DateFormat.getDateTimeInstance(3, 3).format(backupDate);
@@ -175,7 +159,16 @@ public class RealmsWorldManagementScreen extends RealmsScreen {
 
       try {
          String downloadLink = client.download(this.serverData.id);
-         Realms.setScreen(new RealmsDownloadLatestWorldScreen(this, downloadLink, this.serverData.name));
+         Realms.setScreen(
+            new RealmsDownloadLatestWorldScreen(
+               this,
+               downloadLink,
+               this.serverData.name
+                  + " ("
+                  + ((RealmsOptions)this.serverData.slots.get(this.serverData.activeSlot)).getSlotName(this.serverData.activeSlot)
+                  + ")"
+            )
+         );
       } catch (RealmsServiceException var3) {
          LOGGER.error("Couldn't download world data");
          Realms.setScreen(new RealmsGenericErrorScreen(var3, this));
@@ -196,7 +189,7 @@ public class RealmsWorldManagementScreen extends RealmsScreen {
 
    private void restore() {
       Backup backup = (Backup)this.backups.get(this.selectedBackup);
-      RealmsWorldManagementScreen.RestoreTask restoreTask = new RealmsWorldManagementScreen.RestoreTask(backup);
+      RealmsBackupScreen.RestoreTask restoreTask = new RealmsBackupScreen.RestoreTask(backup);
       RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(this.lastScreen, restoreTask);
       longRunningMcoTaskScreen.start();
       Realms.setScreen(longRunningMcoTaskScreen);
@@ -206,18 +199,13 @@ public class RealmsWorldManagementScreen extends RealmsScreen {
       this.toolTip = null;
       this.renderBackground();
       this.backupSelectionList.render(xm, ym, a);
-      this.drawCenteredString(getLocalizedString("mco.backup.title"), this.width() / 2, 10, 16777215);
-      this.drawString(getLocalizedString("mco.backup.backup"), (this.width() - 150) / 2 - 90, 20, 10526880);
+      this.drawCenteredString(getLocalizedString("mco.configure.world.backup"), this.width() / 2, 12, 16777215);
+      this.drawString(getLocalizedString("mco.configure.world.backup"), (this.width() - 150) / 2 - 90, 20, 10526880);
       if (this.noBackups) {
          this.drawString(getLocalizedString("mco.backup.nobackups"), 20, this.height() / 2 - 10, 16777215);
       }
 
       this.downloadButton.active(!this.noBackups);
-      if (this.showUpload) {
-         this.uploadButton.active(!this.serverData.expired);
-      }
-
-      this.resetButton.active(!this.serverData.expired);
       super.render(xm, ym, a);
       if (this.toolTip != null) {
          this.renderMousehoverTooltip(this.toolTip, xm, ym);
@@ -251,19 +239,17 @@ public class RealmsWorldManagementScreen extends RealmsScreen {
          int ry = y - 12;
          int width = this.fontWidth(msg);
          this.fillGradient(rx - 3, ry - 3, rx + width + 3, ry + 8 + 3, -1073741824, -1073741824);
-         this.fontDrawShadow(msg, rx, ry, -1);
+         this.fontDrawShadow(msg, rx, ry, 16777215);
       }
    }
 
    private class BackupSelectionList extends RealmsClickableScrolledSelectionList {
       public BackupSelectionList() {
-         super(
-            RealmsWorldManagementScreen.this.width() - 150, RealmsWorldManagementScreen.this.height(), 32, RealmsWorldManagementScreen.this.height() - 15, 36
-         );
+         super(RealmsBackupScreen.this.width() - 150, RealmsBackupScreen.this.height(), 32, RealmsBackupScreen.this.height() - 15, 36);
       }
 
       public int getItemCount() {
-         return RealmsWorldManagementScreen.this.backups.size() + 1;
+         return RealmsBackupScreen.this.backups.size() + 1;
       }
 
       public int getMaxPosition() {
@@ -271,7 +257,7 @@ public class RealmsWorldManagementScreen extends RealmsScreen {
       }
 
       public void renderBackground() {
-         RealmsWorldManagementScreen.this.renderBackground();
+         RealmsBackupScreen.this.renderBackground();
       }
 
       public void customMouseEvent(int y0, int y1, int headerHeight, float yo, int itemHeight) {
@@ -289,8 +275,8 @@ public class RealmsWorldManagementScreen extends RealmsScreen {
 
       public void renderItem(int i, int x, int y, int h, int mouseX, int mouseY) {
          x += 16;
-         if (i < RealmsWorldManagementScreen.this.backups.size()) {
-            this.renderBackupItem(i, x, y, h, RealmsWorldManagementScreen.this.width);
+         if (i < RealmsBackupScreen.this.backups.size()) {
+            this.renderBackupItem(i, x, y, h, RealmsBackupScreen.this.width);
          }
 
       }
@@ -305,32 +291,32 @@ public class RealmsWorldManagementScreen extends RealmsScreen {
          int mx = infox + 10;
          int my = infoy - 3;
          if (xm >= infox && xm <= infox + 9 && ym >= infoy && ym <= infoy + 9) {
-            if (!((Backup)RealmsWorldManagementScreen.this.backups.get(slot)).changeList.isEmpty()) {
-               RealmsWorldManagementScreen.lastScrollPosition = this.getScroll();
-               Realms.setScreen(new RealmsBackupInfoScreen(RealmsWorldManagementScreen.this, (Backup)RealmsWorldManagementScreen.this.backups.get(slot)));
+            if (!((Backup)RealmsBackupScreen.this.backups.get(slot)).changeList.isEmpty()) {
+               RealmsBackupScreen.lastScrollPosition = this.getScroll();
+               Realms.setScreen(new RealmsBackupInfoScreen(RealmsBackupScreen.this, (Backup)RealmsBackupScreen.this.backups.get(slot)));
             }
          } else if (xm >= mx && xm <= mx + 9 && ym >= my && ym <= my + 9) {
-            RealmsWorldManagementScreen.lastScrollPosition = this.getScroll();
-            RealmsWorldManagementScreen.this.restoreClicked(slot);
+            RealmsBackupScreen.lastScrollPosition = this.getScroll();
+            RealmsBackupScreen.this.restoreClicked(slot);
          }
 
       }
 
       private void renderBackupItem(int i, int x, int y, int h, int width) {
-         Backup backup = (Backup)RealmsWorldManagementScreen.this.backups.get(i);
+         Backup backup = (Backup)RealmsBackupScreen.this.backups.get(i);
          int color = backup.isUploadedVersion() ? -8388737 : 16777215;
-         RealmsWorldManagementScreen.this.drawString(
-            "Backup (" + RealmsWorldManagementScreen.this.convertToAgePresentation(System.currentTimeMillis() - backup.lastModifiedDate.getTime()) + ")",
+         RealmsBackupScreen.this.drawString(
+            "Backup (" + RealmsBackupScreen.this.convertToAgePresentation(System.currentTimeMillis() - backup.lastModifiedDate.getTime()) + ")",
             x + 2,
             y + 1,
             color
          );
-         RealmsWorldManagementScreen.this.drawString(this.getMediumDatePresentation(backup.lastModifiedDate), x + 2, y + 12, 7105644);
+         RealmsBackupScreen.this.drawString(this.getMediumDatePresentation(backup.lastModifiedDate), x + 2, y + 12, 5000268);
          int dx = this.width() - 30;
          int dy = -3;
          int infox = dx - 10;
          int infoy = dy + 3;
-         if (!RealmsWorldManagementScreen.this.serverData.expired) {
+         if (!RealmsBackupScreen.this.serverData.expired) {
             this.drawRestore(dx, y + dy, this.xm(), this.ym());
          }
 
@@ -351,8 +337,8 @@ public class RealmsWorldManagementScreen extends RealmsScreen {
          GL11.glScalef(0.5F, 0.5F, 0.5F);
          RealmsScreen.blit(x * 2, y * 2, 0.0F, 0.0F, 23, 28, 23.0F, 28.0F);
          GL11.glPopMatrix();
-         if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9 && ym < RealmsWorldManagementScreen.this.height() - 15 && ym > 32) {
-            RealmsWorldManagementScreen.this.toolTip = RealmsScreen.getLocalizedString("mco.backup.button.restore");
+         if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9 && ym < RealmsBackupScreen.this.height() - 15 && ym > 32) {
+            RealmsBackupScreen.this.toolTip = RealmsScreen.getLocalizedString("mco.backup.button.restore");
          }
 
       }
@@ -364,8 +350,8 @@ public class RealmsWorldManagementScreen extends RealmsScreen {
          GL11.glScalef(0.5F, 0.5F, 0.5F);
          RealmsScreen.blit(x * 2, y * 2, 0.0F, 0.0F, 15, 15, 15.0F, 15.0F);
          GL11.glPopMatrix();
-         if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9 && ym < RealmsWorldManagementScreen.this.height() - 15 && ym > 32) {
-            RealmsWorldManagementScreen.this.toolTip = RealmsScreen.getLocalizedString("mco.backup.changes.tooltip");
+         if (xm >= x && xm <= x + 9 && ym >= y && ym <= y + 9 && ym < RealmsBackupScreen.this.height() - 15 && ym > 32) {
+            RealmsBackupScreen.this.toolTip = RealmsScreen.getLocalizedString("mco.backup.changes.tooltip");
          }
 
       }
@@ -389,13 +375,13 @@ public class RealmsWorldManagementScreen extends RealmsScreen {
                }
 
                RealmsClient client = RealmsClient.createRealmsClient();
-               client.restoreWorld(RealmsWorldManagementScreen.this.serverData.id, this.backup.backupId);
+               client.restoreWorld(RealmsBackupScreen.this.serverData.id, this.backup.backupId);
                this.pause(1);
                if (this.aborted()) {
                   return;
                }
 
-               Realms.setScreen(RealmsWorldManagementScreen.this.lastScreen);
+               Realms.setScreen(RealmsBackupScreen.this.lastScreen);
                return;
             } catch (RetryCallException var3) {
                if (this.aborted()) {
@@ -409,15 +395,15 @@ public class RealmsWorldManagementScreen extends RealmsScreen {
                   return;
                }
 
-               RealmsWorldManagementScreen.LOGGER.error("Couldn't restore backup");
-               Realms.setScreen(new RealmsGenericErrorScreen(var4, RealmsWorldManagementScreen.this.lastScreen));
+               RealmsBackupScreen.LOGGER.error("Couldn't restore backup");
+               Realms.setScreen(new RealmsGenericErrorScreen(var4, RealmsBackupScreen.this.lastScreen));
                return;
             } catch (Exception var5) {
                if (this.aborted()) {
                   return;
                }
 
-               RealmsWorldManagementScreen.LOGGER.error("Couldn't restore backup");
+               RealmsBackupScreen.LOGGER.error("Couldn't restore backup");
                this.error(var5.getLocalizedMessage());
                return;
             }
@@ -429,7 +415,7 @@ public class RealmsWorldManagementScreen extends RealmsScreen {
          try {
             Thread.sleep((long)(pauseSeconds * 1000));
          } catch (InterruptedException var3) {
-            RealmsWorldManagementScreen.LOGGER.error(var3);
+            RealmsBackupScreen.LOGGER.error(var3);
          }
 
       }

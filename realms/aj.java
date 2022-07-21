@@ -68,6 +68,8 @@ public class aj extends RealmsScreen {
             this.a(getLocalizedString("mco.configure.world.players.error"));
          }
 
+      } else {
+         this.a(getLocalizedString("mco.configure.world.players.error"));
       }
    }
 

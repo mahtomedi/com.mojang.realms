@@ -3,6 +3,7 @@ package realms;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -33,6 +34,7 @@ public class au extends RealmsScreen {
    private final String[] l = new String[4];
    private RealmsLabel m;
    private RealmsLabel n;
+   private RealmsLabel o;
 
    public au(long worldId, int slotId, ar lastScreen) {
       this.b = lastScreen;
@@ -83,6 +85,12 @@ public class au extends RealmsScreen {
       this.e.active(this.h >= 0 && this.h < this.g.size());
       this.addWidget(this.m = new RealmsLabel(getLocalizedString("mco.upload.select.world.title"), this.width() / 2, 13, 16777215));
       this.addWidget(this.n = new RealmsLabel(getLocalizedString("mco.upload.select.world.subtitle"), this.width() / 2, u.a(-1), 10526880));
+      if (this.g.isEmpty()) {
+         this.addWidget(this.o = new RealmsLabel(getLocalizedString("mco.upload.select.world.none"), this.width() / 2, this.height() / 2 - 20, 16777215));
+      } else {
+         this.o = null;
+      }
+
       this.narrateLabels();
    }
 
@@ -103,8 +111,8 @@ public class au extends RealmsScreen {
       this.i.render(xm, ym, a);
       this.m.render(this);
       this.n.render(this);
-      if (this.g.size() == 0) {
-         this.drawCenteredString(getLocalizedString("mco.upload.select.world.none"), this.width() / 2, this.height() / 2 - 20, 16777215);
+      if (this.o != null) {
+         this.o.render(this);
       }
 
       super.render(xm, ym, a);
@@ -121,6 +129,14 @@ public class au extends RealmsScreen {
 
    public void tick() {
       super.tick();
+   }
+
+   private String a(RealmsLevelSummary levelSummary) {
+      return this.l[levelSummary.getGameMode()];
+   }
+
+   private String b(RealmsLevelSummary levelSummary) {
+      return this.f.format(new Date(levelSummary.getLastPlayed()));
    }
 
    class a extends RealmListEntry {
@@ -146,13 +162,13 @@ public class au extends RealmsScreen {
          }
 
          String id = levelSummary.getLevelId();
-         id = id + " (" + au.this.f.format(new Date(levelSummary.getLastPlayed()));
+         id = id + " (" + au.this.b(levelSummary);
          id = id + ")";
          String info = "";
          if (levelSummary.isRequiresConversion()) {
             info = au.this.k + " " + info;
          } else {
-            info = au.this.l[levelSummary.getGameMode()];
+            info = au.this.a(levelSummary);
             if (levelSummary.isHardcore()) {
                info = q.e + RealmsScreen.getLocalizedString("mco.upload.hardcore") + q.v;
             }
@@ -196,7 +212,10 @@ public class au extends RealmsScreen {
       public void selectItem(int item) {
          this.setSelected(item);
          if (item != -1) {
-            Realms.narrateNow(RealmsScreen.getLocalizedString("narrator.select", new Object[]{((RealmsLevelSummary)au.this.g.get(item)).getLevelName()}));
+            RealmsLevelSummary summary = (RealmsLevelSummary)au.this.g.get(item);
+            String positionInList = RealmsScreen.getLocalizedString("narrator.select.list.position", new Object[]{item + 1, au.this.g.size()});
+            String narration = Realms.joinNarrations(Arrays.asList(summary.getLevelName(), au.this.b(summary), au.this.a(summary), positionInList));
+            Realms.narrateNow(RealmsScreen.getLocalizedString("narrator.select", new Object[]{narration}));
          }
 
          au.this.h = item;

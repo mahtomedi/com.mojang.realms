@@ -5,6 +5,7 @@ import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.WorldTemplate;
 import com.mojang.realmsclient.dto.WorldTemplatePaginatedList;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -348,7 +349,12 @@ public class av extends RealmsScreen {
          av.this.f = item;
          this.setSelected(item);
          if (item != -1) {
-            Realms.narrateNow(RealmsScreen.getLocalizedString("narrator.select", new Object[]{((WorldTemplate)av.this.d.get(item)).name}));
+            WorldTemplate template = (WorldTemplate)av.this.d.get(item);
+            String positionInList = RealmsScreen.getLocalizedString("narrator.select.list.position", new Object[]{item + 1, av.this.d.size()});
+            String version = RealmsScreen.getLocalizedString("mco.template.select.narrate.version", new Object[]{template.version});
+            String author = RealmsScreen.getLocalizedString("mco.template.select.narrate.authors", new Object[]{template.author});
+            String narration = Realms.joinNarrations(Arrays.asList(template.name, author, template.recommendedPlayers, version, positionInList));
+            Realms.narrateNow(RealmsScreen.getLocalizedString("narrator.select", new Object[]{narration}));
          }
 
          av.this.b();
